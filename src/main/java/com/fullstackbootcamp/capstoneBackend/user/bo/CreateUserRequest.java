@@ -2,6 +2,7 @@ package com.fullstackbootcamp.capstoneBackend.user.bo;
 
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 public class CreateUserRequest {
 
@@ -18,9 +19,11 @@ public class CreateUserRequest {
     private String password;
 
     @NotNull(message = "The 'civilId' field is required and it's missing")
+    @Pattern(regexp = "\\d{12}", message = "The 'civilId' field must contain exactly 12 digits")
     private String civilId;
 
     @NotNull(message = "The 'mobileNumber' field is required and it's missing")
+    @Pattern(regexp = "\\d{8}", message = "The 'mobileNumber' field must contain exactly 8 digits")
     private String mobileNumber;
 
     public String getFirstName() {

@@ -13,6 +13,7 @@ public class AuthServiceImpl implements AuthService {
         this.userService = userService;
     }
 
+    // forward request to user service
     public SignupResponseDTO processSignupRequest(CreateUserRequest request){
         return userService.createUser(request);
     }

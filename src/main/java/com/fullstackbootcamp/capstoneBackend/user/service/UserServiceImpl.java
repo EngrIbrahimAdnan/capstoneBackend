@@ -21,31 +21,23 @@ public class UserServiceImpl implements UserService {
     @Override
     public SignupResponseDTO createUser(CreateUserRequest request) {
 
-        // Ensure civil id and phone number contains only numbers and no letters
-        if (containsLetters(request.getCivilId()) || containsLetters(request.getMobileNumber())){
-            SignupResponseDTO response = new SignupResponseDTO();
-            response.setMessage("Civil id and mobile number must only contain numbers.");
-            response.setStatus(CreateUserStatus.FAIL);
-            return response;
-        }
-
         // Check if either username or civil id is already registered with
         boolean civilIdPresent = getUserByCivilId(request.getCivilId()).isPresent();
         boolean usernamePresent = getUserByUsername(request.getUsername()).isPresent();
 
-        // if either one is true, a return response is returned
+        // if either one is true, a conflict status is returned since user already exists
         if (civilIdPresent || usernamePresent) {
             SignupResponseDTO response = new SignupResponseDTO();
-            response.setMessage("Username/password is already registered with");
-            response.setStatus(CreateUserStatus.FAIL);
+            response.setMessage("Username/civil Id is already registered with");
+            response.setStatus(CreateUserStatus.USER_ALREADY_EXISTS);
             return response;
         }
 
         else {
             UserEntity user = new UserEntity();
-            user.setFirstName(request.getFirstName().toLowerCase()); // ensure first name is case
-            user.setLastName(request.getLastName().toLowerCase());
-            user.setUsername(request.getUsername().toLowerCase());
+            user.setFirstName(request.getFirstName().toLowerCase()); // ensure its lower case
+            user.setLastName(request.getLastName().toLowerCase()); // ensure its lower case
+            user.setUsername(request.getUsername().toLowerCase()); // ensure its lower case
             user.setCivilId(request.getCivilId());
             user.setMobileNumber(request.getMobileNumber());
             userRepository.save(user);
@@ -66,10 +58,4 @@ public class UserServiceImpl implements UserService {
     public Optional<UserEntity> getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
-
-    public boolean containsLetters(String str) {
-        // Check if the string contains any alphabetic characters
-        return str != null && str.matches(".*[a-zA-Z].*");
-    }
-
 }
