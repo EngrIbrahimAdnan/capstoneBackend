@@ -38,6 +38,8 @@ public class UserServiceImpl implements UserService {
             user.setFirstName(request.getFirstName().toLowerCase()); // ensure its lower case
             user.setLastName(request.getLastName().toLowerCase()); // ensure its lower case
             user.setUsername(request.getUsername().toLowerCase()); // ensure its lower case
+            user.setPassword(request.getPassword()); // TODO: encode later
+
             user.setCivilId(request.getCivilId());
             user.setMobileNumber(request.getMobileNumber());
             userRepository.save(user);

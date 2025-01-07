@@ -1,0 +1,34 @@
+[
+  {
+    "mobileNumber": "91450294",
+    "firstName": "Ibrahim",
+    "lastName":"Alibrahim",
+    "password": "password",
+    "username": "EngrIbrahimAdnan",
+    "civilId":"294810249824"
+  },
+  {
+    "mobileNumber": "29913920",
+    "firstName": "Mohamed",
+    "lastName":"Baqer",
+    "password": "password",
+    "username": "AB",
+    "civilId":"599510249824"
+  },
+  {
+    "mobileNumber": "28041829",
+    "firstName": "Fajri",
+    "lastName":"Alhussaini",
+    "password": "password",
+    "username": "alfredo",
+    "civilId":"693510241824"
+  },
+  {
+    "mobileNumber": "19402349",
+    "firstName": "Salem",
+    "lastName":"Almutari",
+    "password": "password",
+    "username": "salem",
+    "civilId":"994830249814"
+  }
+]
