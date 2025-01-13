@@ -1,6 +1,7 @@
 package com.fullstackbootcamp.capstoneBackend.user.bo;
 
 
+import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
@@ -25,6 +26,18 @@ public class CreateUserRequest {
     @NotNull(message = "The 'mobileNumber' field is required and it's missing")
     @Pattern(regexp = "\\d{8}", message = "The 'mobileNumber' field must contain exactly 8 digits")
     private String mobileNumber;
+
+    @NotNull(message = "The 'role' field is required and it's missing")
+    private Roles role;
+
+
+    public Roles getRole() {
+        return role;
+    }
+
+    public void setRole(Roles role) {
+        this.role = role;
+    }
 
     public String getFirstName() {
         return firstName;
