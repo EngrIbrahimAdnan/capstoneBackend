@@ -1,7 +1,9 @@
 package com.fullstackbootcamp.capstoneBackend.auth.controller;
 
 import com.fullstackbootcamp.capstoneBackend.auth.service.AuthService;
+import com.fullstackbootcamp.capstoneBackend.auth.service.JwtUtil;
 import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
+import com.fullstackbootcamp.capstoneBackend.user.dto.AuthenticationRequestDTO;
 import com.fullstackbootcamp.capstoneBackend.user.dto.SignupResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
 import jakarta.validation.Valid;
@@ -13,14 +15,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RequestMapping("/v1/auth")
+@RequestMapping("/auth/v1")
 @RestController
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, JwtUtil jwtUtil) {
         this.authService = authService;
+        this.jwtUtil = jwtUtil;
+
     }
 
     // signup for user
@@ -62,9 +67,15 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/login")
-    public String loginUser() {
-        return "User has logged in up";
+    @PostMapping("/login")
+    public String login(@RequestBody AuthenticationRequestDTO authRequest) {
+
+        
+        if ("user".equals(authRequest.getUsername()) && "password".equals(authRequest.getPassword())) {
+            return jwtUtil.generateToken(authRequest.getUsername()); // Generate and return JWT token
+        }
+        throw new RuntimeException("Invalid credentials");
     }
+
 
 }
