@@ -8,6 +8,7 @@ import io.jsonwebtoken.Jwts;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -36,12 +37,16 @@ public class JwtUtil {
     public String generateRefreshToken(UserEntity user) {
         String tokenId = UUID.randomUUID().toString();
 
+        // Set expiration to 2 months from now
+        ZonedDateTime expirationZonedDateTime = ZonedDateTime.now().plusMonths(2);
+        Date expirationDate = Date.from(expirationZonedDateTime.toInstant());
+
         return Jwts.builder()
                 .setId(tokenId)
                 .setSubject(user.getUsername())
                 .claim("type", TokenTypes.REFRESH.name()) // specify the type to refresh
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 604800000)) // 7 days
+                .setExpiration(expirationDate)
                 .signWith(secretKey)
                 .compact();
     }

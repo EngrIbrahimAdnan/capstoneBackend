@@ -43,13 +43,26 @@ public class AuthServiceImpl implements AuthService {
     // forward request to user service
     public SignupResponseDTO processSignupRequest(CreateUserRequest request) {
 
-        // encode the password before passing the information to the user
+        // encode the password before passing the information to the user service
         request.setPassword(passwordEncoder.encode(request.getPassword()));
-        return userService.createUser(request);
+        SignupResponseDTO response = userService.createUser(request);
+
+        // generate tokens if the creation is successful
+        if (response.getStatus().equals(CreateUserStatus.SUCCESS)){
+
+            // obtain user entity to generate refresh and access tokens
+            Optional<UserEntity> user = userService.getUserByCivilId(request.getCivilId());
+
+            String accessToken = jwtUtil.generateAccessToken(user.get());
+            String refreshToken = jwtUtil.generateRefreshToken(user.get());
+            response.setAccessToken(accessToken);
+            response.setRefreshToken(refreshToken);
+        }
+
+        return response;
     }
 
-    // load users
-
+    // load users from predefined file
     public <T> LoadUsersResponseDTO loadEntites(
             String file,
             TypeReference<List<T>> typeReference
@@ -138,7 +151,7 @@ public class AuthServiceImpl implements AuthService {
         // ensure the endpoint only accepts refresh tokens, NOT access tokens (per the name)
         if (jwt.getClaims().get("type").equals(TokenTypes.ACCESS.name())) {
             response.setStatus(TokenServiceStatus.TOKEN_INVALID);
-            response.setMessage("The user is not found in the database ");
+            response.setMessage("Refresh token is required when Access token is provided");
             return response;
 
         }

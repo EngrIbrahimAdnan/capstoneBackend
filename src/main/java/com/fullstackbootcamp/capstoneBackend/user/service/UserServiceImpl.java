@@ -28,8 +28,8 @@ public class UserServiceImpl implements UserService {
         // if either one is true, a conflict status is returned since user already exists
         if (civilIdPresent || usernamePresent) {
             SignupResponseDTO response = new SignupResponseDTO();
-            response.setMessage("Username/civil Id is already registered with");
             response.setStatus(CreateUserStatus.USER_ALREADY_EXISTS);
+            response.setMessage("Username/civil Id is already registered with");
             return response;
         }
 
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
             user.setFirstName(request.getFirstName().toLowerCase()); // ensure its lower case
             user.setLastName(request.getLastName().toLowerCase()); // ensure its lower case
             user.setUsername(request.getUsername().toLowerCase()); // ensure its lower case
-            user.setPassword(request.getPassword()); // TODO: encode later
+            user.setPassword(request.getPassword());
             user.setCivilId(request.getCivilId());
             user.setMobileNumber(request.getMobileNumber());
             user.setRole(request.getRole());
@@ -46,8 +46,8 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
 
             SignupResponseDTO response = new SignupResponseDTO();
-            response.setMessage("User is successfully registered");
             response.setStatus(CreateUserStatus.SUCCESS);
+            response.setMessage("User is successfully registered");
             return response;
         }
     }
