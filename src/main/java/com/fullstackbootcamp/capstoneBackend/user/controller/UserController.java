@@ -1,6 +1,7 @@
 package com.fullstackbootcamp.capstoneBackend.user.controller;
 
 import com.fullstackbootcamp.capstoneBackend.auth.dto.LoadUsersResponseDTO;
+import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenTypes;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import com.fullstackbootcamp.capstoneBackend.user.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
@@ -22,32 +23,38 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
-    @PostMapping("/profile")
-    public ResponseEntity<?> getUserProfile(Authentication authentication) {
+    // Refer to this when you wish to extract information from token
+    @PostMapping("/token-info")
+    public ResponseEntity<?> extractTokenInfo(Authentication authentication) {
         Jwt jwt = (Jwt) authentication.getPrincipal();
 
-        String id = jwt.getId();
-        String username = jwt.getSubject();
+        // To ensure the access token is provided and NOT the refresh token
+        // The refresh token contains less information, is only ever used to generate an access token
+        if (jwt.getClaims().get("type").equals(TokenTypes.REFRESH.name())) {
+            return ResponseEntity.ok(Map.of("Error"," refresh token is provided when Access token is required"));
+        }
 
-        Object civilId = jwt.getClaims().get("civilId");
-        Object role = jwt.getClaims().get("roles");
+        // All Obtainable information from access token
+        String id = jwt.getId(); // token id
+        String username = jwt.getSubject(); // username of the user
+        Object type = jwt.getClaims().get("type"); // the type of access (ACCESS or REFRESH)
+        Object role = jwt.getClaims().get("roles"); // roles: ADMIN, BANKER, BUSINESS_OWNER
+        Object civilId = jwt.getClaims().get("civilId"); // user civil id
+        Instant issue = jwt.getIssuedAt(); // issue date of token
+        Instant expire = jwt.getExpiresAt(); // expire date of token
 
-        Instant issue = jwt.getIssuedAt();
-        Instant expire = jwt.getExpiresAt();
-
-        System.out.println(id);
-        System.out.println(username);
-        System.out.println(role);
-        System.out.println(issue);
-        System.out.println(expire);
-
-
-        if (role.equals(Roles.ADMIN.toString())){
+        // Could be used for role specific endpoints
+        if (role.equals(Roles.ADMIN.name())) {
             return ResponseEntity.ok("Welcome, Admin!");
         }
-        return ResponseEntity.ok(Map.of("civil ID", civilId, "roles", jwt.getClaims().get("roles")));
 
-
-
+        return ResponseEntity.ok(Map.of(
+                "Token Id", id,
+                "username", username,
+                "civil Id", civilId,
+                "roles", role,
+                "type", type,
+                "issue", issue,
+                "expire", expire));
     }
 }
