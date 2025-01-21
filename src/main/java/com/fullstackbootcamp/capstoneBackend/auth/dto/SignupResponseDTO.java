@@ -1,4 +1,4 @@
-package com.fullstackbootcamp.capstoneBackend.user.dto;
+package com.fullstackbootcamp.capstoneBackend.auth.dto;
 
 import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
 

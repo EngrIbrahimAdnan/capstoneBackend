@@ -1,7 +1,7 @@
 package com.fullstackbootcamp.capstoneBackend.user.service;
 
 import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
-import com.fullstackbootcamp.capstoneBackend.user.dto.SignupResponseDTO;
+import com.fullstackbootcamp.capstoneBackend.auth.dto.SignupResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import org.springframework.stereotype.Service;
 

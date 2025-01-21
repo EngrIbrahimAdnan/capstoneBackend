@@ -1,7 +1,7 @@
 package com.fullstackbootcamp.capstoneBackend.user.service;
 
 import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
-import com.fullstackbootcamp.capstoneBackend.user.dto.SignupResponseDTO;
+import com.fullstackbootcamp.capstoneBackend.auth.dto.SignupResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
 import com.fullstackbootcamp.capstoneBackend.user.repository.UserRepository;
@@ -56,6 +56,8 @@ public class UserServiceImpl implements UserService {
     public Optional<UserEntity> getUserByCivilId(String civilId) {
         return userRepository.findByCivilId(civilId);
     }
+
+
 
     @Override
     public Optional<UserEntity> getUserByUsername(String username) {
