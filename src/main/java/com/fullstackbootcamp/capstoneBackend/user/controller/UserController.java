@@ -31,7 +31,7 @@ public class UserController {
         // To ensure the access token is provided and NOT the refresh token
         // The refresh token contains less information, is only ever used to generate an access token
         if (jwt.getClaims().get("type").equals(TokenTypes.REFRESH.name())) {
-            return ResponseEntity.ok(Map.of("Error"," refresh token is provided when Access token is required"));
+            return ResponseEntity.ok(Map.of("Error"," refresh token is required when Access token is provided"));
         }
 
         // All Obtainable information from access token
