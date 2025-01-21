@@ -5,21 +5,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fullstackbootcamp.capstoneBackend.auth.dto.LoadUsersResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.auth.service.AuthService;
 import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
-import com.fullstackbootcamp.capstoneBackend.user.dto.SignupResponseDTO;
-import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RequestMapping("/auth/v1/setup")
+@RequestMapping("/setup/v1")
 @RestController
 public class SetupController {
 

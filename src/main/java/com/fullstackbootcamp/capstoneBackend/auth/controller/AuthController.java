@@ -1,10 +1,13 @@
 package com.fullstackbootcamp.capstoneBackend.auth.controller;
 
+import com.fullstackbootcamp.capstoneBackend.auth.dto.RefreshTokenRequestDTO;
+import com.fullstackbootcamp.capstoneBackend.auth.dto.TokenResponseDTO;
+import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenServiceStatus;
 import com.fullstackbootcamp.capstoneBackend.auth.service.AuthService;
-import com.fullstackbootcamp.capstoneBackend.auth.service.JwtUtil;
+import com.fullstackbootcamp.capstoneBackend.auth.util.JwtUtil;
 import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
-import com.fullstackbootcamp.capstoneBackend.user.dto.AuthenticationRequestDTO;
-import com.fullstackbootcamp.capstoneBackend.user.dto.SignupResponseDTO;
+import com.fullstackbootcamp.capstoneBackend.user.bo.LoginRequest;
+import com.fullstackbootcamp.capstoneBackend.auth.dto.SignupResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -13,7 +16,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequestMapping("/auth/v1")
 @RestController
@@ -67,15 +69,64 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/login")
-    public String login(@RequestBody AuthenticationRequestDTO authRequest) {
+    @PostMapping("/refresh-token")
+    public ResponseEntity<TokenResponseDTO> refreshAccessToken(@RequestBody RefreshTokenRequestDTO request) {
 
-        
-        if ("user".equals(authRequest.getUsername()) && "password".equals(authRequest.getPassword())) {
-            return jwtUtil.generateToken(authRequest.getUsername()); // Generate and return JWT token
+
+        try {
+            TokenResponseDTO response = authService.refreshAccessToken(request.getRefreshToken());
+            switch (response.getStatus()) {
+                case SUCCESS: // accepted status returned for successfully refreshing access token
+                    return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+
+                case UNAUTHORIZED: // conflict status returned when username/civilId already exists
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+
+                case TOKEN_INVALID: // bad request status returned when field is not in correct format
+                    return ResponseEntity.badRequest().body(response);
+
+                default: // default error
+                    response.setStatus(TokenServiceStatus.FAILURE);
+                    response.setMessage("Failed in refreshing token");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+
+        } catch (Exception e) {
+            TokenResponseDTO response = new TokenResponseDTO();
+            response.setStatus(TokenServiceStatus.FAILURE);
+            response.setMessage("Unknown Error encountered when refreshing the access Token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
-        throw new RuntimeException("Invalid credentials");
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<TokenResponseDTO> login(@RequestBody LoginRequest loginRequest) {
+        try {
+            // Delegate to AuthService
+            TokenResponseDTO response = authService.login(loginRequest);
+
+            System.out.println("I am after function call");
+            switch (response.getStatus()) {
+                case SUCCESS: // accepted status returned for successfully refreshing access token
+                    return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+
+                case UNAUTHORIZED: // conflict status returned when username/civilId already exists
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+
+                case TOKEN_INVALID: // bad request status returned when field is not in correct format
+                    return ResponseEntity.badRequest().body(response);
+
+                default: // default error
+                    response.setStatus(TokenServiceStatus.FAILURE);
+                    response.setMessage("Failed in refreshing token");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+
+        } catch (Exception e) {
+            System.out.println("I am ebfore unathorized");
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
 
 }
