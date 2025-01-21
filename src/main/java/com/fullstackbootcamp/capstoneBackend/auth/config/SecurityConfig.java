@@ -58,7 +58,7 @@ public class SecurityConfig {
     public Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         grantedAuthoritiesConverter.setAuthoritiesClaimName("roles"); // Match JWT claim
-        grantedAuthoritiesConverter.setAuthorityPrefix(""); // No need for "ROLE_" here
+        grantedAuthoritiesConverter.setAuthorityPrefix(""); // No need for "roles" here
 
         JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
         authenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);

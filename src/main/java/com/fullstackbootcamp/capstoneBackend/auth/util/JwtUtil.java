@@ -1,5 +1,6 @@
 package com.fullstackbootcamp.capstoneBackend.auth.util;
 
+import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenTypes;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -25,7 +26,7 @@ public class JwtUtil {
                 .setSubject(user.getUsername())
                 .claim("roles", user.getRole().name())
                 .claim("civilId", user.getCivilId())
-                .claim("type", "access") // specify the type to be access
+                .claim("type", TokenTypes.ACCESS.name()) // specify the type to be access
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 hour
                 .signWith(secretKey)
@@ -38,7 +39,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setId(tokenId)
                 .setSubject(user.getUsername())
-                .claim("type", "refresh") // specify the type to refresh
+                .claim("type", TokenTypes.REFRESH.name()) // specify the type to refresh
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 604800000)) // 7 days
                 .signWith(secretKey)

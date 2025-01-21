@@ -2,9 +2,11 @@ package com.fullstackbootcamp.capstoneBackend.auth.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fullstackbootcamp.capstoneBackend.auth.config.SecurityConfig;
 import com.fullstackbootcamp.capstoneBackend.auth.dto.LoadUsersResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.auth.dto.TokenResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenServiceStatus;
+import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenTypes;
 import com.fullstackbootcamp.capstoneBackend.auth.util.JwtUtil;
 import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
 import com.fullstackbootcamp.capstoneBackend.auth.dto.SignupResponseDTO;
@@ -16,6 +18,8 @@ import io.jsonwebtoken.Claims;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -27,11 +31,13 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final JwtDecoder jwtDecoder;
 
-    public AuthServiceImpl(UserService userService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public AuthServiceImpl(UserService userService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, JwtDecoder jwtDecoder) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.jwtDecoder = jwtDecoder;
     }
 
     // forward request to user service
@@ -122,8 +128,20 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public TokenResponseDTO refreshAccessToken(String refreshToken) {
+
         // new responseDTO to return to controller
         TokenResponseDTO response = new TokenResponseDTO();
+
+        // decode the refresh token passed to ensure its type is in-fact REFRESH and not ACCESS
+        Jwt jwt = jwtDecoder.decode(refreshToken);
+
+        // ensure the endpoint only accepts refresh tokens, NOT access tokens (per the name)
+        if (jwt.getClaims().get("type").equals(TokenTypes.ACCESS.name())) {
+            response.setStatus(TokenServiceStatus.TOKEN_INVALID);
+            response.setMessage("The user is not found in the database ");
+            return response;
+
+        }
 
         // Validate the refresh token
         Claims claims = jwtUtil.validateToken(refreshToken);
@@ -134,7 +152,7 @@ public class AuthServiceImpl implements AuthService {
 
 
         // true if user does not exist in database
-        if (user.isEmpty()){
+        if (user.isEmpty()) {
             // only status and message fields are assigned.
             // refresh and access tokens are skipped
             response.setStatus(TokenServiceStatus.UNAUTHORIZED);
@@ -146,8 +164,8 @@ public class AuthServiceImpl implements AuthService {
 
         // Optional: Check token revocation (if using a refresh token repository)
         if (!jwtUtil.isRefreshTokenValid(refreshToken)) {
-            response.setStatus(TokenServiceStatus.TOKEN_INVALID);
-            response.setMessage("Invalid or expired refresh token");
+            response.setStatus(TokenServiceStatus.INVALID_REQUEST);
+            response.setMessage("Invalid or expired refresh token. ensure it is a refresh token and not access token");
             return response;
         }
 
@@ -168,14 +186,8 @@ public class AuthServiceImpl implements AuthService {
 
         Optional<UserEntity> user = userService.getUserByCivilId(loginRequest.getCivilId());
 
-        System.out.println(user.get().getFirstName());
-        System.out.println(user.get().getCivilId());
-        System.out.println(user.get().getPassword());
-        System.out.println(user.get().getFirstName());
-        System.out.println(user.get().getFirstName());
-
         // true if user does not exist in database
-        if (user.isEmpty()){
+        if (user.isEmpty()) {
             // only status and message fields are assigned.
             // refresh and access tokens are skipped
             response.setStatus(TokenServiceStatus.UNAUTHORIZED);
@@ -185,16 +197,15 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.get().getPassword())) {
-            System.out.println("I am here");
-            throw new BadCredentialsException("Invalid username/email or password");
+            response.setStatus(TokenServiceStatus.INVALID_REQUEST);
+            response.setMessage("The username/password is incorrect");
+
+            return response;
         }
 
-        System.out.println("before tokens");
+        // generate tokens
         String accessToken = jwtUtil.generateAccessToken(user.get());
         String refreshToken = jwtUtil.generateRefreshToken(user.get());
-
-        System.out.println(accessToken);
-        System.out.println(refreshToken);
 
         response.setStatus(TokenServiceStatus.SUCCESS);
         response.setMessage("successfully logged in");
