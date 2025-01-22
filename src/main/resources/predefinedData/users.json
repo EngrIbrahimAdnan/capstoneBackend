@@ -5,7 +5,7 @@
     "lastName": "Alibrahim",
     "password": "password",
     "username": "EngrIbrahimAdnan",
-    "civilId": "294810249824",
+    "civilId": "000000000000",
     "role": "BANKER"
   },
   {
@@ -14,7 +14,7 @@
     "lastName": "Baqer",
     "password": "password",
     "username": "AB",
-    "civilId": "599510249824",
+    "civilId": "111111111111",
     "role": "BUSINESS_OWNER"
   },
   {
@@ -23,7 +23,7 @@
     "lastName": "Alhussaini",
     "password": "password",
     "username": "alfredo",
-    "civilId": "693510241824",
+    "civilId": "222222222222",
     "role": "ADMIN"
   },
   {
@@ -32,7 +32,7 @@
     "lastName": "Almutari",
     "password": "password",
     "username": "salem",
-    "civilId": "994830249814",
+    "civilId": "333333333333",
     "role": "BUSINESS_OWNER"
   }
 ]
