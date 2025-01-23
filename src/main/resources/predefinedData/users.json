@@ -6,7 +6,8 @@
     "password": "password",
     "username": "EngrIbrahimAdnan",
     "civilId": "000000000000",
-    "role": "BANKER"
+    "role": "BANKER",
+    "bank": "BOUBYAN_BANK"
   },
   {
     "mobileNumber": "29913920",
@@ -15,7 +16,8 @@
     "password": "password",
     "username": "AB",
     "civilId": "111111111111",
-    "role": "BUSINESS_OWNER"
+    "role": "BANKER",
+    "bank": "KUWAIT_FINANCE_HOUSE"
   },
   {
     "mobileNumber": "28041829",
@@ -24,7 +26,8 @@
     "password": "password",
     "username": "alfredo",
     "civilId": "222222222222",
-    "role": "ADMIN"
+    "role": "ADMIN",
+    "bank": "NOT_BANK"
   },
   {
     "mobileNumber": "19402349",
@@ -33,6 +36,7 @@
     "password": "password",
     "username": "salem",
     "civilId": "333333333333",
-    "role": "BUSINESS_OWNER"
+    "role": "BUSINESS_OWNER",
+    "bank": "NOT_BANK"
   }
 ]

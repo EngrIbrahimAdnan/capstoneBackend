@@ -26,6 +26,7 @@ public class JwtUtil {
                 .setId(tokenId)
                 .setSubject(user.getUsername())
                 .claim("roles", user.getRole().name())
+                .claim("bank", user.getBank().name())
                 .claim("civilId", user.getCivilId())
                 .claim("type", TokenTypes.ACCESS.name()) // specify the type to be access
                 .setIssuedAt(new Date())
