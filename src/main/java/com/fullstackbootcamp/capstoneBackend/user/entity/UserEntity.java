@@ -1,5 +1,6 @@
 package com.fullstackbootcamp.capstoneBackend.user.entity;
 
+import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,6 +21,15 @@ public class UserEntity {
     private String civilId;
     private String mobileNumber;
     private Roles role;
+    private Bank bank;
+
+    public Bank getBank() {
+        return bank;
+    }
+
+    public void setBank(Bank bank) {
+        this.bank = bank;
+    }
 
     public Roles getRole() {
         return role;

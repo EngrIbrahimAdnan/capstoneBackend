@@ -1,6 +1,7 @@
 package com.fullstackbootcamp.capstoneBackend.user.bo;
 
 
+import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -30,6 +31,17 @@ public class CreateUserRequest {
     @NotNull(message = "The 'role' field is required and it's missing")
     private Roles role;
 
+    @NotNull(message = "The 'bank' field is required and it's missing")
+    private Bank bank;
+
+
+    public Bank getBank() {
+        return bank;
+    }
+
+    public void setBank(Bank bank) {
+        this.bank = bank;
+    }
 
     public Roles getRole() {
         return role;

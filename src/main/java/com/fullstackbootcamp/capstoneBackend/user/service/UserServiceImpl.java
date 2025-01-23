@@ -42,6 +42,8 @@ public class UserServiceImpl implements UserService {
             user.setCivilId(request.getCivilId());
             user.setMobileNumber(request.getMobileNumber());
             user.setRole(request.getRole());
+            user.setBank(request.getBank());
+
 
             userRepository.save(user);
 

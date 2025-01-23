@@ -39,6 +39,8 @@ public class UserController {
         String username = jwt.getSubject(); // username of the user
         Object type = jwt.getClaims().get("type"); // the type of access (ACCESS or REFRESH)
         Object role = jwt.getClaims().get("roles"); // roles: ADMIN, BANKER, BUSINESS_OWNER
+        Object bank = jwt.getClaims().get("bank"); // bank: a value from the different enum banks
+
         Object civilId = jwt.getClaims().get("civilId"); // user civil id
         Instant issue = jwt.getIssuedAt(); // issue date of token
         Instant expire = jwt.getExpiresAt(); // expire date of token
@@ -53,6 +55,7 @@ public class UserController {
                 "username", username,
                 "civil Id", civilId,
                 "roles", role,
+                "bank", bank,
                 "type", type,
                 "issue", issue,
                 "expire", expire));
