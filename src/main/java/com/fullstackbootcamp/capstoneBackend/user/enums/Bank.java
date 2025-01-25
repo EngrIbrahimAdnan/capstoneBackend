@@ -6,5 +6,4 @@ public enum Bank {
     KUWAIT_INTERNATIONAL_BANK,
     KUWAIT_FINANCE_HOUSE,
     WARBA_BANK
-
 }

@@ -69,4 +69,11 @@ public class JwtUtil {
         return claims.getExpiration().after(new Date()); // Ensure it's not expired
     }
 
+    public String extractUserUsernameFromToken(String authHeader) {
+        if (authHeader.startsWith("Bearer ")) {
+            authHeader = authHeader.substring(7);
+        }
+        Claims claims = validateToken(authHeader);
+        return claims.getSubject();
+    }
 }
