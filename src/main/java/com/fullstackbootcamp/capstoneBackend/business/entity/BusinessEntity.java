@@ -1,5 +1,6 @@
 package com.fullstackbootcamp.capstoneBackend.business.entity;
 
+import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessState;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import jakarta.persistence.*;
 
@@ -21,7 +22,7 @@ public class BusinessEntity {
     private String businessLicense;
 
     @Column(name = "business_state", nullable = false, length = 50)
-    private String businessState;
+    private BusinessState businessState;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "financial_statement_id", nullable = false)
@@ -58,11 +59,11 @@ public class BusinessEntity {
         this.businessLicense = businessLicense;
     }
 
-    public String getBusinessState() {
+    public BusinessState getBusinessState() {
         return businessState;
     }
 
-    public void setBusinessState(String businessState) {
+    public void setBusinessState(BusinessState businessState) {
         this.businessState = businessState;
     }
 
