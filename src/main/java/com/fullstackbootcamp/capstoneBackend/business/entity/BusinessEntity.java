@@ -21,15 +21,26 @@ public class BusinessEntity {
     @Column(name = "business_license", nullable = false, length = 50)
     private String businessLicense;
 
-    @Column(name = "business_state", nullable = false, length = 50)
+    // TODO: Change nullable to true once logic for the business state is implemented.
+    //  Same for financial statement and score
+    @Column(name = "business_state", nullable = true, length = 50)
     private BusinessState businessState;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "financial_statement_id", nullable = false)
+    @JoinColumn(name = "financial_statement_id", nullable = true)
     private FinancialStatementEntity financialStatement;
 
-    @Column(name = "financial_score", nullable = false)
+    @Column(name = "financial_score", nullable = true)
     private Double financialScore;
+
+    public BusinessEntity() {
+    }
+
+    public BusinessEntity(UserEntity businessOwnerUser, String businessName, String businessLicense) {
+        this.businessOwnerUser = businessOwnerUser;
+        this.businessName = businessName;
+        this.businessLicense = businessLicense;
+    }
 
     public Long getId() {
         return id;
