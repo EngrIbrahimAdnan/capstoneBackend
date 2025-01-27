@@ -199,20 +199,10 @@ public class AuthServiceImpl implements AuthService {
 
         Optional<UserEntity> user = userService.getUserByCivilId(loginRequest.getCivilId());
 
-        // true if user does not exist in database
-        if (user.isEmpty()) {
-            // only status and message fields are assigned.
-            // refresh and access tokens are skipped
+        // Handle user not found or incorrect password with a generic message
+        if (user.isEmpty() || !passwordEncoder.matches(loginRequest.getPassword(), user.get().getPassword())) {
             response.setStatus(TokenServiceStatus.UNAUTHORIZED);
-            response.setMessage("The user is not found in the database ");
-
-            return response;
-        }
-
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.get().getPassword())) {
-            response.setStatus(TokenServiceStatus.INVALID_REQUEST);
-            response.setMessage("The username/password is incorrect");
-
+            response.setMessage("The civil id or password is incorrect");
             return response;
         }
 
