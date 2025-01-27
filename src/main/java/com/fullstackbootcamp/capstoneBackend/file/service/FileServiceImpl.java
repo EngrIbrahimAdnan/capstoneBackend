@@ -19,6 +19,10 @@ public class FileServiceImpl implements FileService {
 
     public FileEntity saveFile(MultipartFile file) throws Exception {
         FileEntity fileEntity = new FileEntity();
+        System.out.println(file.getOriginalFilename());
+        System.out.println(file.getContentType());
+        System.out.println(file.getBytes());
+
         fileEntity.setName(file.getOriginalFilename());
         fileEntity.setType(file.getContentType());
         fileEntity.setData(file.getBytes());

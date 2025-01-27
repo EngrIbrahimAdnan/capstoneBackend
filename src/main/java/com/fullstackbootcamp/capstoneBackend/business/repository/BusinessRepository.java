@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface BusinessRepository extends JpaRepository<BusinessEntityWithImages, Long> {
-    Optional<BusinessEntityWithImages> findByBusinessOwnerUser(UserEntity user);
+public interface BusinessRepository extends JpaRepository<BusinessEntity, Long> {
+    Optional<BusinessEntity> findByBusinessOwnerUser(UserEntity user);
 
 }

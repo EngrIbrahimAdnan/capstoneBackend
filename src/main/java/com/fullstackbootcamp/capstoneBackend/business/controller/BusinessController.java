@@ -1,28 +1,16 @@
 package com.fullstackbootcamp.capstoneBackend.business.controller;
 
-import com.fullstackbootcamp.capstoneBackend.auth.dto.SignupResponseDTO;
-import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenTypes;
 import com.fullstackbootcamp.capstoneBackend.business.bo.AddBusinessRequest;
-import com.fullstackbootcamp.capstoneBackend.business.bo.AddBusinessRequestWithFiles;
 import com.fullstackbootcamp.capstoneBackend.business.dto.AddBusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.business.dto.getBusinessDTO;
-import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessAdditionStatus;
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessRetrievalStatus;
 import com.fullstackbootcamp.capstoneBackend.business.service.BusinessService;
-import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
-import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-import java.util.Map;
 
 @RequestMapping("/business/v1")
 @RestController
@@ -35,15 +23,15 @@ public class BusinessController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<AddBusinessDTO> addBusiness(@RequestParam("businessNickname") String businessNickname,
-                                                      @RequestParam("financialStatementPDF") MultipartFile financialStatementPDF,
-                                                      @RequestParam("businessLicenseImage") MultipartFile businessLicenseImage,
+    public ResponseEntity<AddBusinessDTO> addBusiness(@RequestParam("text") String businessNickname,
+                                                      @RequestParam("file") MultipartFile financialStatementPDF,
+                                                      @RequestParam("file2") MultipartFile businessLicenseImage,
                                                       Authentication authentication) {
 
-        AddBusinessRequestWithFiles request = new AddBusinessRequestWithFiles();
+        AddBusinessRequest request = new AddBusinessRequest();
         request.setBusinessNickname(businessNickname);
         request.setFinancialStatementPDF(financialStatementPDF);
-        request.setBusinessLicenseImage(businessLicenseImage);
+//        request.setBusinessLicenseImage(businessLicenseImage);
 
         AddBusinessDTO response = businessService.addBusiness(request, authentication);
 
@@ -58,6 +46,7 @@ public class BusinessController {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
 
             default: // default error
+
                 AddBusinessDTO noResponse = new AddBusinessDTO();
                 noResponse.setStatus(BusinessAdditionStatus.FAIL);
                 noResponse.setMessage("Error status unrecognized");

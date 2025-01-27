@@ -1,9 +1,7 @@
 package com.fullstackbootcamp.capstoneBackend.business.service;
 
-import com.fullstackbootcamp.capstoneBackend.auth.dto.SignupResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenTypes;
 import com.fullstackbootcamp.capstoneBackend.business.bo.AddBusinessRequest;
-import com.fullstackbootcamp.capstoneBackend.business.bo.AddBusinessRequestWithFiles;
 import com.fullstackbootcamp.capstoneBackend.business.dto.AddBusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.business.dto.getBusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
@@ -13,18 +11,14 @@ import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessRetrievalSta
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessState;
 import com.fullstackbootcamp.capstoneBackend.business.repository.BusinessRepository;
 import com.fullstackbootcamp.capstoneBackend.file.entity.FileEntity;
-import com.fullstackbootcamp.capstoneBackend.file.repository.FileRepository;
 import com.fullstackbootcamp.capstoneBackend.file.service.FileService;
-import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import com.fullstackbootcamp.capstoneBackend.user.service.UserService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -42,7 +36,7 @@ public class BusinessServiceImpl implements BusinessService {
 
 
     @Override
-    public AddBusinessDTO addBusiness(AddBusinessRequestWithFiles request, Authentication authentication) {
+    public AddBusinessDTO addBusiness(AddBusinessRequest request, Authentication authentication) {
         AddBusinessDTO response = new AddBusinessDTO();
 
         String message = validateToken(authentication); // Validate token and get response
@@ -65,17 +59,18 @@ public class BusinessServiceImpl implements BusinessService {
             return response;
         }
 
-        BusinessEntityWithImages business = new BusinessEntityWithImages();
+        BusinessEntity business = new BusinessEntity();
         business.setBusinessNickname(request.getBusinessNickname().toLowerCase());
         business.setBusinessOwnerUser(user.get());
 
-//        business.setBusinessState(BusinessState.CRITICAL);// todo: currently hard coded, use the information from financial statment to calculate the state
+        business.setBusinessState(BusinessState.CRITICAL);// todo: currently hard coded, use the information from financial statment to calculate the state
 //        business.setFinancialStatement(null);
 
-//        business.setFinancialScore(8.3);// todo: currently hard coded, use the information from financial statment to calculate the state
+        business.setFinancialScore(8.3);// todo: currently hard coded, use the information from financial statment to calculate the state
 
         // to store financial statement pdf
         try {
+            System.out.println("for finanical statement pdf");
             FileEntity entity = fileService.saveFile(request.getFinancialStatementPDF());
             business.setFinancialStatementPDF(entity);
 
@@ -87,6 +82,8 @@ public class BusinessServiceImpl implements BusinessService {
 
         // to store business license Image
         try {
+            System.out.println("for license image pdf");
+
             FileEntity entity = fileService.saveFile(request.getBusinessLicenseImage());
             business.setBusinessLicenseImage(entity);
 
@@ -146,7 +143,7 @@ public class BusinessServiceImpl implements BusinessService {
         }
 
         // check business exists
-        Optional<BusinessEntityWithImages> businessEntity = businessRepository.findByBusinessOwnerUser(user.get());
+        Optional<BusinessEntity> businessEntity = businessRepository.findByBusinessOwnerUser(user.get());
         if (businessEntity.isEmpty()){
             response.setStatus(BusinessRetrievalStatus.FAIL);
             response.setMessage("Business entity does not exist.");

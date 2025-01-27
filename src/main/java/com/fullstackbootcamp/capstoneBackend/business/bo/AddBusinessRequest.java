@@ -16,13 +16,13 @@ public class AddBusinessRequest {
     @NotNull(message = "The 'businessLicenseImage' file is required and it's missing")
     private MultipartFile businessLicenseImage;
 
-    @Nullable // Nullable be changed later once the text scan is implemented and tested to work
+    @Nullable // Nullable should be changed later once the text scan is implemented and tested to work
     private String financialStatement;
 
-    @Nullable  // Nullable be changed later once the text scan is implemented and tested to work
+    @Nullable  // Nullable should be changed later once the text scan is implemented and tested to work
     private String businessLicense;
 
-    @Nullable // Nullable be changed later once the text scan and AI endpoint is implemented and tested to work
+    @Nullable // Nullable should be changed later once the text scan and AI endpoint is implemented and tested to work
     private String statementAnalysis;
 
     public String getBusinessNickname() {
