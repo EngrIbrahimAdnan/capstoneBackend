@@ -94,6 +94,10 @@ public class OpenAIService {
                 }
               }
             }
+            
+            The conditions should define the recommended loan amount, the interest rate, and the period of payment (for example, 100,000 KWD over 10 months) 
+            
+            If there are any ratios or values that are not available, make the values null.
         
             Make sure your response can be parsed easily in JSON format without extra commentary. DO NOT wrap the JSON in triple backticks.
             """
