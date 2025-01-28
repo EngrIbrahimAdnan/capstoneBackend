@@ -3,6 +3,10 @@ package com.fullstackbootcamp.capstoneBackend.openai.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -22,7 +26,7 @@ public class OpenAIService {
   @Value("${myapp.secret-key}")
   private String API_KEY;
 
-  public String getChatGPTResponse(String prompt) {
+  public Map<String, Object> getChatGPTResponse(String prompt) throws JsonProcessingException {
 
     RestTemplate restTemplate = new RestTemplate();
 
@@ -31,11 +35,68 @@ public class OpenAIService {
     headers.set("Authorization", "Bearer " + API_KEY);
     headers.set("Content-Type", "application/json");
 
-    // Create a system message and the user message
+    // System message
     Map<String, Object> systemMessage = Map.of(
             "role", "system",
-            // TODO: Give a proper system message
-            "content", "You are a helpful chatbot. Please respond in a friendly and concise manner."
+            "content",
+            """
+            You are a financial analysis assistant. Based on the provided financial statement documentation, 
+            perform the following tasks:
+            
+            1. Calculate and provide the following financial ratios:
+               - Profitability ratios
+               - Leverage ratios
+               - Operating ratios
+               - Valuation ratios
+               - Liquidity ratios
+               - Market ratios
+               - Efficiency ratios
+               - Solvency ratios
+               - Capital budgeting ratios
+        
+            2. Provide a numerical financialScore between 0 and 10 (0 = worst, 10 = best).
+        
+            3. Provide a businessState that must be exactly one of the following:
+               EXCELLENT, GOOD, STABLE, STRUGGLING, CRITICAL, or BANKRUPT.
+        
+            4. Include a local market study that considers the Kuwaiti market:
+               - marketOverview: a summary of relevant market conditions in Kuwait
+               - businessProspects: whether this specific business has good prospects in Kuwait
+        
+            5. Give a personal recommendation (loanFeasibility) to the banker about whether 
+               or not to provide a loan to the company, and specify any conditions or requirements 
+               in a list (conditions).
+        
+            **Return all results in valid JSON** with the following structure:
+        
+            {
+              "financialRatios": {
+                "profitabilityRatios": "...",
+                "leverageRatios": "...",
+                "operatingRatios": "...",
+                "valuationRatios": "...",
+                "liquidityRatios": "...",
+                "marketRatios": "...",
+                "efficiencyRatios": "...",
+                "solvencyRatios": "...",
+                "capitalBudgetingRatios": "..."
+              },
+              "assessment": {
+                "financialScore": 0,
+                "businessState": "",
+                "localMarketStudy": {
+                  "marketOverview": "",
+                  "businessProspects": ""
+                },
+                "recommendation": {
+                  "loanFeasibility": "",
+                  "conditions": []
+                }
+              }
+            }
+        
+            Make sure your response can be parsed easily in JSON format without extra commentary. DO NOT wrap the JSON in triple backticks.
+            """
     );
 
     Map<String, Object> userMessage = Map.of(
@@ -45,7 +106,7 @@ public class OpenAIService {
 
     // Prepare request body
     Map<String, Object> requestBody = new HashMap<>();
-    requestBody.put("model", "o1-mini");
+    requestBody.put("model", "chatgpt-4o-latest");
     // Put both the system and user messages in the messages array
     requestBody.put("messages", List.of(systemMessage, userMessage));
 
@@ -71,7 +132,10 @@ public class OpenAIService {
     // Finally, the 'content' field is a string
     String content = (String) message.get("content");
 
-    return content;
+    // Use Jackson to parse the content JSON into a Map
+    ObjectMapper mapper = new ObjectMapper();
+    Map<String, Object> parsedJson = mapper.readValue(content, new TypeReference<>() {});
+    return parsedJson;
   }
 
 }
