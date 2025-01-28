@@ -23,15 +23,15 @@ public class BusinessController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<AddBusinessDTO> addBusiness(@RequestParam("text") String businessNickname,
-                                                      @RequestParam("file") MultipartFile financialStatementPDF,
-                                                      @RequestParam("file2") MultipartFile businessLicenseImage,
+    public ResponseEntity<AddBusinessDTO> addBusiness(@RequestParam("businessNickname") String businessNickname,
+                                                      @RequestParam("financialStatementPDF") MultipartFile financialStatementPDF,
+                                                      @RequestParam("businessLicenseImage") MultipartFile businessLicenseImage,
                                                       Authentication authentication) {
 
         AddBusinessRequest request = new AddBusinessRequest();
         request.setBusinessNickname(businessNickname);
         request.setFinancialStatementPDF(financialStatementPDF);
-//        request.setBusinessLicenseImage(businessLicenseImage);
+        request.setBusinessLicenseImage(businessLicenseImage);
 
         AddBusinessDTO response = businessService.addBusiness(request, authentication);
 
@@ -73,5 +73,14 @@ public class BusinessController {
                 return ResponseEntity.badRequest().body(noResponse);
         }
     }
+
+    @GetMapping("/get-test")
+    public ResponseEntity<?> getBusinessTest(Authentication authentication) {
+
+        return businessService.getBusiness2(authentication);
+
+    }
+    
+
 
 }

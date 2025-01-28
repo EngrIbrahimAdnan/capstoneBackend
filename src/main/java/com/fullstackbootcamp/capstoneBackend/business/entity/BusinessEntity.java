@@ -6,6 +6,7 @@ import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "businesses")
 public class BusinessEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,14 +19,11 @@ public class BusinessEntity {
     @Column(name = "business_Nickname", nullable = false, length = 100)
     private String businessNickname;
 
-    @OneToOne
     @JoinColumn(name = "financial_statement_PDF", nullable = false)
-    private FileEntity financialStatementPDF;
+    private Long financialStatementId;
 
-    @OneToOne
-    @JoinColumn(name = "business_License_image", nullable = false)
-    private FileEntity businessLicenseImage;
-
+    @JoinColumn(name = "business_License_PDF", nullable = false)
+    private Long businessLicenseImageId;
 
     @Column(name = "business_state", length = 50)
     private BusinessState businessState;
@@ -37,13 +35,6 @@ public class BusinessEntity {
     @Column(name = "financial_score", nullable = false)
     private Double financialScore;
 
-    public FileEntity getBusinessLicenseImage() {
-        return businessLicenseImage;
-    }
-
-    public void setBusinessLicenseImage(FileEntity businessLicenseImage) {
-        this.businessLicenseImage = businessLicenseImage;
-    }
 
     public String getBusinessNickname() {
         return businessNickname;
@@ -90,12 +81,20 @@ public class BusinessEntity {
         this.financialScore = financialScore;
     }
 
-    public FileEntity getFinancialStatementPDF() {
-        return financialStatementPDF;
+    public Long getFinancialStatementId() {
+        return financialStatementId;
     }
 
-    public void setFinancialStatementPDF(FileEntity financialStatementPDF) {
-        this.financialStatementPDF = financialStatementPDF;
+    public void setFinancialStatementId(Long financialStatementId) {
+        this.financialStatementId = financialStatementId;
+    }
+
+    public Long getBusinessLicenseImageId() {
+        return businessLicenseImageId;
+    }
+
+    public void setBusinessLicenseImageId(Long businessLicenseImageId) {
+        this.businessLicenseImageId = businessLicenseImageId;
     }
 }
 

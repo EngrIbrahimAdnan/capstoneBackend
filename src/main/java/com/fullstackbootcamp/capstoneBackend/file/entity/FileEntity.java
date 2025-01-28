@@ -1,5 +1,6 @@
 package com.fullstackbootcamp.capstoneBackend.file.entity;
 
+import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import jakarta.persistence.*;
 
 @Entity
