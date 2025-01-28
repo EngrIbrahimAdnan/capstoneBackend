@@ -73,14 +73,4 @@ public class BusinessController {
                 return ResponseEntity.badRequest().body(noResponse);
         }
     }
-
-    @GetMapping("/get-test")
-    public ResponseEntity<?> getBusinessTest(Authentication authentication) {
-
-        return businessService.getBusiness2(authentication);
-
-    }
-    
-
-
 }

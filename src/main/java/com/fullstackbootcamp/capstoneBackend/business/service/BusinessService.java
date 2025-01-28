@@ -13,8 +13,4 @@ public interface BusinessService{
 
 
     AddBusinessDTO addBusiness(AddBusinessRequest request, Authentication authentication);
-
-    ResponseEntity<?> getBusiness2(Authentication authentication);
-    AddBusinessDTO addBusiness2(AddBusinessRequest request, Authentication authentication);
-
 }
