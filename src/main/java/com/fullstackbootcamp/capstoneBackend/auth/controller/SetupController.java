@@ -24,7 +24,6 @@ public class SetupController {
         this.authService = authService;
     }
 
-
     // Loads users from "users.json" in "predefinedData" folder under resources
     @PostMapping("/load-users")
     public ResponseEntity<LoadUsersResponseDTO> signupUser() {

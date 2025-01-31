@@ -17,14 +17,19 @@ public class FileServiceImpl implements FileService {
         this.fileRepository = fileRepository;
     }
 
+    // save file in a repository
     public FileEntity saveFile(MultipartFile file) throws Exception {
-        FileEntity fileEntity = new FileEntity();
-        System.out.println(file.getOriginalFilename());
-        System.out.println(file.getContentType());
-        System.out.println(file.getBytes());
 
+        // TODO: further error handling to ensure the file is indeed image/jpeg and not text file
+        FileEntity fileEntity = new FileEntity();
+
+        // get file name
         fileEntity.setName(file.getOriginalFilename());
+
+        // Set content type (i.e., "image/jpeg")
         fileEntity.setType(file.getContentType());
+
+        // Set file size (currently set to 5MB max, see application.properties)
         fileEntity.setData(file.getBytes());
 
         return fileRepository.save(fileEntity);

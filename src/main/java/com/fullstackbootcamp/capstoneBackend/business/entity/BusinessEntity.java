@@ -22,19 +22,27 @@ public class BusinessEntity {
     @JoinColumn(name = "financial_statement_PDF", nullable = false)
     private Long financialStatementId;
 
-    @JoinColumn(name = "business_License_PDF", nullable = false)
+    @JoinColumn(name = "business_License_Image", nullable = false)
     private Long businessLicenseImageId;
 
+    /* Review:
+        the following are related to the text extraction feature
+        They are currently nullable. To adjust, Add "nullable = false"
+     */
+
+    /* TODO:
+        Uncomment financialStatement
+     */
+//    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    @JoinColumn(name = "financial_statement_id")
+//    private FinancialStatementEntity financialStatement;
+
+    // TODO: Add business license entity relationship here once its created
     @Column(name = "business_state", length = 50)
     private BusinessState businessState;
 
-//    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    @JoinColumn(name = "financial_statement_id")// add "nullable = false" once the text extraction is implemented
-//    private FinancialStatementEntity financialStatement;
-
-    @Column(name = "financial_score", nullable = false)
+    @Column(name = "financial_score")
     private Double financialScore;
-
 
     public String getBusinessNickname() {
         return businessNickname;
@@ -68,7 +76,7 @@ public class BusinessEntity {
 //    public FinancialStatementEntity getFinancialStatement() {
 //        return financialStatement;
 //    }
-
+//
 //    public void setFinancialStatement(FinancialStatementEntity financialStatement) {
 //        this.financialStatement = financialStatement;
 //    }

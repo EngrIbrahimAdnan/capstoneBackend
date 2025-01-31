@@ -22,17 +22,39 @@ public class BusinessController {
         this.businessService = businessService;
     }
 
+
     @PostMapping("/add")
     public ResponseEntity<AddBusinessDTO> addBusiness(@RequestParam("businessNickname") String businessNickname,
-                                                      @RequestParam("financialStatementPDF") MultipartFile financialStatementPDF,
-                                                      @RequestParam("businessLicenseImage") MultipartFile businessLicenseImage,
+                                                      @RequestParam("financialStatementPDF") MultipartFile financialStatementPDF, // image file
+                                                      @RequestParam("businessLicenseImage") MultipartFile businessLicenseImage, // image file
+                                                      @RequestParam(value = "financialStatementText", required = false) String financialStatementText, // fields extracted into string
+                                                      @RequestParam(value = "businessLicenseText", required = false) String businessLicenseText, // fields extracted into string
                                                       Authentication authentication) {
 
-        // manually creating
+        /*
+         NOTE:
+          Manually creating the BO entity since @RequestBody is designed
+          for parsing a single JSON object, not a mixed multipart/form-data request.
+        */
+
         AddBusinessRequest request = new AddBusinessRequest();
         request.setBusinessNickname(businessNickname);
-        request.setFinancialStatementPDF(financialStatementPDF); // currently, the financial statement is an image since many of the document upload libraries are deprecated in react native
+
+        // Uploaded files
+        /* HACK:
+            currently, financial statement is an image since many of the document-upload
+            libraries are deprecated in react native
+         */
+        request.setFinancialStatementPDF(financialStatementPDF);
         request.setBusinessLicenseImage(businessLicenseImage);
+
+        // Extracted text from the two files
+        /* Note:
+            The text extractions are nullable. No error would be thrown out here
+            if the fields weren't provided
+         */
+        request.setFinancialStatementText(financialStatementText);
+        request.setBusinessLicenseText(businessLicenseText);
 
         AddBusinessDTO response = businessService.addBusiness(request, authentication);
 
@@ -47,7 +69,6 @@ public class BusinessController {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
 
             default: // default error
-
                 AddBusinessDTO noResponse = new AddBusinessDTO();
                 noResponse.setStatus(BusinessAdditionStatus.FAIL);
                 noResponse.setMessage("Error status unrecognized");
@@ -55,6 +76,11 @@ public class BusinessController {
         }
     }
 
+    /* NOTE:
+        As for the two files, this get method returns the business entity with only their ids.
+        Due to how the response entity needs to be structured to return files, another
+        endpoint needs to be called to retrieve those files.
+     */
     @GetMapping("/get")
     public ResponseEntity<getBusinessDTO> getBusiness(Authentication authentication) {
 
@@ -74,4 +100,11 @@ public class BusinessController {
                 return ResponseEntity.badRequest().body(noResponse);
         }
     }
+
+    /* TODO:
+        Although the endpoint in file's controller works just fine to get financial statement & business license, it
+        is possible to create endpoints here that return the financial statement & business directly without passing
+        any parameters by using the token of the user to get user entity, followed by getting business entity, and then lastly
+        use the ids stored in the business entity to retrieve the files from the file repository.
+    */
 }

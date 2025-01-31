@@ -71,7 +71,6 @@ public class AuthServiceImpl implements AuthService {
         // Load entities from the JSON file
         List<T> entities = loadEntities(file, typeReference);
 
-
         // Returns here only when the file is not found
         if (entities == null) {
             LoadUsersResponseDTO response = new LoadUsersResponseDTO();
@@ -100,7 +99,6 @@ public class AuthServiceImpl implements AuthService {
                         } else {
                             continue;
                         }
-
 
                     case "anotherFile.json":
                         break;

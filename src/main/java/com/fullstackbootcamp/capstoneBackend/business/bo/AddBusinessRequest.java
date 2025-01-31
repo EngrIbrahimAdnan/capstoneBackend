@@ -1,6 +1,5 @@
 package com.fullstackbootcamp.capstoneBackend.business.bo;
 
-import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessState;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,14 +15,11 @@ public class AddBusinessRequest {
     @NotNull(message = "The 'businessLicenseImage' file is required and it's missing")
     private MultipartFile businessLicenseImage;
 
-    @Nullable // Nullable should be changed later once the text scan is implemented and tested to work
-    private String financialStatement;
+//    @Nullable // Nullable should be changed later once the text scan is implemented and tested to work
+    private String financialStatementText;
 
-    @Nullable  // Nullable should be changed later once the text scan is implemented and tested to work
-    private String businessLicense;
-
-    @Nullable // Nullable should be changed later once the text scan and AI endpoint is implemented and tested to work
-    private String statementAnalysis;
+//    @Nullable  // Nullable should be changed later once the text scan is implemented and tested to work
+    private String businessLicenseText;
 
     public String getBusinessNickname() {
         return businessNickname;
@@ -49,28 +45,19 @@ public class AddBusinessRequest {
         this.businessLicenseImage = businessLicenseImage;
     }
 
-    public String getFinancialStatement() {
-        return financialStatement;
+    public String getFinancialStatementText() {
+        return financialStatementText;
     }
 
-    public void setFinancialStatement(String financialStatement) {
-        this.financialStatement = financialStatement;
+    public void setFinancialStatementText(String financialStatementText) {
+        this.financialStatementText = financialStatementText;
     }
 
-    public String getBusinessLicense() {
-        return businessLicense;
+    public String getBusinessLicenseText() {
+        return businessLicenseText;
     }
 
-    public void setBusinessLicense(String businessLicense) {
-        this.businessLicense = businessLicense;
+    public void setBusinessLicenseText(String businessLicenseText) {
+        this.businessLicenseText = businessLicenseText;
     }
-
-    public String getStatementAnalysis() {
-        return statementAnalysis;
-    }
-
-    public void setStatementAnalysis(String statementAnalysis) {
-        this.statementAnalysis = statementAnalysis;
-    }
-
 }
