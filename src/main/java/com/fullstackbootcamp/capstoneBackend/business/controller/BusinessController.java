@@ -28,9 +28,10 @@ public class BusinessController {
                                                       @RequestParam("businessLicenseImage") MultipartFile businessLicenseImage,
                                                       Authentication authentication) {
 
+        // manually creating
         AddBusinessRequest request = new AddBusinessRequest();
         request.setBusinessNickname(businessNickname);
-        request.setFinancialStatementPDF(financialStatementPDF);
+        request.setFinancialStatementPDF(financialStatementPDF); // currently, the financial statement is an image since many of the document upload libraries are deprecated in react native
         request.setBusinessLicenseImage(businessLicenseImage);
 
         AddBusinessDTO response = businessService.addBusiness(request, authentication);
