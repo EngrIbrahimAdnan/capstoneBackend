@@ -80,7 +80,11 @@ public class BusinessServiceImpl implements BusinessService {
         business.setBusinessOwnerUser(user.get());
 
         // add Business Nickname
-        // REVIEW: this field doesn't have to be lower-cased since it won't be used to search with
+        /* REVIEW:
+            nickname doesn't have to be lower-cased since it won't be used to search with
+            Its merely a convenience for the user
+         */
+
         business.setBusinessNickname(request.getBusinessNickname());
 
         // Attempt to store financial statement document
@@ -94,7 +98,7 @@ public class BusinessServiceImpl implements BusinessService {
                 disgusting this looks. The error steams from adding relationships with large files (like images)
                 will look for a way around it.
              */
-            business.setFinancialStatementId(entity.getId());
+            business.setFinancialStatementFileId(entity.getId());
         } catch (Exception e) {
             response.setStatus(BusinessAdditionStatus.FAIL);
             response.setMessage("Unable to upload PDF document.");
@@ -109,7 +113,7 @@ public class BusinessServiceImpl implements BusinessService {
                 Again, we are associating the business entity with the ID of the business license file
                 instead of an entity relationship
              */
-            business.setBusinessLicenseImageId(entity.getId());
+            business.setBusinessLicenseImageFileId(entity.getId());
 
         } catch (Exception e) {
             response.setStatus(BusinessAdditionStatus.FAIL);
@@ -128,11 +132,16 @@ public class BusinessServiceImpl implements BusinessService {
          */
 
         // add financial statement entity
-        // business.setFinancialStatement(null); TODO: uncomment and set each individual field accordingly
+        // TODO: change from null add all necessary fields
+        business.setFinancialStatement(null);
 
         // add business license
-        // TODO: add error handling if a business license is already associated with the business entity
         // TODO: set all other fields
+        /* NOTE:
+            error handling to check if a business license already associates with
+            the business entity won't be necessary since the business entity is just created
+            However, this error may come in handy if you use pgadmin to delete the business entity
+         */
         BusinessLicenseEntity businessLicense = new BusinessLicenseEntity();
         businessLicense.setIssueDate(LocalDate.now());
         businessLicense.setLicenseNumber("23JSCL23");
@@ -150,7 +159,6 @@ public class BusinessServiceImpl implements BusinessService {
         response.setStatus(BusinessAdditionStatus.SUCCESS);
         response.setMessage("Successfully added business to user.");
         return response;
-
     }
 
 
@@ -196,7 +204,7 @@ public class BusinessServiceImpl implements BusinessService {
          *   are stored, this is especially critical when the relationships are revisited and added between business entities
          *   and file entities. It doesn't hurt to also check for the time being*/
 
-        Optional<FileEntity> financialStatement = fileService.getFile(businessEntity.get().getFinancialStatementId());
+        Optional<FileEntity> financialStatement = fileService.getFile(businessEntity.get().getFinancialStatementFileId());
 
         if (financialStatement.isEmpty()) {
             response.setStatus(BusinessRetrievalStatus.FAIL);
@@ -204,7 +212,7 @@ public class BusinessServiceImpl implements BusinessService {
             return response;
         }
 
-        Optional<FileEntity> businessLicense = fileService.getFile(businessEntity.get().getBusinessLicenseImageId());
+        Optional<FileEntity> businessLicense = fileService.getFile(businessEntity.get().getBusinessLicenseImageFileId());
 
         if (businessLicense.isEmpty()) {
             response.setStatus(BusinessRetrievalStatus.FAIL);

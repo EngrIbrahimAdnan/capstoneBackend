@@ -25,7 +25,6 @@ public class BusinessLicenseEntity {
     private LocalDate expiryDate;
     private String civilAuthorityNumber;
     private String licenseType;
-
     private LocalDate registrationDate;
 
     // Business Activities

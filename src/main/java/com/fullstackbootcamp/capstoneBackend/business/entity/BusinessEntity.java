@@ -20,32 +20,27 @@ public class BusinessEntity {
     private String businessNickname;
 
     @JoinColumn(name = "financial_statement_PDF", nullable = false)
-    private Long financialStatementId;
-
+    private Long financialStatementFileId;
 
     @JoinColumn(name = "business_License_Image", nullable = false)
-    private Long businessLicenseImageId;
+    private Long businessLicenseImageFileId;
 
     /* Review:
         the following are related to the text extraction feature
         They are currently nullable. To adjust, Add "nullable = false"
      */
-
-    /* TODO:
-        Uncomment financialStatement
-     */
-//    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    @JoinColumn(name = "financial_statement_id")
-//    private FinancialStatementEntity financialStatement;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "financial_statement")
+    private FinancialStatementEntity financialStatement;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "business_license_id")
+    @JoinColumn(name = "business_license")
     private BusinessLicenseEntity businessLicense;
 
     @Column(name = "financial_analysis")
     private String financialAnalysis;
 
-    @Column(name = "business_state", length = 50)
+    @Column(name = "business_state")
     private BusinessState businessState;
 
     @Column(name = "financial_score")
@@ -71,29 +66,29 @@ public class BusinessEntity {
         this.businessNickname = businessNickname;
     }
 
-    public Long getFinancialStatementId() {
-        return financialStatementId;
+    public Long getFinancialStatementFileId() {
+        return financialStatementFileId;
     }
 
-    public void setFinancialStatementId(Long financialStatementId) {
-        this.financialStatementId = financialStatementId;
+    public void setFinancialStatementFileId(Long financialStatementFileId) {
+        this.financialStatementFileId = financialStatementFileId;
     }
 
-    public Long getBusinessLicenseImageId() {
-        return businessLicenseImageId;
+    public Long getBusinessLicenseImageFileId() {
+        return businessLicenseImageFileId;
     }
 
-    public void setBusinessLicenseImageId(Long businessLicenseImageId) {
-        this.businessLicenseImageId = businessLicenseImageId;
+    public void setBusinessLicenseImageFileId(Long businessLicenseImageFileId) {
+        this.businessLicenseImageFileId = businessLicenseImageFileId;
     }
 
-    //    public FinancialStatementEntity getFinancialStatement() {
-//        return financialStatement;
-//    }
-//
-//    public void setFinancialStatement(FinancialStatementEntity financialStatement) {
-//        this.financialStatement = financialStatement;
-//    }
+    public FinancialStatementEntity getFinancialStatement() {
+        return financialStatement;
+    }
+
+    public void setFinancialStatement(FinancialStatementEntity financialStatement) {
+        this.financialStatement = financialStatement;
+    }
 
 
     public BusinessLicenseEntity getBusinessLicense() {
