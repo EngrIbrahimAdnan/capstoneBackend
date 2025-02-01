@@ -13,7 +13,7 @@ public class BusinessMapperService {
         return new BusinessDTO(
             businessEntity.getBusinessOwnerUser().getUsername()
 //            businessEntity.getBusinessName(), TODO: due to entity restructure, business name would be extracted from financial statement entity
-//            businessEntity.getBusinessLicense() TODO: similarly, this would be extracted from business license entity (once its made)
+//            businessEntity.getBusinessLicense() TODO: similarly, this would be extracted from business license entity (once its refined)
             );
     }
 

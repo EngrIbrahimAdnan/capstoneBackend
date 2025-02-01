@@ -1,7 +1,6 @@
 package com.fullstackbootcamp.capstoneBackend.business.dto;
 
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessAdditionStatus;
-import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
 
 public class AddBusinessDTO {
     private BusinessAdditionStatus status; // SUCCESS, FAIL, BUSINESS_ALREADY_EXISTS

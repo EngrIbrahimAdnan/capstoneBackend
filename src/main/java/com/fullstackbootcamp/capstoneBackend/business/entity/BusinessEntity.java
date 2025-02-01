@@ -1,7 +1,6 @@
 package com.fullstackbootcamp.capstoneBackend.business.entity;
 
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessState;
-import com.fullstackbootcamp.capstoneBackend.file.entity.FileEntity;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import jakarta.persistence.*;
 
@@ -39,7 +38,13 @@ public class BusinessEntity {
 //    @JoinColumn(name = "financial_statement_id")
 //    private FinancialStatementEntity financialStatement;
 
-    // TODO: Add business license entity relationship here once its created
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "business_license_id")
+    private BusinessLicenseEntity businessLicense;
+
+    @Column(name = "financial_analysis")
+    private String financialAnalysis;
+
     @Column(name = "business_state", length = 50)
     private BusinessState businessState;
 
@@ -90,6 +95,23 @@ public class BusinessEntity {
 //        this.financialStatement = financialStatement;
 //    }
 
+
+    public BusinessLicenseEntity getBusinessLicense() {
+        return businessLicense;
+    }
+
+    public void setBusinessLicense(BusinessLicenseEntity businessLicense) {
+        this.businessLicense = businessLicense;
+    }
+
+
+    public String getFinancialAnalysis() {
+        return financialAnalysis;
+    }
+
+    public void setFinancialAnalysis(String financialAnalysis) {
+        this.financialAnalysis = financialAnalysis;
+    }
 
     public BusinessState getBusinessState() {
         return businessState;

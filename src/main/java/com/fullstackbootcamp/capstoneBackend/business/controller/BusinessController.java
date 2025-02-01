@@ -46,7 +46,7 @@ public class BusinessController {
         // Uploaded files
         /* HACK:
             currently, financial statement is an image since many of the document-upload
-            libraries are deprecated in react native
+            libraries are deprecated in react native. This may be revisited later.
          */
         request.setFinancialStatementPDF(financialStatementPDF);
         request.setBusinessLicenseImage(businessLicenseImage);
