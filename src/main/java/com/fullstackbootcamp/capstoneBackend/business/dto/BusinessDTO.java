@@ -12,7 +12,6 @@ public class BusinessDTO {
         to avoid playing with the logic intended.
      */
 
-
 //    private String businessName;
 //    private String businessLicense;
 
