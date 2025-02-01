@@ -51,7 +51,7 @@ public class BusinessController {
         request.setFinancialStatementPDF(financialStatementPDF);
         request.setBusinessLicenseImage(businessLicenseImage);
 
-        // Extracted text from the two files
+        // Extracted text from the two files, received from application
         /* Note:
             The text extractions are nullable. No error would be thrown out here
             if the fields weren't provided
@@ -106,7 +106,7 @@ public class BusinessController {
 
     /* TODO:
         Although the endpoint in file's controller works just fine to get financial statement & business license, it
-        is possible to create endpoints here that return the financial statement & business directly without passing
+        is possible to create endpoints here that return the financial statement & business license directly without passing
         any parameters by using the token of the user to get user entity, followed by getting business entity, and then lastly
         use the ids stored in the business entity to retrieve the files from the file repository.
     */
