@@ -1,6 +1,5 @@
 package com.fullstackbootcamp.capstoneBackend.business.bo;
 
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,10 +14,10 @@ public class AddBusinessRequest {
     @NotNull(message = "The 'businessLicenseImage' file is required and it's missing")
     private MultipartFile businessLicenseImage;
 
-//    @Nullable // Nullable should be changed later once the text scan is implemented and tested to work
+    // @Nullable NOTE: Nullable can be changed later to not null once the text scan works perfectly
     private String financialStatementText;
 
-//    @Nullable  // Nullable should be changed later once the text scan is implemented and tested to work
+    // @Nullable NOTE: Nullable can be changed later to not null once the text scan works perfectly
     private String businessLicenseText;
 
     public String getBusinessNickname() {

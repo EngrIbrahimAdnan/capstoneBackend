@@ -5,6 +5,7 @@ import com.fullstackbootcamp.capstoneBackend.business.bo.AddBusinessRequest;
 import com.fullstackbootcamp.capstoneBackend.business.dto.AddBusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.business.dto.getBusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
+import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessLicenseEntity;
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessAdditionStatus;
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessRetrievalStatus;
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessState;
@@ -18,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -89,7 +91,8 @@ public class BusinessServiceImpl implements BusinessService {
             /* Hack:
                 Although it looks disgusting to associate the business entity with the file entity this way,
                 this gets rid of the error message "LOB: unable to stream". This might be revisited later due to how
-                disgusting this looks.
+                disgusting this looks. The error steams from adding relationships with large files (like images)
+                will look for a way around it.
              */
             business.setFinancialStatementId(entity.getId());
         } catch (Exception e) {
@@ -118,18 +121,29 @@ public class BusinessServiceImpl implements BusinessService {
             Depending on how the string, containing the fields extracted from document, is
             structured and separated, perform logic here to set the following fields:
             -   Financial Statement
+            -   Business License
+            -   Financial Analysis
             -   Business State
             -   Financial Score
          */
 
+        // add financial statement entity
         // business.setFinancialStatement(null); TODO: uncomment and set each individual field accordingly
-        // business.setBusinessState(BusinessState.CRITICAL); todo: currently hard coded
-        // business.setFinancialScore(8.3); todo: currently hard coded
 
-        /* TODO:
-            Add business license entity to the business entity once its created and added
-            as a relationship to the business entity
-         */
+        // add business license
+        // TODO: add error handling if a business license is already associated with the business entity
+        // TODO: set all other fields
+        BusinessLicenseEntity businessLicense = new BusinessLicenseEntity();
+        businessLicense.setIssueDate(LocalDate.now());
+        businessLicense.setLicenseNumber("23JSCL23");
+        business.setBusinessLicense(businessLicense);
+
+        // TODO: Set the financial analysis obtained from openai
+        business.setFinancialAnalysis("This is a financial analysis based ...");
+
+        // TODO: perform logic and switch statement to set the correct business state and score
+        business.setBusinessState(BusinessState.CRITICAL);
+        business.setFinancialScore(8.3);
 
         businessRepository.save(business);
 
@@ -179,8 +193,8 @@ public class BusinessServiceImpl implements BusinessService {
 
         // Check existence of both files
         /* NOTE: although this wouldn't throwout an error for 'financial Statement' & 'business license' since only the image Ids
-        *   are stored, this is especially critical when the relationships are revisited and added between business entities
-        *   and file entities. It doesn't hurt to also check for the time being*/
+         *   are stored, this is especially critical when the relationships are revisited and added between business entities
+         *   and file entities. It doesn't hurt to also check for the time being*/
 
         Optional<FileEntity> financialStatement = fileService.getFile(businessEntity.get().getFinancialStatementId());
 

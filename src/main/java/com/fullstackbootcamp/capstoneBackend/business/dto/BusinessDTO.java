@@ -5,6 +5,14 @@ import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessState;
 public class BusinessDTO {
     // TODO: Add financial score and business state once logic is implemented
     private String businessOwnerName;
+
+    /* NOTE:
+        these are commented out since business name is now a field of financial statement entity
+        while businessLicense is now an entirely separate entity. I simply commented them out
+        to avoid playing with the logic intended.
+     */
+
+
 //    private String businessName;
 //    private String businessLicense;
 
