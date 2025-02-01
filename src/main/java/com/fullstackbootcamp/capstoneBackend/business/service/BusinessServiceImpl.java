@@ -200,7 +200,7 @@ public class BusinessServiceImpl implements BusinessService {
         }
 
         // Check existence of both files
-        /* NOTE: although this wouldn't throwout an error for 'financial Statement' & 'business license' since only the image Ids
+        /* REVIEW: although this wouldn't throwout an error for 'financial Statement' & 'business license' since only the image Ids
          *   are stored, this is especially critical when the relationships are revisited and added between business entities
          *   and file entities. It doesn't hurt to also check for the time being*/
 
