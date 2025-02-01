@@ -10,5 +10,4 @@ import java.util.Optional;
 @Repository
 public interface BusinessRepository extends JpaRepository<BusinessEntity, Long> {
     Optional<BusinessEntity> findByBusinessOwnerUser(UserEntity user);
-
 }

@@ -13,4 +13,5 @@ public interface BusinessService{
 
 
     AddBusinessDTO addBusiness(AddBusinessRequest request, Authentication authentication);
+
 }

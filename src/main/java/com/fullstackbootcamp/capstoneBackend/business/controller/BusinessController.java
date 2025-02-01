@@ -1,5 +1,6 @@
 package com.fullstackbootcamp.capstoneBackend.business.controller;
 
+
 import com.fullstackbootcamp.capstoneBackend.business.bo.AddBusinessRequest;
 import com.fullstackbootcamp.capstoneBackend.business.dto.AddBusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.business.dto.getBusinessDTO;
@@ -12,14 +13,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@RequestMapping("/business/v1")
+@RequestMapping("/business")
 @RestController
 public class BusinessController {
+
 
     private final BusinessService businessService;
 
     public BusinessController(BusinessService businessService) {
         this.businessService = businessService;
+
     }
 
 

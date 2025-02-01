@@ -121,8 +121,8 @@ public class AuthController {
             TokenResponseDTO response = authService.login(loginRequest);
 
             switch (response.getStatus()) {
-                case SUCCESS: // accepted status returned for successfully logging in
-                    return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+                case SUCCESS: // ok status returned for successfully logging in
+                    return ResponseEntity.status(HttpStatus.OK).body(response);
 
                 case UNAUTHORIZED: // unauthorized status returned when user does not exist in database
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
@@ -132,7 +132,7 @@ public class AuthController {
 
                 default: // default error
                     response.setStatus(TokenServiceStatus.FAILURE);
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
             }
 
         } catch (Exception e) {

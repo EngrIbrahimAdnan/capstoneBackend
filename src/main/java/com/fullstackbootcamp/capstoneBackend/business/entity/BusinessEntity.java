@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "businesses")
 public class BusinessEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,6 +22,7 @@ public class BusinessEntity {
 
     @JoinColumn(name = "financial_statement_PDF", nullable = false)
     private Long financialStatementId;
+
 
     @JoinColumn(name = "business_License_Image", nullable = false)
     private Long businessLicenseImageId;
@@ -44,14 +46,6 @@ public class BusinessEntity {
     @Column(name = "financial_score")
     private Double financialScore;
 
-    public String getBusinessNickname() {
-        return businessNickname;
-    }
-
-    public void setBusinessNickname(String businessNickname) {
-        this.businessNickname = businessNickname;
-    }
-
     public Long getId() {
         return id;
     }
@@ -64,29 +58,12 @@ public class BusinessEntity {
         this.businessOwnerUser = businessOwnerUser;
     }
 
-
-    public BusinessState getBusinessState() {
-        return businessState;
+    public String getBusinessNickname() {
+        return businessNickname;
     }
 
-    public void setBusinessState(BusinessState businessState) {
-        this.businessState = businessState;
-    }
-
-//    public FinancialStatementEntity getFinancialStatement() {
-//        return financialStatement;
-//    }
-//
-//    public void setFinancialStatement(FinancialStatementEntity financialStatement) {
-//        this.financialStatement = financialStatement;
-//    }
-
-    public Double getFinancialScore() {
-        return financialScore;
-    }
-
-    public void setFinancialScore(Double financialScore) {
-        this.financialScore = financialScore;
+    public void setBusinessNickname(String businessNickname) {
+        this.businessNickname = businessNickname;
     }
 
     public Long getFinancialStatementId() {
@@ -103,6 +80,31 @@ public class BusinessEntity {
 
     public void setBusinessLicenseImageId(Long businessLicenseImageId) {
         this.businessLicenseImageId = businessLicenseImageId;
+    }
+
+    //    public FinancialStatementEntity getFinancialStatement() {
+//        return financialStatement;
+//    }
+//
+//    public void setFinancialStatement(FinancialStatementEntity financialStatement) {
+//        this.financialStatement = financialStatement;
+//    }
+
+
+    public BusinessState getBusinessState() {
+        return businessState;
+    }
+
+    public void setBusinessState(BusinessState businessState) {
+        this.businessState = businessState;
+    }
+
+    public Double getFinancialScore() {
+        return financialScore;
+    }
+
+    public void setFinancialScore(Double financialScore) {
+        this.financialScore = financialScore;
     }
 }
 
