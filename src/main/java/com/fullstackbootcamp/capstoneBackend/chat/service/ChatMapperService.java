@@ -13,40 +13,50 @@ import java.util.stream.Collectors;
 @Service
 public class ChatMapperService {
 
-    public ChatDTO convertToDTO(ChatEntity chatEntity) {
+    public ChatDTO convertToDTO(ChatEntity chatEntity, String username) {
         if (chatEntity == null) {
             return null;
         }
 
+        // Figure out if the "banker" in this chat is the currently logged-in user
+        boolean bankerIsYou = chatEntity.getBanker().getUsername().equals(username);
+
         return new ChatDTO(
                 chatEntity.getId(),
-                convertUserToDTO(chatEntity.getBanker()),
-                convertUserToDTO(chatEntity.getBusinessOwner()),
-                convertMessages(chatEntity)
+                convertUserToDTO(chatEntity.getBanker(), bankerIsYou),
+                convertUserToDTO(chatEntity.getBusinessOwner(), !bankerIsYou),
+                convertMessages(chatEntity, username) // Pass username down
         );
     }
 
-    private UserDTO convertUserToDTO(UserEntity user) {
+    private UserDTO convertUserToDTO(UserEntity user, boolean isYou) {
         if (user == null) {
             return null;
         }
         return new UserDTO(
                 user.getId(),
                 user.getFirstName(),
-                user.getBank().toString()
+                user.getBank().toString(),
+                isYou
         );
     }
 
-    List<MessageDTO> convertMessages(ChatEntity chatEntity) {
+    private List<MessageDTO> convertMessages(ChatEntity chatEntity, String username) {
         if (chatEntity.getMessages() == null) {
             return null;
         }
         return chatEntity.getMessages().stream()
-                .map(messageEntity -> new MessageDTO(
-                        messageEntity.getId(),
-                        messageEntity.getCharacters(),
-                        messageEntity.getSender().getFirstName(),
-                        messageEntity.getTimestamp()))
+                .map(messageEntity -> {
+                    boolean senderIsYou = messageEntity.getSender().getUsername().equals(username);
+
+                    return new MessageDTO(
+                            messageEntity.getId(),
+                            messageEntity.getCharacters(),
+                            messageEntity.getSender().getFirstName(),
+                            messageEntity.getTimestamp(),
+                            senderIsYou
+                    );
+                })
                 .collect(Collectors.toList());
     }
 
