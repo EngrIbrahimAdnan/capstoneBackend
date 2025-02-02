@@ -25,7 +25,7 @@ public class LoanRequest {
      *  - Once the banker assigns it to himself, UserEntity is assigned to this loanRequest
      */
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "banker_user_id")
     @JsonIgnore
     private UserEntity banker;
@@ -35,7 +35,7 @@ public class LoanRequest {
      *  - It would be redundant to include it here as well.
      */
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "business_id", nullable = false)
     @JsonIgnore
     private BusinessEntity business;
