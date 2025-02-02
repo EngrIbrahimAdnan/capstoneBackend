@@ -6,8 +6,8 @@
     "password": "password",
     "username": "EngrIbrahimAdnan",
     "civilId": "000000000000",
-    "role": "BANKER",
-    "bank": "BOUBYAN_BANK"
+    "role": "BUSINESS_OWNER",
+    "bank": "NOT_BANK"
   },
   {
     "mobileNumber": "29913920",
@@ -36,7 +36,11 @@
     "password": "password",
     "username": "salem",
     "civilId": "333333333333",
-    "role": "BUSINESS_OWNER",
-    "bank": "NOT_BANK"
+    "role": "BANKER",
+    "bank": "BOUBYAN_BANK"
   }
 ]
+
+
+
+

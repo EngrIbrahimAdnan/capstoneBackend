@@ -28,8 +28,11 @@ public class UserController {
     public ResponseEntity<?> extractTokenInfo(Authentication authentication) {
         Jwt jwt = (Jwt) authentication.getPrincipal();
 
-        // To ensure the access token is provided and NOT the refresh token
-        // The refresh token contains less information, is only ever used to generate an access token
+        /* NOTE:
+            To ensure the access token is provided and NOT the refresh token,
+            the refresh token, which contains less information, is only ever used to
+            generate an access token
+         */
         if (jwt.getClaims().get("type").equals(TokenTypes.REFRESH.name())) {
             return ResponseEntity.ok(Map.of("Error"," refresh token is required when Access token is provided"));
         }
@@ -37,7 +40,7 @@ public class UserController {
         // All Obtainable information from access token
         String id = jwt.getId(); // token id
         String username = jwt.getSubject(); // username of the user
-        Object type = jwt.getClaims().get("type"); // the type of access (ACCESS or REFRESH)
+        Object type = jwt.getClaims().get("type"); // the type of token (ACCESS or REFRESH)
         Object role = jwt.getClaims().get("roles"); // roles: ADMIN, BANKER, BUSINESS_OWNER
         Object bank = jwt.getClaims().get("bank"); // bank: a value from the different enum banks
 

@@ -1,5 +1,6 @@
 package com.fullstackbootcamp.capstoneBackend.business.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessState;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import jakarta.persistence.*;
@@ -7,6 +8,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "businesses")
 public class BusinessEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -15,32 +17,45 @@ public class BusinessEntity {
     @JoinColumn(name = "business_owner_user_id", nullable = false)
     private UserEntity businessOwnerUser;
 
-    @Column(name = "business_name", nullable = false, length = 100)
-    private String businessName;
+    @Column(name = "business_Nickname", nullable = false, length = 100)
+    private String businessNickname;
 
-    @Column(name = "business_license", nullable = false, length = 50)
-    private String businessLicense;
+    @JoinColumn(name = "financial_statement_PDF", nullable = false)
+    private Long financialStatementFileId;
 
-    // TODO: Change nullable to true once logic for the business state is implemented.
-    //  Same for financial statement and score
-    @Column(name = "business_state", nullable = true, length = 50)
-    private BusinessState businessState;
+    @JoinColumn(name = "business_License_Image", nullable = false)
+    private Long businessLicenseImageFileId;
 
+    /* Review:
+        the following are related to the text extraction feature
+        They are currently nullable. To adjust, Add "nullable = false"
+     */
+
+    /*
+     * NOTE: @JsonIgnore for financialStatement & businessLicense
+     *  - Prevents serialization issues caused by Hibernate's lazy loading proxy.
+     *  - Ensures that Jackson does not attempt to serialize an uninitialized entity.
+     *  - Without this annotation, you may encounter the following error:
+     *   {@code [simple type, class org.hibernate.proxy.pojo.bytebuddy.ByteBuddyInterceptor]}
+     */
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "financial_statement_id", nullable = true)
+    @JoinColumn(name = "financial_statement")
+    @JsonIgnore
     private FinancialStatementEntity financialStatement;
 
-    @Column(name = "financial_score", nullable = true)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "business_license")
+    @JsonIgnore
+    private BusinessLicenseEntity businessLicense;
+
+    @Column(name = "financial_analysis")
+    private String financialAnalysis;
+
+    @Column(name = "business_state")
+    private BusinessState businessState;
+
+    @Column(name = "financial_score")
     private Double financialScore;
-
-    public BusinessEntity() {
-    }
-
-    public BusinessEntity(UserEntity businessOwnerUser, String businessName, String businessLicense) {
-        this.businessOwnerUser = businessOwnerUser;
-        this.businessName = businessName;
-        this.businessLicense = businessLicense;
-    }
 
     public Long getId() {
         return id;
@@ -54,28 +69,28 @@ public class BusinessEntity {
         this.businessOwnerUser = businessOwnerUser;
     }
 
-    public String getBusinessName() {
-        return businessName;
+    public String getBusinessNickname() {
+        return businessNickname;
     }
 
-    public void setBusinessName(String businessName) {
-        this.businessName = businessName;
+    public void setBusinessNickname(String businessNickname) {
+        this.businessNickname = businessNickname;
     }
 
-    public String getBusinessLicense() {
-        return businessLicense;
+    public Long getFinancialStatementFileId() {
+        return financialStatementFileId;
     }
 
-    public void setBusinessLicense(String businessLicense) {
-        this.businessLicense = businessLicense;
+    public void setFinancialStatementFileId(Long financialStatementFileId) {
+        this.financialStatementFileId = financialStatementFileId;
     }
 
-    public BusinessState getBusinessState() {
-        return businessState;
+    public Long getBusinessLicenseImageFileId() {
+        return businessLicenseImageFileId;
     }
 
-    public void setBusinessState(BusinessState businessState) {
-        this.businessState = businessState;
+    public void setBusinessLicenseImageFileId(Long businessLicenseImageFileId) {
+        this.businessLicenseImageFileId = businessLicenseImageFileId;
     }
 
     public FinancialStatementEntity getFinancialStatement() {
@@ -86,6 +101,32 @@ public class BusinessEntity {
         this.financialStatement = financialStatement;
     }
 
+
+    public BusinessLicenseEntity getBusinessLicense() {
+        return businessLicense;
+    }
+
+    public void setBusinessLicense(BusinessLicenseEntity businessLicense) {
+        this.businessLicense = businessLicense;
+    }
+
+
+    public String getFinancialAnalysis() {
+        return financialAnalysis;
+    }
+
+    public void setFinancialAnalysis(String financialAnalysis) {
+        this.financialAnalysis = financialAnalysis;
+    }
+
+    public BusinessState getBusinessState() {
+        return businessState;
+    }
+
+    public void setBusinessState(BusinessState businessState) {
+        this.businessState = businessState;
+    }
+
     public Double getFinancialScore() {
         return financialScore;
     }
@@ -94,3 +135,14 @@ public class BusinessEntity {
         this.financialScore = financialScore;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
