@@ -19,16 +19,16 @@ public class LoanRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /* Note:
-     *  - banker is intentionally left nullable
-     *  - This is to account for the case before it is assigned to a banker user
-     *  - Once the banker assigns it to himself, UserEntity is assigned to this loanRequest
-     */
+//    /* Note:
+//     *  - banker is intentionally left nullable
+//     *  - This is to account for the case before it is assigned to a banker user
+//     *  - Once the banker assigns it to himself, UserEntity is assigned to this loanRequest
+//     */
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "banker_user_id")
-    @JsonIgnore
-    private UserEntity banker;
+//    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    @JoinColumn(name = "banker_user_id")
+//    @JsonIgnore
+//    private UserEntity banker;
 
     /* Note:
      *  - BusinessOwner User can be obtained from the business entity business
@@ -85,13 +85,13 @@ public class LoanRequest {
         this.id = id;
     }
 
-    public UserEntity getBanker() {
-        return banker;
-    }
-
-    public void setBanker(UserEntity banker) {
-        this.banker = banker;
-    }
+//    public UserEntity getBanker() {
+//        return banker;
+//    }
+//
+//    public void setBanker(UserEntity banker) {
+//        this.banker = banker;
+//    }
 
     public BusinessEntity getBusiness() {
         return business;

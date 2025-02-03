@@ -8,9 +8,13 @@ import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessRetrievalStatus;
 import com.fullstackbootcamp.capstoneBackend.business.service.BusinessService;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanRequest;
+import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanResponse;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanRequestDTO;
+import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequest;
+import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanResponse;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanRequestStatus;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanResponseStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.RejectionSource;
 import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanRepository;
@@ -22,6 +26,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import javax.management.relation.Role;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -40,12 +45,13 @@ public class LoanServiceImpl implements LoanService {
         this.businessService = businessService;
     }
 
+    // Note: endpoint only for business owner
     @Override
     public LoanRequestDTO createLoanRequest(CreateLoanRequest request, Authentication authentication) {
 
         LoanRequestDTO response = new LoanRequestDTO();
 
-        String message = validateToken(authentication); // Validate token and get response
+        String message = validateToken(Roles.BUSINESS_OWNER,authentication); // Validate token and get response
 
         // return a response if a message is returned
         if (message != null) {
@@ -81,7 +87,7 @@ public class LoanServiceImpl implements LoanService {
 
         // default values
         LoanRequest loanRequest = new LoanRequest();
-        loanRequest.setBanker(null); // null because no banker has assigned it to themselves
+//        loanRequest.setBanker(null); // null because no banker has assigned it to themselves
         loanRequest.setBusiness(businessEntity.get());
         loanRequest.setBank(request.getBank());
 
@@ -106,7 +112,60 @@ public class LoanServiceImpl implements LoanService {
         return response;
     }
 
-    public String validateToken(Authentication authentication) {
+    // Note: endpoint only for bankers
+    public LoanResponseDTO createLoanResponse(CreateLoanResponse request, Authentication authentication){
+
+        LoanResponseDTO response = new LoanResponseDTO();
+
+        String message = validateToken(Roles.BANKER,authentication); // Validate token and get response
+
+        // return a response if a message is returned
+        if (message != null) {
+            response.setStatus(CreateLoanResponseStatus.FAIL);
+            response.setMessage(message);
+            return response;
+        }
+
+        // ensure the user in the token exists
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Object civilId = jwt.getClaims().get("civilId"); // user civil id
+        Optional<UserEntity> user = userService.getUserByCivilId(civilId.toString());
+
+        // if use is not found in repository
+        /* TODO: Instead of Fail, another enum value could be added so that it gets routed to an
+            explicit case in the controller layer to utilize 'HttpStatus.NOT_FOUND' which is more
+             appropriate than 'Bad_Request' when user is not found.
+         */
+        if (user.isEmpty()) {
+            response.setStatus(CreateLoanResponseStatus.FAIL);
+            response.setMessage("User does not exist");
+            return response;
+        }
+
+        // ensure the loan request exists using the id
+        Optional<LoanRequest> loanRequest = getLoanById(request.getLoanRequestId());
+
+        if (loanRequest.isEmpty()) {
+            response.setStatus(CreateLoanResponseStatus.FAIL);
+            response.setMessage("No loan request is associated with id provided");
+            return response; // If there was an error during validation, return early
+        }
+
+        LoanResponse loanResponse = new LoanResponse();
+        loanResponse.
+
+
+
+
+        // if all is well, return success
+        response.setStatus(CreateLoanResponseStatus.SUCCESS);
+        response.setMessage("Loan Request is created.");
+        return response;
+
+
+    }
+
+    public String validateToken(Roles role, Authentication authentication) {
         Jwt jwt = (Jwt) authentication.getPrincipal();
 
         // To ensure the access token is provided and NOT the refresh token
@@ -115,11 +174,15 @@ public class LoanServiceImpl implements LoanService {
         }
 
         // Ensures the user is business owner
-        if (jwt.getClaims().get("roles").equals(Roles.BANKER.name())) {
-            return "Not allowed for bankers. This endpoint is only for Business Owners";
+        if (jwt.getClaims().get("roles").equals(role.name())) {
+            return "Not allowed for provided role. This endpoint is only for "+role.name();
         }
 
         return null; // No errors, return null to continue the flow
+    }
+
+    public Optional<LoanRequest> getLoanById(Long id) {
+        return loanRepository.findById(id);
     }
 
 }
