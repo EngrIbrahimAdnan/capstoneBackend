@@ -191,7 +191,7 @@ public class BusinessServiceImpl implements BusinessService {
         }
 
         // check business exists
-        Optional<BusinessEntity> businessEntity = businessRepository.findByBusinessOwnerUser(user.get());
+        Optional<BusinessEntity> businessEntity = getBusinessOwnerEntity(user.get());
 
         if (businessEntity.isEmpty()) {
             response.setStatus(BusinessRetrievalStatus.FAIL);
@@ -242,6 +242,10 @@ public class BusinessServiceImpl implements BusinessService {
         }
 
         return null; // No errors, return null to continue the flow
+    }
+
+    public Optional<BusinessEntity> getBusinessOwnerEntity(UserEntity user) {
+        return businessRepository.findByBusinessOwnerUser(user);
     }
 
 }
