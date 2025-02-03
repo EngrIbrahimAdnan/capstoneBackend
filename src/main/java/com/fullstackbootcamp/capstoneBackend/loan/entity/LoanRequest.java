@@ -25,9 +25,8 @@ public class LoanRequest {
      *  - This is to account for the case upon entity creation
      *  - Once the banker sends the first loan response, loan request is updated
      */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "loan_responses")
-    @JsonIgnore
     private List<LoanResponse> loanResponses;
 
     /* Note:
@@ -36,9 +35,8 @@ public class LoanRequest {
      *  - Once the banker assigns it to himself, UserEntity is assigned to this loanRequest
      */
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "banker_user_id")
-    @JsonIgnore
     private UserEntity banker;
 
     /* Note:
@@ -46,9 +44,8 @@ public class LoanRequest {
      *  - It would be redundant to include it here as well.
      */
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "business_id", nullable = false)
-    @JsonIgnore
     private BusinessEntity business;
 
     /* Note:
