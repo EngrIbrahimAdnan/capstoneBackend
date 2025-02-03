@@ -1,6 +1,7 @@
 package com.fullstackbootcamp.capstoneBackend.business.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fullstackbootcamp.capstoneBackend.business.bo.AddBusinessRequest;
 import com.fullstackbootcamp.capstoneBackend.business.dto.AddBusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.business.dto.getBusinessDTO;
@@ -32,7 +33,7 @@ public class BusinessController {
                                                       @RequestParam("businessLicenseImage") MultipartFile businessLicenseImage, // image file
                                                       @RequestParam(value = "financialStatementText", required = false) String financialStatementText, // fields extracted into string
                                                       @RequestParam(value = "businessLicenseText", required = false) String businessLicenseText, // fields extracted into string
-                                                      Authentication authentication) {
+                                                      Authentication authentication) throws JsonProcessingException {
 
         /*
          NOTE:
