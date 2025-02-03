@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "loan_request")
@@ -19,16 +20,26 @@ public class LoanRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    /* Note:
-//     *  - banker is intentionally left nullable
-//     *  - This is to account for the case before it is assigned to a banker user
-//     *  - Once the banker assigns it to himself, UserEntity is assigned to this loanRequest
-//     */
+    /* Note:
+     *  - loanResponses is intentionally left nullable
+     *  - This is to account for the case upon entity creation
+     *  - Once the banker sends the first loan response, loan request is updated
+     */
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "loan_responses")
+    @JsonIgnore
+    private List<LoanResponse> loanResponses;
 
-//    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    @JoinColumn(name = "banker_user_id")
-//    @JsonIgnore
-//    private UserEntity banker;
+    /* Note:
+     *  - banker is intentionally left nullable
+     *  - This is to account for the case before it is assigned to a banker user
+     *  - Once the banker assigns it to himself, UserEntity is assigned to this loanRequest
+     */
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "banker_user_id")
+    @JsonIgnore
+    private UserEntity banker;
 
     /* Note:
      *  - BusinessOwner User can be obtained from the business entity business
@@ -44,13 +55,19 @@ public class LoanRequest {
      *  - bank field can be seen as the gateway that forwards the request to the specified bank
      *  - This field would be retrieved on the banker side, before banker user is assigned.
      */
-    @NotNull
+    @NotNull(message = "The 'bank' field is required and it's missing")
     private Bank bank;
 
     @Column(name = "request_analysis", nullable = false)
     private String requestAnalysis; // ai endpoint
 
-    @NotNull
+    @Column(name = "loan_title", nullable = false)
+    private String loanTitle ; // expects
+
+    @Column(name = "loan_purpose", nullable = false)
+    private String loanPurpose; // expects
+
+    @NotNull(message = "The 'amount' field is required and it's missing")
     private BigDecimal amount;
 
     /* Note: standard loanTerms in banks:
@@ -59,7 +76,10 @@ public class LoanRequest {
     @Column(name = "loan_term", nullable = false)
     private String loanTerm; // expects
 
-    @NotNull
+    @Column(name = "repayment_plan", nullable = false)
+    private String repaymentPlan; // expects
+
+    @NotNull(message = "The 'status' field is required and it's missing")
     private LoanRequestStatus status;
 
     @Column(name = "rejection_source", nullable = false)
@@ -73,7 +93,7 @@ public class LoanRequest {
 
     // Note: keeping track on whether the request is viewed
     // Note: changes to False each status update to alert user
-    @NotNull
+    @NotNull(message = "The 'viewed' field is required and it's missing")
     private Boolean viewed;
 
 
@@ -85,13 +105,45 @@ public class LoanRequest {
         this.id = id;
     }
 
-//    public UserEntity getBanker() {
-//        return banker;
-//    }
-//
-//    public void setBanker(UserEntity banker) {
-//        this.banker = banker;
-//    }
+    public List<LoanResponse> getLoanResponses() {
+        return loanResponses;
+    }
+
+    public void setLoanResponses(List<LoanResponse> loanResponses) {
+        this.loanResponses = loanResponses;
+    }
+
+    public UserEntity getBanker() {
+        return banker;
+    }
+
+    public void setBanker(UserEntity banker) {
+        this.banker = banker;
+    }
+
+    public String getLoanTitle() {
+        return loanTitle;
+    }
+
+    public void setLoanTitle(String loanTitle) {
+        this.loanTitle = loanTitle;
+    }
+
+    public String getLoanPurpose() {
+        return loanPurpose;
+    }
+
+    public void setLoanPurpose(String loanPurpose) {
+        this.loanPurpose = loanPurpose;
+    }
+
+    public String getRepaymentPlan() {
+        return repaymentPlan;
+    }
+
+    public void setRepaymentPlan(String repaymentPlan) {
+        this.repaymentPlan = repaymentPlan;
+    }
 
     public BusinessEntity getBusiness() {
         return business;

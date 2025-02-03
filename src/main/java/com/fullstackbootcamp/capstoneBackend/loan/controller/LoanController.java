@@ -5,10 +5,12 @@ import com.fullstackbootcamp.capstoneBackend.business.dto.AddBusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessAdditionStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanResponse;
+import com.fullstackbootcamp.capstoneBackend.loan.dto.GetLoanRequestDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanRequestDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanRequestStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanResponseStatus;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestRetrievalStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.service.LoanService;
 import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
 import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
@@ -100,6 +102,28 @@ public class LoanController {
             default: // default error
                 LoanResponseDTO noResponse = new LoanResponseDTO();
                 noResponse.setStatus(CreateLoanResponseStatus.FAIL);
+                noResponse.setMessage("Error status unrecognized");
+                return ResponseEntity.badRequest().body(noResponse);
+        }
+    }
+
+
+    @GetMapping("/request/{id}")
+    public ResponseEntity<GetLoanRequestDTO> getrequestLoan(@PathVariable Long id,
+                                                         Authentication authentication) {
+
+        GetLoanRequestDTO response = loanService.getLoanRequestById(id,authentication);
+
+        switch (response.getStatus()) {
+            case SUCCESS: // accepted status returned for successfully creating loan request
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+
+            case FAIL: // bad request status returned when field is not in correct format
+                return ResponseEntity.badRequest().body(response);
+
+            default: // default error
+                GetLoanRequestDTO noResponse = new GetLoanRequestDTO();
+                noResponse.setStatus(LoanRequestRetrievalStatus.FAIL);
                 noResponse.setMessage("Error status unrecognized");
                 return ResponseEntity.badRequest().body(noResponse);
         }

@@ -1,33 +1,26 @@
 package com.fullstackbootcamp.capstoneBackend.loan.service;
 
 import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenTypes;
-import com.fullstackbootcamp.capstoneBackend.business.bo.AddBusinessRequest;
-import com.fullstackbootcamp.capstoneBackend.business.dto.AddBusinessDTO;
-import com.fullstackbootcamp.capstoneBackend.business.dto.getBusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
-import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessRetrievalStatus;
 import com.fullstackbootcamp.capstoneBackend.business.service.BusinessService;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanResponse;
+import com.fullstackbootcamp.capstoneBackend.loan.dto.GetLoanRequestDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanRequestDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanResponse;
-import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanRequestStatus;
-import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanResponseStatus;
-import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestStatus;
-import com.fullstackbootcamp.capstoneBackend.loan.enums.RejectionSource;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.*;
 import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanRepository;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
-import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import com.fullstackbootcamp.capstoneBackend.user.service.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
-import javax.management.relation.Role;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -51,7 +44,7 @@ public class LoanServiceImpl implements LoanService {
 
         LoanRequestDTO response = new LoanRequestDTO();
 
-        String message = validateToken(Roles.BUSINESS_OWNER,authentication); // Validate token and get response
+        String message = validateToken(Roles.BUSINESS_OWNER, authentication); // Validate token and get response
 
         // return a response if a message is returned
         if (message != null) {
@@ -87,7 +80,8 @@ public class LoanServiceImpl implements LoanService {
 
         // default values
         LoanRequest loanRequest = new LoanRequest();
-//        loanRequest.setBanker(null); // null because no banker has assigned it to themselves
+        loanRequest.setLoanResponses(null); // no responses yet
+        loanRequest.setBanker(null); // null because no banker has assigned it to themselves
         loanRequest.setBusiness(businessEntity.get());
         loanRequest.setBank(request.getBank());
 
@@ -97,8 +91,13 @@ public class LoanServiceImpl implements LoanService {
          */
 
         loanRequest.setRequestAnalysis("make api call here after doing logic");
+
+        // default values upon creation
+        loanRequest.setLoanTitle(request.getLoanTitle());
+        loanRequest.setLoanPurpose(request.getLoanPurpose());
         loanRequest.setAmount(request.getAmount());
         loanRequest.setLoanTerm(request.getLoanTerm());
+        loanRequest.setRepaymentPlan(request.getRepaymentPlan());
         loanRequest.setStatus(LoanRequestStatus.PENDING);
         loanRequest.setRejectionSource(RejectionSource.NONE); // rejected by None by default
         loanRequest.setReason(null);// no reason since it's not rejected yet
@@ -113,11 +112,11 @@ public class LoanServiceImpl implements LoanService {
     }
 
     // Note: endpoint only for bankers
-    public LoanResponseDTO createLoanResponse(CreateLoanResponse request, Authentication authentication){
+    public LoanResponseDTO createLoanResponse(CreateLoanResponse request, Authentication authentication) {
 
         LoanResponseDTO response = new LoanResponseDTO();
 
-        String message = validateToken(Roles.BANKER,authentication); // Validate token and get response
+        String message = validateToken(Roles.BANKER, authentication); // Validate token and get response
 
         // return a response if a message is returned
         if (message != null) {
@@ -151,11 +150,29 @@ public class LoanServiceImpl implements LoanService {
             return response; // If there was an error during validation, return early
         }
 
+        // first case: the banker approves the request offer straight away
         LoanResponse loanResponse = new LoanResponse();
-        loanResponse.
+        loanResponse.setAmount(request.getAmount());
+        loanResponse.setLoanTerm(request.getLoanTerm());
+        loanResponse.setRepaymentPlan(request.getRepaymentPlan());
+        loanResponse.setStatus(LoanRequestStatus.APPROVED);
+        loanResponse.setStatusDate(LocalDate.now());
+        loanResponse.setViewed(false);
 
+        LoanRequest updateLoanRequest = loanRequest.get();
 
+        // Ensure loanResponses list is initialized
+        if (updateLoanRequest.getLoanResponses() == null) {
+            updateLoanRequest.setLoanResponses(new ArrayList<>());
+        }
 
+        // Add the new loanResponse to the loanResponses list
+        updateLoanRequest.getLoanResponses().add(loanResponse);
+
+        // Maintain bidirectional relationship
+        updateLoanRequest.setLoanResponses(updateLoanRequest.getLoanResponses());
+
+        loanRepository.save(updateLoanRequest);
 
         // if all is well, return success
         response.setStatus(CreateLoanResponseStatus.SUCCESS);
@@ -165,6 +182,34 @@ public class LoanServiceImpl implements LoanService {
 
     }
 
+    public GetLoanRequestDTO getLoanRequestById(Long id, Authentication authentication){
+        GetLoanRequestDTO response = new GetLoanRequestDTO();
+
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+
+        // To ensure the access token is provided and NOT the refresh token
+        if (jwt.getClaims().get("type").equals(TokenTypes.REFRESH.name())) {
+            response.setStatus(LoanRequestRetrievalStatus.FAIL);
+            response.setMessage("Incorrect Token provided. Please provide access token");
+            return response;
+        }
+
+        // ensure the loan request exists using the id
+        Optional<LoanRequest> loanRequest = getLoanById(id);
+
+        if (loanRequest.isEmpty()) {
+            response.setStatus(LoanRequestRetrievalStatus.FAIL);
+            response.setMessage("No loan request is associated with id provided");
+            return response; // If there was an error during validation, return early
+        }
+
+        response.setStatus(LoanRequestRetrievalStatus.SUCCESS);
+        response.setMessage("Loan Request entity is successfully retrieved");
+        response.setEntity(loanRequest.get());
+        return response;
+    }
+
+
     public String validateToken(Roles role, Authentication authentication) {
         Jwt jwt = (Jwt) authentication.getPrincipal();
 
@@ -173,9 +218,9 @@ public class LoanServiceImpl implements LoanService {
             return "Incorrect Token provided. Please provide access token";
         }
 
-        // Ensures the user is business owner
-        if (jwt.getClaims().get("roles").equals(role.name())) {
-            return "Not allowed for provided role. This endpoint is only for "+role.name();
+        // returns message if the user is anything but the passed 'role'
+        if (!jwt.getClaims().get("roles").equals(role.name())) {
+            return "Not allowed for provided role. This endpoint is only for " + role.name();
         }
 
         return null; // No errors, return null to continue the flow

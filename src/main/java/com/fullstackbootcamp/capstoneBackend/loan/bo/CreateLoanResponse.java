@@ -14,6 +14,9 @@ public class CreateLoanResponse {
     @NotNull(message = "The 'loanTerm' field is required and it's missing")
     private String loanTerm;
 
+    @NotNull(message = "The 'repaymentPlan' field is required and it's missing")
+    private String repaymentPlan; // expects
+
     public Long getLoanRequestId() {
         return loanRequestId;
     }
@@ -38,4 +41,11 @@ public class CreateLoanResponse {
         this.loanTerm = loanTerm;
     }
 
+    public String getRepaymentPlan() {
+        return repaymentPlan;
+    }
+
+    public void setRepaymentPlan(String repaymentPlan) {
+        this.repaymentPlan = repaymentPlan;
+    }
 }

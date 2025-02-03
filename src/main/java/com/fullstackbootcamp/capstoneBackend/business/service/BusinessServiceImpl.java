@@ -3,7 +3,7 @@ package com.fullstackbootcamp.capstoneBackend.business.service;
 import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenTypes;
 import com.fullstackbootcamp.capstoneBackend.business.bo.AddBusinessRequest;
 import com.fullstackbootcamp.capstoneBackend.business.dto.AddBusinessDTO;
-import com.fullstackbootcamp.capstoneBackend.business.dto.getBusinessDTO;
+import com.fullstackbootcamp.capstoneBackend.business.dto.GetBusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
 import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessLicenseEntity;
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessAdditionStatus;
@@ -162,8 +162,8 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
 
-    public getBusinessDTO getBusiness(Authentication authentication) {
-        getBusinessDTO response = new getBusinessDTO();
+    public GetBusinessDTO getBusiness(Authentication authentication) {
+        GetBusinessDTO response = new GetBusinessDTO();
 
         String message = validateToken(authentication); // Validate token and get response
 
