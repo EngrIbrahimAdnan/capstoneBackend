@@ -85,8 +85,8 @@ public class LoanRequest {
 
     // Note: keeping track on whether the request is viewed by each user
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "notification_List", nullable = false)
-    private List<NotificationEntity> notificationEntityList;
+    @JoinColumn(name = "loan_request_notifications")
+    private List<NotificationEntity> loanRequestNotifications;
 
 
     public Long getId() {
@@ -204,11 +204,11 @@ public class LoanRequest {
         this.statusDate = statusDate;
     }
 
-    public List<NotificationEntity> getNotificationEntityList() {
-        return notificationEntityList;
+    public List<NotificationEntity> getLoanRequestNotifications() {
+        return loanRequestNotifications;
     }
 
-    public void setNotificationEntityList(List<NotificationEntity> notificationEntityList) {
-        this.notificationEntityList = notificationEntityList;
+    public void setLoanRequestNotifications(List<NotificationEntity> loanRequestNotifications) {
+        this.loanRequestNotifications = loanRequestNotifications;
     }
 }

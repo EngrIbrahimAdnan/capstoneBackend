@@ -122,7 +122,7 @@ public class LoanServiceImpl implements LoanService {
         loanRequest.setStatusDate(LocalDateTime.now()); // time of creation
 
         // for notifications view track
-        loanRequest.setNotificationEntityList(new ArrayList<>()); // empty array for future loan responses
+        loanRequest.setLoanRequestNotifications(new ArrayList<>()); // empty array for future loan responses
 
 
         loanRepository.save(loanRequest);
@@ -183,7 +183,7 @@ public class LoanServiceImpl implements LoanService {
         loanResponse.setStatusDate(LocalDateTime.now());
 
         // for notifications view track
-        loanResponse.setNotificationEntityList(new ArrayList<>());
+        loanResponse.setLoanResponseNotifications(new ArrayList<>());
 
         // update the original loan request upon the new loan response
         // submitted by banker
@@ -191,7 +191,7 @@ public class LoanServiceImpl implements LoanService {
 
         // Add the new loanResponse to the loanResponses list
         updateLoanRequest.getLoanResponses().add(loanResponse);
-//        updateLoanRequest.setLoanResponses(updateLoanRequest.getLoanResponses());
+        updateLoanRequest.setLoanResponses(updateLoanRequest.getLoanResponses());
 
         /* Note:
          *  - NEW_RESPONSE means the user has received an offer that he is either going to accept or negotiates
@@ -204,7 +204,8 @@ public class LoanServiceImpl implements LoanService {
          *  - this way all notifications associated with this loanResponse is reseted
          *  - this results in all users having to view the notifications
          */
-        updateLoanRequest.setNotificationEntityList(new ArrayList<>());
+
+        updateLoanRequest.setLoanRequestNotifications(new ArrayList<>());
 
 
         /* REVIEW:
@@ -294,13 +295,25 @@ public class LoanServiceImpl implements LoanService {
 
 
         NotificationEntity notification = new NotificationEntity();
-//        notification.setUser(user.get());
-        NotificationEntity savedNotification = notificationsService.saveNotificationEntity(notification);
+        notification.setUser(user.get());
 
-        loanRequest.get().getNotificationEntityList().add(savedNotification);
+        System.out.println(user.get().getCivilId());
+        System.out.println(user.get().getFirstName());
+
+
+        NotificationEntity newNotification=  notificationsService.saveNotificationEntity(notification);
+
+        loanRequest.get().getLoanRequestNotifications().add(newNotification);
+
+        System.out.println(user.get().getCivilId());
+        System.out.println(user.get().getFirstName());
+
+
         loanRepository.save(loanRequest.get());
 
-        response.setStatus(CheckNotificationStatus.FAIL);
+        System.out.println("after save");
+
+        response.setStatus(CheckNotificationStatus.SUCCESS);
         response.setMessage("Request has been viewed by user");
         return response;
     }

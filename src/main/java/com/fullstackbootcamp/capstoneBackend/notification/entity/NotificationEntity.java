@@ -10,9 +10,9 @@ public class NotificationEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-//    @JoinColumn(name = "notifications_user", nullable = false)
-//    private UserEntity userEntity;
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "notifications_user")
+    private UserEntity userEntity;
 
     public Long getId() {
         return id;
@@ -22,11 +22,11 @@ public class NotificationEntity {
         this.id = id;
     }
 
-//    public UserEntity getUser() {
-//        return userEntity;
-//    }
-//
-//    public void setUser(UserEntity user) {
-//        userEntity = user;
-//    }
+    public UserEntity getUser() {
+        return userEntity;
+    }
+
+    public void setUser(UserEntity user) {
+        userEntity = user;
+    }
 }
