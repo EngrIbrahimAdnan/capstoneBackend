@@ -12,7 +12,6 @@ import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanResponse;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.*;
 import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanRepository;
-import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanResponseRepository;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import com.fullstackbootcamp.capstoneBackend.user.service.UserService;
@@ -27,7 +26,6 @@ import java.util.Optional;
 @Service
 public class LoanServiceImpl implements LoanService {
     private final LoanRepository loanRepository;
-    private final LoanResponseRepository loanResponseRepository;
 
     private final UserService userService;
     private final BusinessService businessService;
@@ -35,10 +33,9 @@ public class LoanServiceImpl implements LoanService {
 
     public LoanServiceImpl(LoanRepository loanRepository,
                            UserService userService,
-                           BusinessService businessService,
-                           LoanResponseRepository loanResponseRepository) {
+                           BusinessService businessService
+                           ) {
         this.loanRepository = loanRepository;
-        this.loanResponseRepository = loanResponseRepository;
         this.userService = userService;
         this.businessService = businessService;
     }
@@ -197,7 +194,7 @@ public class LoanServiceImpl implements LoanService {
          */
 
         // save both entities together once no error is encountered
-        loanResponseRepository.save(loanResponse);
+//        loanResponseRepository.save(loanResponse);
         loanRepository.save(updateLoanRequest);
 
         // if all is well, return success
