@@ -5,9 +5,11 @@ import com.fullstackbootcamp.capstoneBackend.business.dto.AddBusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessAdditionStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanResponse;
+import com.fullstackbootcamp.capstoneBackend.loan.dto.CheckNotificationDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.GetLoanRequestDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanRequestDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanResponseDTO;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.CheckNotificationStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanRequestStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanResponseStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestRetrievalStatus;
@@ -32,7 +34,7 @@ public class LoanController {
         this.loanService = loanService;
     }
 
-
+    // endpoint for business owners to request loan offers from bankers
     @PostMapping("/request")
     public ResponseEntity<LoanRequestDTO> requestLoan(@Valid @RequestBody CreateLoanRequest request,
                                                       BindingResult bindingResult,
@@ -70,6 +72,7 @@ public class LoanController {
         }
     }
 
+    // endpoint for bankers to response to loan
     @PostMapping("/response")
     public ResponseEntity<LoanResponseDTO> counterLoan(@Valid @RequestBody CreateLoanResponse request,
                                                        BindingResult bindingResult,
@@ -107,6 +110,26 @@ public class LoanController {
         }
     }
 
+    @PostMapping("/request/notifications/{id}/viewed")
+    public ResponseEntity<CheckNotificationDTO> requestView(@PathVariable Long id,
+                                                            Authentication authentication) {
+
+        CheckNotificationDTO response = loanService.viewRequest(id,authentication);
+
+        switch (response.getStatus()) {
+            case SUCCESS: // accepted status returned for successfully creating loan request
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+
+            case FAIL: // bad request status returned when field is not in correct format
+                return ResponseEntity.badRequest().body(response);
+
+            default: // default error
+                CheckNotificationDTO noResponse = new CheckNotificationDTO();
+                noResponse.setStatus(CheckNotificationStatus.FAIL);
+                noResponse.setMessage("Error status unrecognized");
+                return ResponseEntity.badRequest().body(noResponse);
+        }
+    }
 
     @GetMapping("/request/{id}")
     public ResponseEntity<GetLoanRequestDTO> getrequestLoan(@PathVariable Long id,

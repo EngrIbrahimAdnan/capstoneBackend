@@ -6,6 +6,7 @@ import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanTerm;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.RejectionSource;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.RepaymentPlan;
+import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import jakarta.persistence.*;
@@ -82,10 +83,10 @@ public class LoanRequest {
     @Column(name = "data_status", nullable = false)
     private LocalDateTime statusDate;
 
-    // Note: keeping track on whether the request is viewed
-    // Note: changes to False each status update to alert user
-    @NotNull(message = "The 'viewed' field is required and it's missing")
-    private Boolean viewed;
+    // Note: keeping track on whether the request is viewed by each user
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "loan_request_notifications")
+    private List<NotificationEntity> loanRequestNotifications;
 
 
     public Long getId() {
@@ -203,11 +204,11 @@ public class LoanRequest {
         this.statusDate = statusDate;
     }
 
-    public Boolean getViewed() {
-        return viewed;
+    public List<NotificationEntity> getLoanRequestNotifications() {
+        return loanRequestNotifications;
     }
 
-    public void setViewed(Boolean viewed) {
-        this.viewed = viewed;
+    public void setLoanRequestNotifications(List<NotificationEntity> loanRequestNotifications) {
+        this.loanRequestNotifications = loanRequestNotifications;
     }
 }
