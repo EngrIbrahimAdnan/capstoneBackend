@@ -5,6 +5,7 @@ import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanResponseStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanTerm;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.RepaymentPlan;
+import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -12,6 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "loan_response")
@@ -51,10 +53,11 @@ public class LoanResponse {
     @Column(name = "data_status", nullable = false)
     private LocalDateTime statusDate;
 
-    // Note: keeping track on whether the request is viewed by business owner
-    // Note: changes to False each status update to alert user
-    @NotNull(message = "The 'viewed' field is required and it's missing")
-    private Boolean viewed;
+    // Note: keeping track on whether the request is viewed by each user
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "notification_List", nullable = false)
+    private List<NotificationEntity> notificationEntityList;
+
 
     public Long getId() {
         return id;
@@ -112,11 +115,11 @@ public class LoanResponse {
         this.statusDate = statusDate;
     }
 
-    public Boolean getViewed() {
-        return viewed;
+    public List<NotificationEntity> getNotificationEntityList() {
+        return notificationEntityList;
     }
 
-    public void setViewed(Boolean viewed) {
-        this.viewed = viewed;
+    public void setNotificationEntityList(List<NotificationEntity> notificationEntityList) {
+        this.notificationEntityList = notificationEntityList;
     }
 }

@@ -52,7 +52,6 @@ public class CreateLoanRequest {
         this.loanPurpose = loanPurpose;
     }
 
-
     public BigDecimal getAmount() {
         return amount;
     }
