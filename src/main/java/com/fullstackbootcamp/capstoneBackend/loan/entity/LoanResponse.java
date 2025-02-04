@@ -2,6 +2,8 @@ package com.fullstackbootcamp.capstoneBackend.loan.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestStatus;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanTerm;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.RepaymentPlan;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -26,18 +28,19 @@ public class LoanResponse {
     @JoinColumn(name = "banker_user_id", nullable = false)
     private UserEntity banker;
 
-
-    @NotNull(message = "The 'amount' field is required and it's missing")
+    /* Note: the following fields are all nullable in case status is approve:
+     *  - amount, loan term, repayment plan
+     */
     private BigDecimal amount;
 
     /* Note: standard loanTerms in banks:
      *  - SIX_MONTHS, ONE_YEAR, TWO_YEARS, FIVE_YEARS
      */
-    @Column(name = "loan_term", nullable = false)
-    private String loanTerm; // expects
+    @Column(name = "loan_term")
+    private LoanTerm loanTerm; // expects
 
-    @Column(name = "repayment_plan", nullable = false)
-    private String repaymentPlan; // expects
+    @Column(name = "repayment_plan")
+    private RepaymentPlan repaymentPlan; // expects
 
     @NotNull(message = "The 'status' field is required and it's missing")
     private LoanRequestStatus status;
@@ -75,19 +78,19 @@ public class LoanResponse {
         this.amount = amount;
     }
 
-    public String getLoanTerm() {
+    public LoanTerm getLoanTerm() {
         return loanTerm;
     }
 
-    public void setLoanTerm(String loanTerm) {
+    public void setLoanTerm(LoanTerm loanTerm) {
         this.loanTerm = loanTerm;
     }
 
-    public String getRepaymentPlan() {
+    public RepaymentPlan getRepaymentPlan() {
         return repaymentPlan;
     }
 
-    public void setRepaymentPlan(String repaymentPlan) {
+    public void setRepaymentPlan(RepaymentPlan repaymentPlan) {
         this.repaymentPlan = repaymentPlan;
     }
 

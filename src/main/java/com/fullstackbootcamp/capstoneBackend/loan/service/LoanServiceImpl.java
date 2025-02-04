@@ -12,6 +12,7 @@ import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanResponse;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.*;
 import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanRepository;
+import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanResponseRepository;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import com.fullstackbootcamp.capstoneBackend.user.service.UserService;
@@ -26,18 +27,19 @@ import java.util.Optional;
 @Service
 public class LoanServiceImpl implements LoanService {
     private final LoanRepository loanRepository;
-
+    private final LoanResponseRepository loanResponseRepository;
     private final UserService userService;
     private final BusinessService businessService;
 
 
     public LoanServiceImpl(LoanRepository loanRepository,
                            UserService userService,
-                           BusinessService businessService
-                           ) {
+                           BusinessService businessService,
+                           LoanResponseRepository loanResponseRepository) {
         this.loanRepository = loanRepository;
         this.userService = userService;
         this.businessService = businessService;
+        this.loanResponseRepository = loanResponseRepository;
     }
 
     /* Note:
@@ -93,6 +95,7 @@ public class LoanServiceImpl implements LoanService {
          *  - loanPurpose, loanAmount, LoanTerm, Financial statement and business license
          */
         loanRequest.setRequestAnalysis("make api call here after doing logic");
+
 
         // default values upon creation before request
         loanRequest.setSelectedBanks(request.getSelectedBanks());
@@ -185,8 +188,6 @@ public class LoanServiceImpl implements LoanService {
         updateLoanRequest.setViewed(false);
 
 
-
-
         /* REVIEW:
          *  - here, We may also reassign requestAnalysis field as well and feed it back into
          *  - AI endpoint with new information so that it acts as a
@@ -194,12 +195,12 @@ public class LoanServiceImpl implements LoanService {
          */
 
         // save both entities together once no error is encountered
-//        loanResponseRepository.save(loanResponse);
+        loanResponseRepository.save(loanResponse);
         loanRepository.save(updateLoanRequest);
 
         // if all is well, return success
         response.setStatus(CreateLoanResponseStatus.SUCCESS);
-        response.setMessage("Loan Request is created.");
+        response.setMessage("Loan Response is successfully sent to Business owner.");
         return response;
 
 

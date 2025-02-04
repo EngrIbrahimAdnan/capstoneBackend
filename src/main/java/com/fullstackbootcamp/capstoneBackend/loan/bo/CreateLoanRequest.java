@@ -1,5 +1,7 @@
 package com.fullstackbootcamp.capstoneBackend.loan.bo;
 
+import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanTerm;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.RepaymentPlan;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import jakarta.validation.constraints.NotNull;
 
@@ -20,10 +22,10 @@ public class CreateLoanRequest {
     private BigDecimal amount;
 
     @NotNull(message = "The 'loanTerm' field is required and it's missing")
-    private String loanTerm;
+    private LoanTerm loanTerm;
 
     @NotNull(message = "The 'repaymentPlan' field is required and it's missing")
-    private String repaymentPlan;
+    private RepaymentPlan repaymentPlan;
 
 
     public List<Bank> getSelectedBanks() {
@@ -59,19 +61,19 @@ public class CreateLoanRequest {
         this.amount = amount;
     }
 
-    public String getLoanTerm() {
+    public LoanTerm getLoanTerm() {
         return loanTerm;
     }
 
-    public void setLoanTerm(String loanTerm) {
+    public void setLoanTerm(LoanTerm loanTerm) {
         this.loanTerm = loanTerm;
     }
 
-    public String getRepaymentPlan() {
+    public RepaymentPlan getRepaymentPlan() {
         return repaymentPlan;
     }
 
-    public void setRepaymentPlan(String repaymentPlan) {
+    public void setRepaymentPlan(RepaymentPlan repaymentPlan) {
         this.repaymentPlan = repaymentPlan;
     }
 }

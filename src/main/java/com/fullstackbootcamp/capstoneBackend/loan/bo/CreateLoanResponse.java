@@ -1,6 +1,8 @@
 package com.fullstackbootcamp.capstoneBackend.loan.bo;
 
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestStatus;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanTerm;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.RepaymentPlan;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
@@ -10,18 +12,14 @@ public class CreateLoanResponse {
     @NotNull(message = "The 'loanRequestId' field is required and it's missing")
     private Long loanRequestId;
 
-    //
+    @NotNull(message = "The 'responseStatus' field is required and it's missing")
     private LoanRequestStatus responseStatus; // APPROVED, REJECTED, COUNTER_OFFER, RESCINDED
-    private String reason; // nullable in case its approved. counter_offer
 
-    @NotNull(message = "The 'amount' field is required and it's missing")
+    // the following are nullable in the case of approve for response Status
+    private String reason;
     private BigDecimal amount;
-
-    @NotNull(message = "The 'loanTerm' field is required and it's missing")
-    private String loanTerm;
-
-    @NotNull(message = "The 'repaymentPlan' field is required and it's missing")
-    private String repaymentPlan; // expects
+    private LoanTerm loanTerm;
+    private RepaymentPlan repaymentPlan; // expects
 
     public String getReason() {
         return reason;
@@ -55,19 +53,19 @@ public class CreateLoanResponse {
         this.amount = amount;
     }
 
-    public String getLoanTerm() {
+    public LoanTerm getLoanTerm() {
         return loanTerm;
     }
 
-    public void setLoanTerm(String loanTerm) {
+    public void setLoanTerm(LoanTerm loanTerm) {
         this.loanTerm = loanTerm;
     }
 
-    public String getRepaymentPlan() {
+    public RepaymentPlan getRepaymentPlan() {
         return repaymentPlan;
     }
 
-    public void setRepaymentPlan(String repaymentPlan) {
+    public void setRepaymentPlan(RepaymentPlan repaymentPlan) {
         this.repaymentPlan = repaymentPlan;
     }
 }
