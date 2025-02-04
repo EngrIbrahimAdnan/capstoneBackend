@@ -12,6 +12,7 @@ import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanResponse;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.*;
 import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanRepository;
+import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanResponseRepository;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import com.fullstackbootcamp.capstoneBackend.user.service.UserService;
@@ -26,14 +27,18 @@ import java.util.Optional;
 @Service
 public class LoanServiceImpl implements LoanService {
     private final LoanRepository loanRepository;
+    private final LoanResponseRepository loanResponseRepository;
+
     private final UserService userService;
     private final BusinessService businessService;
 
 
     public LoanServiceImpl(LoanRepository loanRepository,
                            UserService userService,
-                           BusinessService businessService) {
+                           BusinessService businessService,
+                           LoanResponseRepository loanResponseRepository) {
         this.loanRepository = loanRepository;
+        this.loanResponseRepository = loanResponseRepository;
         this.userService = userService;
         this.businessService = businessService;
     }
@@ -84,17 +89,16 @@ public class LoanServiceImpl implements LoanService {
         // default values
         LoanRequest loanRequest = new LoanRequest();
         loanRequest.setLoanResponses(new ArrayList<>()); // empty array for future loan responses
-        loanRequest.setBanker(null); // null because no banker has assigned it to themselves
         loanRequest.setBusiness(businessEntity.get());
-        loanRequest.setBank(request.getBank());
 
         /* TODO:
-         *  - Make API call here and do logic based on:
+         *  - Make API call here and do logic based on a list of parameters, in addition to:
          *  - loanPurpose, loanAmount, LoanTerm, Financial statement and business license
          */
         loanRequest.setRequestAnalysis("make api call here after doing logic");
 
-        // default values upon creation
+        // default values upon creation before request
+        loanRequest.setSelectedBanks(request.getSelectedBanks());
         loanRequest.setLoanTitle(request.getLoanTitle());
         loanRequest.setLoanPurpose(request.getLoanPurpose());
         loanRequest.setAmount(request.getAmount());
@@ -131,7 +135,7 @@ public class LoanServiceImpl implements LoanService {
         Object civilId = jwt.getClaims().get("civilId"); // user civil id
         Optional<UserEntity> bankerUser = userService.getUserByCivilId(civilId.toString());
 
-        // if use is not found in repository
+        // if user is not found in repository
         /* TODO: Instead of Fail, another enum value could be added so that it gets routed to an
             explicit case in the controller layer to utilize 'HttpStatus.NOT_FOUND' which is more
              appropriate than 'Bad_Request' when user is not found.
@@ -155,10 +159,11 @@ public class LoanServiceImpl implements LoanService {
 
         // first case: the banker approves the request offer straight away
         LoanResponse loanResponse = new LoanResponse();
+        loanResponse.setBanker(bankerUser.get());
         loanResponse.setAmount(request.getAmount());
         loanResponse.setLoanTerm(request.getLoanTerm());
         loanResponse.setRepaymentPlan(request.getRepaymentPlan());
-        loanResponse.setStatus(LoanRequestStatus.APPROVED);
+        loanResponse.setStatus(request.getResponseStatus());
         loanResponse.setStatusDate(LocalDate.now());
         loanResponse.setViewed(false);
 
@@ -170,15 +175,29 @@ public class LoanServiceImpl implements LoanService {
         updateLoanRequest.getLoanResponses().add(loanResponse);
         updateLoanRequest.setLoanResponses(updateLoanRequest.getLoanResponses());
 
-        // Assign the banker to request
-        updateLoanRequest.setBanker(bankerUser.get());
+        /* Note:
+         *  - NEW_RESPONSE means the user has received an offer that he is either going to accept or negotiates
+         */
+        updateLoanRequest.setStatus(LoanRequestStatus.NEW_RESPONSE);
+        updateLoanRequest.setStatusDate(LocalDate.now());
+
+        /* Note:
+         *  - Viewed is set to false to alert all bankers that a new offer is made
+         *  - This would hasten to make another loan response before the business owner accepts it
+         */
+        updateLoanRequest.setViewed(false);
+
+
+
 
         /* REVIEW:
-         *  - here, We may reassign requestAnalysis field as well and feed it back into
+         *  - here, We may also reassign requestAnalysis field as well and feed it back into
          *  - AI endpoint with new information so that it acts as a
          *  - history analysis, encompassing all responses obtained so far
          */
 
+        // save both entities together once no error is encountered
+        loanResponseRepository.save(loanResponse);
         loanRepository.save(updateLoanRequest);
 
         // if all is well, return success
@@ -189,7 +208,7 @@ public class LoanServiceImpl implements LoanService {
 
     }
 
-    public GetLoanRequestDTO getLoanRequestById(Long id, Authentication authentication){
+    public GetLoanRequestDTO getLoanRequestById(Long id, Authentication authentication) {
         GetLoanRequestDTO response = new GetLoanRequestDTO();
 
         Jwt jwt = (Jwt) authentication.getPrincipal();

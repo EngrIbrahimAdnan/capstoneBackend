@@ -10,9 +10,9 @@ public class CreateLoanResponse {
     @NotNull(message = "The 'loanRequestId' field is required and it's missing")
     private Long loanRequestId;
 
+    //
     private LoanRequestStatus responseStatus; // APPROVED, REJECTED, COUNTER_OFFER, RESCINDED
-    private String reason;
-
+    private String reason; // nullable in case its approved. counter_offer
 
     @NotNull(message = "The 'amount' field is required and it's missing")
     private BigDecimal amount;
@@ -23,7 +23,13 @@ public class CreateLoanResponse {
     @NotNull(message = "The 'repaymentPlan' field is required and it's missing")
     private String repaymentPlan; // expects
 
+    public String getReason() {
+        return reason;
+    }
 
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
 
     public Long getLoanRequestId() {
         return loanRequestId;

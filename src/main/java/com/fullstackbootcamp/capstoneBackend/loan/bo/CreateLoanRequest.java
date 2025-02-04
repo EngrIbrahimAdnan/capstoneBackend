@@ -4,10 +4,11 @@ import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class CreateLoanRequest {
-    @NotNull(message = "The 'bank' field is required and it's missing")
-    private Bank bank;
+    @NotNull(message = "The 'selectedBanks' field is required and it's missing")
+    private List<Bank> selectedBanks;
 
     @NotNull(message = "The 'loanTitle' field is required and it's missing")
     private String loanTitle;
@@ -24,8 +25,13 @@ public class CreateLoanRequest {
     @NotNull(message = "The 'repaymentPlan' field is required and it's missing")
     private String repaymentPlan;
 
-    public Bank getBank() {
-        return bank;
+
+    public List<Bank> getSelectedBanks() {
+        return selectedBanks;
+    }
+
+    public void setSelectedBanks(List<Bank> selectedBanks) {
+        this.selectedBanks = selectedBanks;
     }
 
     public String getLoanTitle() {
@@ -44,9 +50,6 @@ public class CreateLoanRequest {
         this.loanPurpose = loanPurpose;
     }
 
-    public void setBank(Bank bank) {
-        this.bank = bank;
-    }
 
     public BigDecimal getAmount() {
         return amount;

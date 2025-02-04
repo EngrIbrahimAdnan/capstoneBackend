@@ -16,6 +16,17 @@ public class LoanResponse {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /* Note:
+     *  - banker is intentionally left nullable
+     *  - This is to account for the case before it is assigned to a banker user
+     *  - Once the banker assigns it to himself, UserEntity is assigned to this loanRequest
+     */
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "banker_user_id", nullable = false)
+    private UserEntity banker;
+
+
     @NotNull(message = "The 'amount' field is required and it's missing")
     private BigDecimal amount;
 
@@ -42,6 +53,14 @@ public class LoanResponse {
 
     public Long getId() {
         return id;
+    }
+
+    public UserEntity getBanker() {
+        return banker;
+    }
+
+    public void setBanker(UserEntity banker) {
+        this.banker = banker;
     }
 
     public void setId(Long id) {

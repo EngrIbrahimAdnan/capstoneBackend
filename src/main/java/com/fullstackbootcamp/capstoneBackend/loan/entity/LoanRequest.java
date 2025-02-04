@@ -29,15 +29,7 @@ public class LoanRequest {
     @JoinColumn(name = "loan_responses")
     private List<LoanResponse> loanResponses;
 
-    /* Note:
-     *  - banker is intentionally left nullable
-     *  - This is to account for the case before it is assigned to a banker user
-     *  - Once the banker assigns it to himself, UserEntity is assigned to this loanRequest
-     */
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "banker_user_id")
-    private UserEntity banker;
 
     /* Note:
      *  - BusinessOwner User can be obtained from the business entity business
@@ -49,11 +41,10 @@ public class LoanRequest {
     private BusinessEntity business;
 
     /* Note:
-     *  - bank field can be seen as the gateway that forwards the request to the specified bank
-     *  - This field would be retrieved on the banker side, before banker user is assigned.
+     *  - selectedBanks allows only the listed banks to see the request offer
      */
-    @NotNull(message = "The 'bank' field is required and it's missing")
-    private Bank bank;
+    @NotNull(message = "The 'selectedBanks' field is required and it's missing")
+    private List<Bank> selectedBanks;
 
     @Column(name = "request_analysis", nullable = false)
     private String requestAnalysis; // ai endpoint
@@ -110,13 +101,7 @@ public class LoanRequest {
         this.loanResponses = loanResponses;
     }
 
-    public UserEntity getBanker() {
-        return banker;
-    }
 
-    public void setBanker(UserEntity banker) {
-        this.banker = banker;
-    }
 
     public String getLoanTitle() {
         return loanTitle;
@@ -150,12 +135,13 @@ public class LoanRequest {
         this.business = business;
     }
 
-    public Bank getBank() {
-        return bank;
+
+    public  List<Bank> getSelectedBanks() {
+        return selectedBanks;
     }
 
-    public void setBank(Bank bank) {
-        this.bank = bank;
+    public void setSelectedBanks(List<Bank> selectedBanks) {
+        this.selectedBanks = selectedBanks;
     }
 
     public String getRequestAnalysis() {
