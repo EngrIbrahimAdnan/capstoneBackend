@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 public interface LoanService {
     LoanRequestDTO createLoanRequest(CreateLoanRequest request, Authentication authentication);
     LoanResponseDTO createLoanResponse(CreateLoanResponse request, Authentication authentication);
-
     GetLoanRequestDTO getLoanRequestById(Long id,Authentication authentication);
 
 }

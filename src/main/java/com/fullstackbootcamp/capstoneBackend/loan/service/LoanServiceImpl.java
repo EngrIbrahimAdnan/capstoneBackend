@@ -38,13 +38,16 @@ public class LoanServiceImpl implements LoanService {
         this.businessService = businessService;
     }
 
-    // Note: endpoint only for business owner
+    /* Note:
+     *  - createLoanRequest function is only for business owner to send original loan request to bank
+     *  - createLoanResponse function is only for banker to either accept, counter, reject offer
+     */
     @Override
     public LoanRequestDTO createLoanRequest(CreateLoanRequest request, Authentication authentication) {
-
         LoanRequestDTO response = new LoanRequestDTO();
 
-        String message = validateToken(Roles.BUSINESS_OWNER, authentication); // Validate token and get response
+        // Validate token and role and get message back if any error is encountered
+        String message = validateToken(Roles.BUSINESS_OWNER, authentication);
 
         // return a response if a message is returned
         if (message != null) {
@@ -58,7 +61,7 @@ public class LoanServiceImpl implements LoanService {
         Object civilId = jwt.getClaims().get("civilId"); // user civil id
         Optional<UserEntity> user = userService.getUserByCivilId(civilId.toString());
 
-        // if use is not found in repository
+        // if user is not found in repository
         /* TODO: Instead of Fail, another enum value could be added so that it gets routed to an
             explicit case in the controller layer to utilize 'HttpStatus.NOT_FOUND' which is more
              appropriate than 'Bad_Request' when user is not found.
@@ -69,7 +72,7 @@ public class LoanServiceImpl implements LoanService {
             return response;
         }
 
-        // check business exists
+        // check business exists with user entity obtained
         Optional<BusinessEntity> businessEntity = businessService.getBusinessOwnerEntity(user.get());
 
         if (businessEntity.isEmpty()) {
@@ -80,16 +83,15 @@ public class LoanServiceImpl implements LoanService {
 
         // default values
         LoanRequest loanRequest = new LoanRequest();
-        loanRequest.setLoanResponses(null); // no responses yet
+        loanRequest.setLoanResponses(new ArrayList<>()); // empty array for future loan responses
         loanRequest.setBanker(null); // null because no banker has assigned it to themselves
         loanRequest.setBusiness(businessEntity.get());
         loanRequest.setBank(request.getBank());
 
         /* TODO:
          *  - Make API call here and do logic based on:
-         *  - loanAmount, LoanTerm, Financial statement and business license
+         *  - loanPurpose, loanAmount, LoanTerm, Financial statement and business license
          */
-
         loanRequest.setRequestAnalysis("make api call here after doing logic");
 
         // default values upon creation
@@ -111,12 +113,11 @@ public class LoanServiceImpl implements LoanService {
         return response;
     }
 
-    // Note: endpoint only for bankers
     public LoanResponseDTO createLoanResponse(CreateLoanResponse request, Authentication authentication) {
-
         LoanResponseDTO response = new LoanResponseDTO();
 
-        String message = validateToken(Roles.BANKER, authentication); // Validate token and get response
+        // Validate token and ensure user is banker
+        String message = validateToken(Roles.BANKER, authentication);
 
         // return a response if a message is returned
         if (message != null) {
@@ -128,14 +129,14 @@ public class LoanServiceImpl implements LoanService {
         // ensure the user in the token exists
         Jwt jwt = (Jwt) authentication.getPrincipal();
         Object civilId = jwt.getClaims().get("civilId"); // user civil id
-        Optional<UserEntity> user = userService.getUserByCivilId(civilId.toString());
+        Optional<UserEntity> bankerUser = userService.getUserByCivilId(civilId.toString());
 
         // if use is not found in repository
         /* TODO: Instead of Fail, another enum value could be added so that it gets routed to an
             explicit case in the controller layer to utilize 'HttpStatus.NOT_FOUND' which is more
              appropriate than 'Bad_Request' when user is not found.
          */
-        if (user.isEmpty()) {
+        if (bankerUser.isEmpty()) {
             response.setStatus(CreateLoanResponseStatus.FAIL);
             response.setMessage("User does not exist");
             return response;
@@ -150,6 +151,8 @@ public class LoanServiceImpl implements LoanService {
             return response; // If there was an error during validation, return early
         }
 
+        // TODO: switch statement for each option
+
         // first case: the banker approves the request offer straight away
         LoanResponse loanResponse = new LoanResponse();
         loanResponse.setAmount(request.getAmount());
@@ -159,18 +162,22 @@ public class LoanServiceImpl implements LoanService {
         loanResponse.setStatusDate(LocalDate.now());
         loanResponse.setViewed(false);
 
+        // update the original loan request upon the new loan response
+        // submitted by banker
         LoanRequest updateLoanRequest = loanRequest.get();
-
-        // Ensure loanResponses list is initialized
-        if (updateLoanRequest.getLoanResponses() == null) {
-            updateLoanRequest.setLoanResponses(new ArrayList<>());
-        }
 
         // Add the new loanResponse to the loanResponses list
         updateLoanRequest.getLoanResponses().add(loanResponse);
-
-        // Maintain bidirectional relationship
         updateLoanRequest.setLoanResponses(updateLoanRequest.getLoanResponses());
+
+        // Assign the banker to request
+        updateLoanRequest.setBanker(bankerUser.get());
+
+        /* REVIEW:
+         *  - here, We may reassign requestAnalysis field as well and feed it back into
+         *  - AI endpoint with new information so that it acts as a
+         *  - history analysis, encompassing all responses obtained so far
+         */
 
         loanRepository.save(updateLoanRequest);
 

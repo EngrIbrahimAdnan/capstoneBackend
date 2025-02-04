@@ -30,22 +30,12 @@ public class BusinessEntity {
         the following are related to the text extraction feature
         They are currently nullable. To adjust, Add "nullable = false"
      */
-
-    /*
-     * NOTE: @JsonIgnore for financialStatement & businessLicense
-     *  - Prevents serialization issues caused by Hibernate's lazy loading proxy.
-     *  - Ensures that Jackson does not attempt to serialize an uninitialized entity.
-     *  - Without this annotation, you may encounter the following error:
-     *   {@code [simple type, class org.hibernate.proxy.pojo.bytebuddy.ByteBuddyInterceptor]}
-     */
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "financial_statement")
-    @JsonIgnore
     private FinancialStatementEntity financialStatement;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "business_license")
-    @JsonIgnore
     private BusinessLicenseEntity businessLicense;
 
     @Column(name = "financial_analysis")
