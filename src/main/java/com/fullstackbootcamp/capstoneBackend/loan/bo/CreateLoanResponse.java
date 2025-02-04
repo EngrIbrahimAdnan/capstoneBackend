@@ -1,6 +1,7 @@
 package com.fullstackbootcamp.capstoneBackend.loan.bo;
 
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestStatus;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanResponseStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanTerm;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.RepaymentPlan;
 import jakarta.validation.constraints.NotNull;
@@ -13,7 +14,7 @@ public class CreateLoanResponse {
     private Long loanRequestId;
 
     @NotNull(message = "The 'responseStatus' field is required and it's missing")
-    private LoanRequestStatus responseStatus; // APPROVED, REJECTED, COUNTER_OFFER, RESCINDED
+    private LoanResponseStatus responseStatus; // APPROVED, REJECTED, COUNTER_OFFER, RESCINDED
 
     // the following are nullable in the case of approve for response Status
     private String reason;
@@ -37,11 +38,11 @@ public class CreateLoanResponse {
         this.loanRequestId = loanRequestId;
     }
 
-    public LoanRequestStatus getResponseStatus() {
+    public LoanResponseStatus getResponseStatus() {
         return responseStatus;
     }
 
-    public void setResponseStatus(LoanRequestStatus responseStatus) {
+    public void setResponseStatus(LoanResponseStatus responseStatus) {
         this.responseStatus = responseStatus;
     }
 

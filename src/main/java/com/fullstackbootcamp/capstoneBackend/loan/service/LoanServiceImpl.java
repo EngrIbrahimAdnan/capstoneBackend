@@ -21,8 +21,12 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class LoanServiceImpl implements LoanService {
@@ -107,7 +111,7 @@ public class LoanServiceImpl implements LoanService {
         loanRequest.setStatus(LoanRequestStatus.PENDING);
         loanRequest.setRejectionSource(RejectionSource.NONE); // rejected by None by default
         loanRequest.setReason(null);// no reason since it's not rejected yet
-        loanRequest.setStatusDate(LocalDate.now()); // time of creation
+        loanRequest.setStatusDate(LocalDateTime.now()); // time of creation
         loanRequest.setViewed(false); // hasn't been viewed by user yet
         loanRepository.save(loanRequest);
 
@@ -147,7 +151,7 @@ public class LoanServiceImpl implements LoanService {
         }
 
         // ensure the loan request exists using the id
-        Optional<LoanRequest> loanRequest = getLoanById(request.getLoanRequestId());
+        Optional<LoanRequest> loanRequest = getLoanRequestById(request.getLoanRequestId());
 
         if (loanRequest.isEmpty()) {
             response.setStatus(CreateLoanResponseStatus.FAIL);
@@ -164,7 +168,7 @@ public class LoanServiceImpl implements LoanService {
         loanResponse.setLoanTerm(request.getLoanTerm());
         loanResponse.setRepaymentPlan(request.getRepaymentPlan());
         loanResponse.setStatus(request.getResponseStatus());
-        loanResponse.setStatusDate(LocalDate.now());
+        loanResponse.setStatusDate(LocalDateTime.now());
         loanResponse.setViewed(false);
 
         // update the original loan request upon the new loan response
@@ -179,7 +183,7 @@ public class LoanServiceImpl implements LoanService {
          *  - NEW_RESPONSE means the user has received an offer that he is either going to accept or negotiates
          */
         updateLoanRequest.setStatus(LoanRequestStatus.NEW_RESPONSE);
-        updateLoanRequest.setStatusDate(LocalDate.now());
+        updateLoanRequest.setStatusDate(LocalDateTime.now());
 
         /* Note:
          *  - Viewed is set to false to alert all bankers that a new offer is made
@@ -196,7 +200,10 @@ public class LoanServiceImpl implements LoanService {
 
         // save both entities together once no error is encountered
         loanResponseRepository.save(loanResponse);
-        loanRepository.save(updateLoanRequest);
+        LoanRequest loanRequests = loanRepository.save(updateLoanRequest);
+
+        // Ensure banker's previous responses are revoked
+        revokePreviousLoanResponses(loanRequests.getLoanResponses(), bankerUser.get());
 
         // if all is well, return success
         response.setStatus(CreateLoanResponseStatus.SUCCESS);
@@ -219,7 +226,7 @@ public class LoanServiceImpl implements LoanService {
         }
 
         // ensure the loan request exists using the id
-        Optional<LoanRequest> loanRequest = getLoanById(id);
+        Optional<LoanRequest> loanRequest = getLoanRequestById(id);
 
         if (loanRequest.isEmpty()) {
             response.setStatus(LoanRequestRetrievalStatus.FAIL);
@@ -250,8 +257,30 @@ public class LoanServiceImpl implements LoanService {
         return null; // No errors, return null to continue the flow
     }
 
-    public Optional<LoanRequest> getLoanById(Long id) {
+    public Optional<LoanRequest> getLoanRequestById(Long id) {
         return loanRepository.findById(id);
     }
+
+
+    public void revokePreviousLoanResponses(List<LoanResponse> loanResponses, UserEntity user) {
+        // Filter responses belonging to the specific user
+        List<LoanResponse> userLoans = loanResponses.stream()
+                .filter(response -> response.getBanker().equals(user))
+                .sorted(Comparator.comparing(LoanResponse::getStatusDate).thenComparing(LoanResponse::getId).reversed()) // Sort by Date first, then ID
+                .collect(Collectors.toList());
+
+        // Ensure at least one exists
+        if (userLoans.isEmpty()) {
+            return;
+        }
+
+        for (int i = 1; i < userLoans.size(); i++) {
+            userLoans.get(i).setStatus(LoanResponseStatus.RESCINDED);
+        }
+
+        // If you are using a database, persist the changes
+        loanResponseRepository.saveAll(userLoans.subList(1, userLoans.size())); // Save only revoked ones
+    }
+
 
 }

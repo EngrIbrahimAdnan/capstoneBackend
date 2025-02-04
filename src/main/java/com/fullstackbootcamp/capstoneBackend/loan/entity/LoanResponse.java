@@ -2,6 +2,7 @@ package com.fullstackbootcamp.capstoneBackend.loan.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestStatus;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanResponseStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanTerm;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.RepaymentPlan;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
@@ -10,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "loan_response")
@@ -43,11 +45,11 @@ public class LoanResponse {
     private RepaymentPlan repaymentPlan; // expects
 
     @NotNull(message = "The 'status' field is required and it's missing")
-    private LoanRequestStatus status;
+    private LoanResponseStatus status;
 
     // Note: data of the last request status update
     @Column(name = "data_status", nullable = false)
-    private LocalDate statusDate;
+    private LocalDateTime statusDate;
 
     // Note: keeping track on whether the request is viewed by business owner
     // Note: changes to False each status update to alert user
@@ -94,19 +96,19 @@ public class LoanResponse {
         this.repaymentPlan = repaymentPlan;
     }
 
-    public LoanRequestStatus getStatus() {
+    public LoanResponseStatus getStatus() {
         return status;
     }
 
-    public void setStatus(LoanRequestStatus status) {
+    public void setStatus(LoanResponseStatus status) {
         this.status = status;
     }
 
-    public LocalDate getStatusDate() {
+    public LocalDateTime getStatusDate() {
         return statusDate;
     }
 
-    public void setStatusDate(LocalDate statusDate) {
+    public void setStatusDate(LocalDateTime statusDate) {
         this.statusDate = statusDate;
     }
 

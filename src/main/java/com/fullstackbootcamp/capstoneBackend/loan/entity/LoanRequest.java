@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -79,7 +80,7 @@ public class LoanRequest {
 
     // Note: data of the last request status update
     @Column(name = "data_status", nullable = false)
-    private LocalDate statusDate;
+    private LocalDateTime statusDate;
 
     // Note: keeping track on whether the request is viewed
     // Note: changes to False each status update to alert user
@@ -194,11 +195,11 @@ public class LoanRequest {
         this.reason = reason;
     }
 
-    public LocalDate getStatusDate() {
+    public LocalDateTime getStatusDate() {
         return statusDate;
     }
 
-    public void setStatusDate(LocalDate statusDate) {
+    public void setStatusDate(LocalDateTime statusDate) {
         this.statusDate = statusDate;
     }
 
