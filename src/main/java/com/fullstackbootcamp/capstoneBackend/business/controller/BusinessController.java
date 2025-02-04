@@ -3,7 +3,7 @@ package com.fullstackbootcamp.capstoneBackend.business.controller;
 
 import com.fullstackbootcamp.capstoneBackend.business.bo.AddBusinessRequest;
 import com.fullstackbootcamp.capstoneBackend.business.dto.AddBusinessDTO;
-import com.fullstackbootcamp.capstoneBackend.business.dto.getBusinessDTO;
+import com.fullstackbootcamp.capstoneBackend.business.dto.GetBusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessAdditionStatus;
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessRetrievalStatus;
 import com.fullstackbootcamp.capstoneBackend.business.service.BusinessService;
@@ -85,9 +85,9 @@ public class BusinessController {
         endpoint needs to be called to retrieve those files.
      */
     @GetMapping("/get")
-    public ResponseEntity<getBusinessDTO> getBusiness(Authentication authentication) {
+    public ResponseEntity<GetBusinessDTO> getBusiness(Authentication authentication) {
 
-        getBusinessDTO response = businessService.getBusiness(authentication);
+        GetBusinessDTO response = businessService.getBusiness(authentication);
 
         switch (response.getStatus()) {
             case SUCCESS: // accepted status returned for successfully adding business
@@ -97,7 +97,7 @@ public class BusinessController {
                 return ResponseEntity.badRequest().body(response);
 
             default: // default error
-                getBusinessDTO noResponse = new getBusinessDTO();
+                GetBusinessDTO noResponse = new GetBusinessDTO();
                 noResponse.setStatus(BusinessRetrievalStatus.FAIL);
                 noResponse.setMessage("Error status unrecognized");
                 return ResponseEntity.badRequest().body(noResponse);
