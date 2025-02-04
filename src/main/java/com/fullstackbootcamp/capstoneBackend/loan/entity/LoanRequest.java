@@ -3,7 +3,9 @@ package com.fullstackbootcamp.capstoneBackend.loan.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestStatus;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanTerm;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.RejectionSource;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.RepaymentPlan;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import jakarta.persistence.*;
@@ -11,6 +13,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -62,10 +65,10 @@ public class LoanRequest {
      *  - SIX_MONTHS, ONE_YEAR, TWO_YEARS, FIVE_YEARS
      */
     @Column(name = "loan_term", nullable = false)
-    private String loanTerm; // expects
+    private LoanTerm loanTerm; // expects
 
     @Column(name = "repayment_plan", nullable = false)
-    private String repaymentPlan; // expects
+    private RepaymentPlan repaymentPlan; // expects
 
     @NotNull(message = "The 'status' field is required and it's missing")
     private LoanRequestStatus status;
@@ -77,7 +80,7 @@ public class LoanRequest {
 
     // Note: data of the last request status update
     @Column(name = "data_status", nullable = false)
-    private LocalDate statusDate;
+    private LocalDateTime statusDate;
 
     // Note: keeping track on whether the request is viewed
     // Note: changes to False each status update to alert user
@@ -119,11 +122,11 @@ public class LoanRequest {
         this.loanPurpose = loanPurpose;
     }
 
-    public String getRepaymentPlan() {
+    public RepaymentPlan getRepaymentPlan() {
         return repaymentPlan;
     }
 
-    public void setRepaymentPlan(String repaymentPlan) {
+    public void setRepaymentPlan(RepaymentPlan repaymentPlan) {
         this.repaymentPlan = repaymentPlan;
     }
 
@@ -160,11 +163,11 @@ public class LoanRequest {
         this.amount = amount;
     }
 
-    public String getLoanTerm() {
+    public LoanTerm getLoanTerm() {
         return loanTerm;
     }
 
-    public void setLoanTerm(String loanTerm) {
+    public void setLoanTerm(LoanTerm loanTerm) {
         this.loanTerm = loanTerm;
     }
 
@@ -192,11 +195,11 @@ public class LoanRequest {
         this.reason = reason;
     }
 
-    public LocalDate getStatusDate() {
+    public LocalDateTime getStatusDate() {
         return statusDate;
     }
 
-    public void setStatusDate(LocalDate statusDate) {
+    public void setStatusDate(LocalDateTime statusDate) {
         this.statusDate = statusDate;
     }
 
