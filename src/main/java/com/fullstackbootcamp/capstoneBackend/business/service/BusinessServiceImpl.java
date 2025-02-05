@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenTypes;
 import com.fullstackbootcamp.capstoneBackend.business.bo.AddBusinessRequest;
 import com.fullstackbootcamp.capstoneBackend.business.dto.AddBusinessDTO;
-import com.fullstackbootcamp.capstoneBackend.business.dto.getBusinessDTO;
+import com.fullstackbootcamp.capstoneBackend.business.dto.GetBusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
 import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessLicenseEntity;
 import com.fullstackbootcamp.capstoneBackend.business.entity.FinancialStatementAssessmentEntity;
@@ -355,8 +355,8 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
 
-    public getBusinessDTO getBusiness(Authentication authentication) {
-        getBusinessDTO response = new getBusinessDTO();
+    public GetBusinessDTO getBusiness(Authentication authentication) {
+        GetBusinessDTO response = new GetBusinessDTO();
 
         String message = validateToken(authentication); // Validate token and get response
 
@@ -384,7 +384,7 @@ public class BusinessServiceImpl implements BusinessService {
         }
 
         // check business exists
-        Optional<BusinessEntity> businessEntity = businessRepository.findByBusinessOwnerUser(user.get());
+        Optional<BusinessEntity> businessEntity = getBusinessOwnerEntity(user.get());
 
         if (businessEntity.isEmpty()) {
             response.setStatus(BusinessRetrievalStatus.FAIL);
@@ -472,5 +472,8 @@ public class BusinessServiceImpl implements BusinessService {
             // Log the exception if needed and return null if the date can't be parsed.
             return null;
         }
+    }
+    public Optional<BusinessEntity> getBusinessOwnerEntity(UserEntity user) {
+        return businessRepository.findByBusinessOwnerUser(user);
     }
 }

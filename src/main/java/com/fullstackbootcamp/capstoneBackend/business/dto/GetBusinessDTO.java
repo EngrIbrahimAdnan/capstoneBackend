@@ -1,12 +1,11 @@
 package com.fullstackbootcamp.capstoneBackend.business.dto;
 
 import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
-import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessAdditionStatus;
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessRetrievalStatus;
 
-public class getBusinessDTO {
-    private BusinessRetrievalStatus status; // SUCCESS, FAIL, BUSINESS_ALREADY_EXISTS
-    private String message;         // Description of the result (e.g., "User created successfully" or error details)
+public class GetBusinessDTO {
+    private BusinessRetrievalStatus status; // SUCCESS, FAIL
+    private String message;         // Description of the result (e.g., "Successfully retrieved business entity" or error details)
     private BusinessEntity entity;
 
     public BusinessRetrievalStatus getStatus() {
