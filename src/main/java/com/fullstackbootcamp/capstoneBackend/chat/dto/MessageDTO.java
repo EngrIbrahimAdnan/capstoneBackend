@@ -7,12 +7,18 @@ public class MessageDTO {
     private String message;
     private String senderFirstName;
     private LocalDateTime sentAt;
+    private Boolean isYou;
 
-    public MessageDTO(Long id, String message, String sentBy, LocalDateTime sentAt) {
+    public MessageDTO(Long id, String message, String sentBy, LocalDateTime sentAt, Boolean isYou) {
         this.id = id;
         this.message = message;
         this.senderFirstName = sentBy;
         this.sentAt = sentAt;
+        this.isYou = isYou;
+    }
+
+    public Boolean getIsYou() {
+        return isYou;
     }
 
     public Long getId() {

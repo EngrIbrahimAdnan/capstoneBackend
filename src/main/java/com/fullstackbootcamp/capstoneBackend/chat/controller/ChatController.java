@@ -55,8 +55,10 @@ public class ChatController {
     }
 
     @GetMapping("/{chatId}")
-    public ResponseEntity<ChatDTO> getChatMessages(@PathVariable Long chatId) {
-        return ResponseEntity.ok(chatService.getChatMessages(chatId));
+    public ResponseEntity<ChatDTO> getChatMessages(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable Long chatId) {
+        return ResponseEntity.ok(chatService.getChatMessages(authHeader, chatId));
     }
 
     @ControllerAdvice

@@ -56,7 +56,7 @@ public class ChatService {
             existingChat = chatRepository.findByBankerAndBusinessOwner(chatTarget.getId(), sender.getId());
         }
         if (existingChat != null) {
-            return chatMapperService.convertToDTO(existingChat);
+            return chatMapperService.convertToDTO(existingChat, username);
         }
 
         ChatEntity chat = new ChatEntity();
@@ -69,7 +69,7 @@ public class ChatService {
             chat.setBusinessOwner(sender);
         }
         ChatEntity chatEntity = chatRepository.save(chat);
-        return chatMapperService.convertToDTO(chatEntity);
+        return chatMapperService.convertToDTO(chatEntity, username);
     }
 
     @Transactional
@@ -92,8 +92,9 @@ public class ChatService {
         chatRepository.save(chat);
     }
 
-    public ChatDTO getChatMessages(Long chatId) {
+    public ChatDTO getChatMessages(String authHeader, Long chatId) {
+        String username = jwtUtil.extractUserUsernameFromToken(authHeader);
         Optional<ChatEntity> chatEntity = chatRepository.findById(chatId);
-        return chatMapperService.convertToDTO(chatEntity.get());
+        return chatMapperService.convertToDTO(chatEntity.get(), username);
     }
 }

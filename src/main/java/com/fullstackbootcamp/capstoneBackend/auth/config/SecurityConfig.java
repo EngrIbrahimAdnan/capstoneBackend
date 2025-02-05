@@ -41,6 +41,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                                 .requestMatchers("/auth/**").permitAll()
                                 .requestMatchers("/setup/**").permitAll()
+                                // For websocket
+                                .requestMatchers("/ws/**").permitAll()
 
 //                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // uncomment if you need endpoints for only admin
 //                        .requestMatchers("/api/user/**").hasRole("USER") // uncomment if you need endpoints for only user
