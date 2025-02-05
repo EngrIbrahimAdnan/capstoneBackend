@@ -275,7 +275,7 @@ public class OpenAIService {
             "content",
             """
             You are a financial analysis assistant. Your task is to parse the provided business license text and convert it into a JSON object that exactly matches the following structure:
-
+            IF THE INPUT IS INCORRECT, STILL RETURN THIS JSON OBJECT
             {
               //(right column)
                   private String licenseNumber;
