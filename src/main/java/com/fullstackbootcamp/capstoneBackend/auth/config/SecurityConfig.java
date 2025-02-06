@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
@@ -23,9 +24,12 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtKeyGenerator jwtKeyGenerator;
+    private final JwtAuthFilter jwtAuthFilter;
 
-    public SecurityConfig(JwtKeyGenerator jwtKeyGenerator) {
+    public SecurityConfig(JwtKeyGenerator jwtKeyGenerator,
+                          JwtAuthFilter JwtAut) {
         this.jwtKeyGenerator = jwtKeyGenerator;
+        this.jwtAuthFilter = JwtAut;
     }
 
     @Bean
@@ -36,25 +40,29 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Add this line
-                .csrf().disable() //Disabling CSRF is fine for APIs, but if you plan to support web clients in the future, consider adding CSRF tokens for form submissions
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf().disable()
                 .authorizeHttpRequests(authorize -> authorize
-                                .requestMatchers("/auth/**").permitAll()
-                                .requestMatchers("/setup/**").permitAll()
-                                // For websocket
-                                .requestMatchers("/ws/**").permitAll()
-
-//                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // uncomment if you need endpoints for only admin
-//                        .requestMatchers("/api/user/**").hasRole("USER") // uncomment if you need endpoints for only user
-                                .anyRequest().authenticated()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/setup/**").permitAll()
+                        // For websocket
+                        .requestMatchers("/ws/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt
                         .decoder(jwtDecoder())
                         .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                ));
-
+                ))
+                .headers(headers -> headers
+                                // Option 1: Disable frame options entirely
+                                .frameOptions(frameOptions -> frameOptions.disable())
+                        // Option 2 (more secure): Allow framing only from the same origin
+                        // .frameOptions(frameOptions -> frameOptions.sameOrigin())
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
 
     @Bean
     UrlBasedCorsConfigurationSource corsConfigurationSource() {
