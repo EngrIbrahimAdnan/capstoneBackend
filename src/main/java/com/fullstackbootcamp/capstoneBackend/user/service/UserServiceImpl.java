@@ -7,6 +7,7 @@ import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
 import com.fullstackbootcamp.capstoneBackend.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -59,10 +60,44 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByCivilId(civilId);
     }
 
-
-
     @Override
     public Optional<UserEntity> getUserByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    // TODO
+    @Override
+    public Map<String, Object> getDashboardData(String token) {
+        return null;
+    }
+
+    // TODO
+    @Override
+    public Map<String, Object> getPendingReview(UserEntity user) {
+        return null;
+    }
+
+    // TODO
+    @Override
+    public Map<String, Object> getNotifications(UserEntity user) {
+        return null;
+    }
+
+    // TODO
+    @Override
+    public Map<String, Object> getFiveMostRecentRequests(UserEntity user) {
+        return null;
+    }
+
+    // TODO
+    @Override
+    public Map<String, Object> getFourMostRecentChats(UserEntity user) {
+        return null;
+    }
+
+    // TODO
+    @Override
+    public Map<String, Object> getRecentHistory(UserEntity user) {
+        return null;
     }
 }
