@@ -1,25 +1,22 @@
 package com.fullstackbootcamp.capstoneBackend.loan.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanTerm;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.RejectionSource;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.RepaymentPlan;
 import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
-import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "loan_request")
-public class LoanRequest {
+public class LoanRequestEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,7 +28,7 @@ public class LoanRequest {
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "loan_responses")
-    private List<LoanResponse> loanResponses;
+    private List<LoanResponseEntity> loanResponsEntities;
 
 
 
@@ -97,12 +94,12 @@ public class LoanRequest {
         this.id = id;
     }
 
-    public List<LoanResponse> getLoanResponses() {
-        return loanResponses;
+    public List<LoanResponseEntity> getLoanResponses() {
+        return loanResponsEntities;
     }
 
-    public void setLoanResponses(List<LoanResponse> loanResponses) {
-        this.loanResponses = loanResponses;
+    public void setLoanResponses(List<LoanResponseEntity> loanResponsEntities) {
+        this.loanResponsEntities = loanResponsEntities;
     }
 
 

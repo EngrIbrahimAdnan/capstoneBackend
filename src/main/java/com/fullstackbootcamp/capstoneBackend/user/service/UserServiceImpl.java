@@ -2,6 +2,7 @@ package com.fullstackbootcamp.capstoneBackend.user.service;
 
 import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
 import com.fullstackbootcamp.capstoneBackend.auth.dto.SignupResponseDTO;
+import com.fullstackbootcamp.capstoneBackend.user.dto.DashboardResponse;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
 import com.fullstackbootcamp.capstoneBackend.user.repository.UserRepository;
@@ -67,14 +68,16 @@ public class UserServiceImpl implements UserService {
 
     // TODO
     @Override
-    public Map<String, Object> getDashboardData(String token) {
+    public DashboardResponse getDashboardData(String token) {
         return null;
     }
 
     // TODO
+    // pendingReview format:
+    // { "pending": 0, "dinarsInReview": 0 }
     @Override
     public Map<String, Object> getPendingReview(UserEntity user) {
-        return null;
+
     }
 
     // TODO

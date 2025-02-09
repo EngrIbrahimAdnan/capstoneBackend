@@ -2,15 +2,14 @@ package com.fullstackbootcamp.capstoneBackend.user.controller;
 
 import com.fullstackbootcamp.capstoneBackend.auth.dto.LoadUsersResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenTypes;
+import com.fullstackbootcamp.capstoneBackend.user.dto.DashboardResponse;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import com.fullstackbootcamp.capstoneBackend.user.repository.UserRepository;
+import com.fullstackbootcamp.capstoneBackend.user.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.Map;
@@ -19,9 +18,12 @@ import java.util.Map;
 @RequestMapping("/user/v1")
 public class UserController {
     private final UserRepository userRepository;
+    private final UserService userService;
 
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository,
+                          UserService userService) {
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     // Refer to this when you wish to extract information from token
@@ -65,6 +67,10 @@ public class UserController {
                 "expire", expire));
     }
 
+
     @GetMapping("/dashboard")
-    public ResponseEntity<>
+    public ResponseEntity<DashboardResponse> getDashboardData(@RequestHeader("Authorization") String authHeader) {
+        return ResponseEntity.ok(userService.getDashboardData(authHeader));
+    }
+
 }
