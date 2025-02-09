@@ -8,12 +8,12 @@ import java.util.Map;
 
 public class NotificationRequest {
     private String message;
-    private NotificationType type;
-    private String senderName;
-    private String recipientName;
+    private NotificationType type; // "NEW_LOAN_REQUEST", "NEW_MESSAGE", "BANKER_CALL", "LOAN_STATUS_CHANGE", "COUNTER_OFFER"
+    private String senderName; // Username, not first name
+    private String recipientName; // Username, not first name
     private Roles senderRole;  // "BANKER" or "BUSINESS_OWNER"
-    private Map<String, Object> additionalData = new HashMap<>();
     private String businessName; // Bank or business name
+    private Map<String, Object> additionalData = new HashMap<>();
 
     public String getBusinessName() {
         return businessName;
