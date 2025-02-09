@@ -1,13 +1,17 @@
 package com.fullstackbootcamp.capstoneBackend.user.service;
 
+import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
+import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanRequestRepository;
 import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
 import com.fullstackbootcamp.capstoneBackend.auth.dto.SignupResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.user.dto.DashboardResponse;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
+import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
 import com.fullstackbootcamp.capstoneBackend.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,9 +19,12 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final LoanRequestRepository loanRequestRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository,
+                           LoanRequestRepository loanRequestRepository) {
         this.userRepository = userRepository;
+        this.loanRequestRepository = loanRequestRepository;
     }
 
     @Override
@@ -66,40 +73,35 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsername(username);
     }
 
+    // For bankers
     // TODO
     @Override
     public DashboardResponse getDashboardData(String token) {
         return null;
     }
 
-    // TODO
     // pendingReview format:
     // { "pending": 0, "dinarsInReview": 0 }
-    @Override
-    public Map<String, Object> getPendingReview(UserEntity user) {
-        return null;
+    public List<LoanRequestEntity> getPendingReview(Bank bank) {
+        return loanRequestRepository.findBySelectedBank(bank);
     }
 
     // TODO
-    @Override
     public Map<String, Object> getNotifications(UserEntity user) {
         return null;
     }
 
     // TODO
-    @Override
     public Map<String, Object> getFiveMostRecentRequests(UserEntity user) {
         return null;
     }
 
     // TODO
-    @Override
     public Map<String, Object> getFourMostRecentChats(UserEntity user) {
         return null;
     }
 
     // TODO
-    @Override
     public Map<String, Object> getRecentHistory(UserEntity user) {
         return null;
     }

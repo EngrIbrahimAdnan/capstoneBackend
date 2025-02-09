@@ -15,9 +15,4 @@ public interface UserService {
     Optional<UserEntity> getUserByCivilId(String civilId);
     Optional<UserEntity> getUserByUsername(String username);
     DashboardResponse getDashboardData(String token);
-    Map<String, Object> getPendingReview(UserEntity user);
-    Map<String, Object> getNotifications(UserEntity user);
-    Map<String, Object> getFiveMostRecentRequests(UserEntity user);
-    Map<String, Object> getFourMostRecentChats(UserEntity user);
-    Map<String, Object> getRecentHistory(UserEntity user);
 }
