@@ -1,12 +1,15 @@
 package com.fullstackbootcamp.capstoneBackend.chat.service;
 
 import com.fullstackbootcamp.capstoneBackend.chat.dto.ChatDTO;
+import com.fullstackbootcamp.capstoneBackend.chat.dto.ChatPreviewDTO;
 import com.fullstackbootcamp.capstoneBackend.chat.dto.MessageDTO;
 import com.fullstackbootcamp.capstoneBackend.chat.dto.UserDTO;
 import com.fullstackbootcamp.capstoneBackend.chat.entity.ChatEntity;
+import com.fullstackbootcamp.capstoneBackend.chat.entity.MessageEntity;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,7 +44,7 @@ public class ChatMapperService {
         );
     }
 
-    private List<MessageDTO> convertMessages(ChatEntity chatEntity, String username) {
+    public List<MessageDTO> convertMessages(ChatEntity chatEntity, String username) {
         if (chatEntity.getMessages() == null) {
             return null;
         }
@@ -60,4 +63,54 @@ public class ChatMapperService {
                 .collect(Collectors.toList());
     }
 
+    public List<ChatPreviewDTO> convertToPreviews(List<ChatEntity> chats, String username) {
+        return chats.stream()
+                .map(chat -> {
+
+                    // Check who in the chat is "you"
+                    boolean bankerIsYou = chat.getBanker() != null
+                            && chat.getBanker().getUsername().equals(username);
+                    boolean businessOwnerIsYou = chat.getBusinessOwner() != null
+                            && chat.getBusinessOwner().getUsername().equals(username);
+
+                    // Determine the other user
+                    UserEntity otherUserEntity;
+                    if (bankerIsYou) {
+                        otherUserEntity = chat.getBusinessOwner();
+                    } else if (businessOwnerIsYou) {
+                        otherUserEntity = chat.getBanker();
+                    } else {
+                        // If neither the banker nor the business owner is "you"
+                        otherUserEntity = null;
+                    }
+
+                    // Convert the other user to a DTO (we mark them as `isYou = false` because they are not the current user)
+                    UserDTO otherUserDTO = convertUserToDTO(otherUserEntity, false);
+
+                    // Find the most recent message in this chat
+                    MessageEntity latestMessageEntity = chat.getMessages().stream()
+                            .max(Comparator.comparing(MessageEntity::getTimestamp))
+                            .orElse(null);
+
+                    String latestMessage = null;
+                    boolean latestMessageSenderIsYou = false;
+
+                    if (latestMessageEntity != null) {
+                        latestMessage = latestMessageEntity.getCharacters();
+                        // Check if the latest message’s sender is "you"
+                        latestMessageSenderIsYou = latestMessageEntity
+                                .getSender()
+                                .getUsername()
+                                .equals(username);
+                    }
+
+                    return new ChatPreviewDTO(
+                            chat.getId(),
+                            otherUserDTO,
+                            latestMessage,
+                            latestMessageSenderIsYou
+                    );
+                })
+                .collect(Collectors.toList());
+    }
 }

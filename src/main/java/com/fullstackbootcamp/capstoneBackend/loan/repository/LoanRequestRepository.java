@@ -12,6 +12,20 @@ import java.util.Optional;
 @Repository
 public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, Long> {
     Optional<LoanRequestEntity> findById(Long id);
+
     @Query("SELECT lr FROM LoanRequestEntity lr WHERE :bank MEMBER OF lr.selectedBanks")
     List<LoanRequestEntity> findBySelectedBank(Bank bank);
+
+    @Query("SELECT lr FROM LoanRequestEntity lr WHERE :bank MEMBER OF lr.selectedBanks AND lr.status = 'PENDING'")
+    List<LoanRequestEntity> findBySelectedBankAndStatusPending(Bank bank);
+
+    @Query("""
+       SELECT lr 
+       FROM LoanRequestEntity lr
+       WHERE :bank MEMBER OF lr.selectedBanks
+         AND lr.status <> 'PENDING'
+       """)
+    List<LoanRequestEntity> findBySelectedBankAndStatusNotPending(Bank bank);
+
+
 }
