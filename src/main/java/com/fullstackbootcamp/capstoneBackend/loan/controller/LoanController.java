@@ -9,6 +9,7 @@ import com.fullstackbootcamp.capstoneBackend.loan.dto.CheckNotificationDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.GetLoanRequestDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanRequestDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanResponseDTO;
+import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.CheckNotificationStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanRequestStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanResponseStatus;
@@ -151,4 +152,27 @@ public class LoanController {
                 return ResponseEntity.badRequest().body(noResponse);
         }
     }
+
+
+
+    @GetMapping("/request/all")
+    public ResponseEntity<List<LoanRequestEntity>> getAllRequestLoan(Authentication authentication) {
+
+        GetLoanRequestDTO response = loanService.getLoanRequestById(id,authentication);
+
+        switch (response.getStatus()) {
+            case SUCCESS: // accepted status returned for successfully creating loan request
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+
+            case FAIL: // bad request status returned when field is not in correct format
+                return ResponseEntity.badRequest().body(response);
+
+            default: // default error
+                GetLoanRequestDTO noResponse = new GetLoanRequestDTO();
+                noResponse.setStatus(LoanRequestRetrievalStatus.FAIL);
+                noResponse.setMessage("Error status unrecognized");
+                return ResponseEntity.badRequest().body(noResponse);
+        }
+    }
+
 }

@@ -6,14 +6,18 @@ import com.fullstackbootcamp.capstoneBackend.loan.dto.CheckNotificationDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.GetLoanRequestDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanRequestDTO;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanResponseDTO;
+import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public interface LoanService {
     LoanRequestDTO createLoanRequest(CreateLoanRequest request, Authentication authentication);
     LoanResponseDTO createLoanResponse(CreateLoanResponse request, Authentication authentication);
     GetLoanRequestDTO getLoanRequestById(Long id,Authentication authentication);
-
     CheckNotificationDTO viewRequest(Long id, Authentication authentication);
+    List<LoanResponseEntity> viewRequest(Authentication authentication);
 }
+
