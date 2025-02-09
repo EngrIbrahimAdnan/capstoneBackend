@@ -13,6 +13,15 @@ public class NotificationRequest {
     private String recipientName;
     private Roles senderRole;  // "BANKER" or "BUSINESS_OWNER"
     private Map<String, Object> additionalData = new HashMap<>();
+    private String businessName; // Bank or business name
+
+    public String getBusinessName() {
+        return businessName;
+    }
+
+    public void setBusinessName(String businessName) {
+        this.businessName = businessName;
+    }
 
     public String getMessage() {
         return message;
