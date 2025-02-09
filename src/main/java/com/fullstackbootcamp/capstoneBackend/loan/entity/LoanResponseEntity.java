@@ -34,6 +34,8 @@ public class LoanResponseEntity {
      */
     private BigDecimal amount;
 
+    private String reason;
+
     /* Note: standard loanTerms in banks:
      *  - SIX_MONTHS, ONE_YEAR, TWO_YEARS, FIVE_YEARS
      */
@@ -46,6 +48,8 @@ public class LoanResponseEntity {
     @NotNull(message = "The 'status' field is required and it's missing")
     private LoanResponseStatus status;
 
+
+
     // Note: data of the last request status update
     @Column(name = "data_status", nullable = false)
     private LocalDateTime statusDate;
@@ -55,6 +59,14 @@ public class LoanResponseEntity {
     @JoinColumn(name = "loan_response_notifications")
     private List<NotificationEntity> loanResponseNotifications;
 
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
 
     public Long getId() {
         return id;

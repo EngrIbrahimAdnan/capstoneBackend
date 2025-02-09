@@ -176,6 +176,7 @@ public class LoanServiceImpl implements LoanService {
         LoanResponseEntity loanResponseEntity = new LoanResponseEntity();
         loanResponseEntity.setBanker(bankerUser.get());
         loanResponseEntity.setAmount(request.getAmount());
+        loanResponseEntity.setReason(request.getReason());
         loanResponseEntity.setLoanTerm(request.getLoanTerm());
         loanResponseEntity.setRepaymentPlan(request.getRepaymentPlan());
         loanResponseEntity.setStatus(request.getResponseStatus());
