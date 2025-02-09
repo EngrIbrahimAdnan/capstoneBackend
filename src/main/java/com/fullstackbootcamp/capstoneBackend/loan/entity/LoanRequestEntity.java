@@ -68,6 +68,7 @@ public class LoanRequestEntity {
     @Column(name = "repayment_plan", nullable = false)
     private RepaymentPlan repaymentPlan; // expects
 
+    @Enumerated(EnumType.STRING)
     @NotNull(message = "The 'status' field is required and it's missing")
     private LoanRequestStatus status;
 
