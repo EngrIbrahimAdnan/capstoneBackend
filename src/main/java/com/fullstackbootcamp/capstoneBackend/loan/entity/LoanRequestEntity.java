@@ -28,7 +28,7 @@ public class LoanRequestEntity {
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "loan_responses")
-    private List<LoanResponseEntity> loanResponsEntities;
+    private List<LoanResponseEntity> loanResponseEntities;
 
 
 
@@ -95,11 +95,11 @@ public class LoanRequestEntity {
     }
 
     public List<LoanResponseEntity> getLoanResponses() {
-        return loanResponsEntities;
+        return loanResponseEntities;
     }
 
     public void setLoanResponses(List<LoanResponseEntity> loanResponsEntities) {
-        this.loanResponsEntities = loanResponsEntities;
+        this.loanResponseEntities = loanResponsEntities;
     }
 
 
