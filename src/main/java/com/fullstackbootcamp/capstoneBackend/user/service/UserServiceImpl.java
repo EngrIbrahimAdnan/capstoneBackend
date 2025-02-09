@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
     // { "pending": 0, "dinarsInReview": 0 }
     @Override
     public Map<String, Object> getPendingReview(UserEntity user) {
-
+        return null;
     }
 
     // TODO
