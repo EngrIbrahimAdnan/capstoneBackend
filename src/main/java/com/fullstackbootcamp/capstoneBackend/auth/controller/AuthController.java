@@ -28,6 +28,12 @@ public class AuthController {
         this.authService = authService;
     }
 
+    // Load SecurityContext
+    @GetMapping("/context")
+    public ResponseEntity<String> loadContext() {
+        return ResponseEntity.ok("Loaded.");
+    }
+
     // signup for user
     @PostMapping("/signup")
     public ResponseEntity<SignupResponseDTO> signupUser(@Valid @RequestBody CreateUserRequest request, BindingResult bindingResult) {
