@@ -44,8 +44,13 @@ public class LoanRequestEntity {
     /* Note:
      *  - selectedBanks allows only the listed banks to see the request offer
      */
+    @ElementCollection(targetClass = Bank.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "loan_request_entity_banks", joinColumns = @JoinColumn(name = "loan_request_id"))
+    @Column(name = "bank")
     @NotNull(message = "The 'selectedBanks' field is required and it's missing")
     private List<Bank> selectedBanks;
+
 
     @Column(name = "request_analysis", nullable = false)
     private String requestAnalysis; // ai endpoint
