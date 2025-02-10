@@ -1,8 +1,5 @@
 package com.fullstackbootcamp.capstoneBackend.loan.controller;
 
-import com.fullstackbootcamp.capstoneBackend.auth.dto.SignupResponseDTO;
-import com.fullstackbootcamp.capstoneBackend.business.dto.AddBusinessDTO;
-import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessAdditionStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanResponse;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.CheckNotificationDTO;
@@ -14,8 +11,6 @@ import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanRequestStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanResponseStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestRetrievalStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.service.LoanService;
-import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
-import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +19,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/loan")
 @RestController
@@ -33,6 +29,22 @@ public class LoanController {
     public LoanController(LoanService loanService) {
         this.loanService = loanService;
     }
+
+    @GetMapping("/bank/history")
+    public ResponseEntity<Map<String, Object>> getLoanRequestsPageable(
+            Authentication authentication,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "status", defaultValue = "") String status,
+            @RequestParam(value = "search", defaultValue = "") String search,
+            @RequestParam(value = "limit", defaultValue = "8") int limit) {
+        try {
+            Map<String, Object> loans = loanService.getLoanRequestsPageable(page, status, search, limit, authentication);
+            return ResponseEntity.ok(loans);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 
     // endpoint for business owners to request loan offers from bankers
     @PostMapping("/request")

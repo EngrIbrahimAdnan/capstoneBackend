@@ -17,17 +17,19 @@ import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanResponseReposit
 import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
 import com.fullstackbootcamp.capstoneBackend.notification.service.NotificationsService;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
+import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import com.fullstackbootcamp.capstoneBackend.user.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -131,6 +133,78 @@ public class LoanServiceImpl implements LoanService {
         response.setMessage("Loan Request is created.");
         return response;
     }
+
+    @Override
+    public Map<String, Object> getLoanRequestsPageable(
+            int page,
+            String status,
+            String search,
+            int limit,
+            Authentication authentication) {
+        Map<String, Object> response = new HashMap<>();
+
+        // Validate token and ensure user is banker
+        String message = validateToken(Roles.BANKER, authentication);
+        if (message != null) {
+            response.put("status", CreateLoanResponseStatus.FAIL);
+            response.put("message", message);
+            return response;
+        }
+
+        // Ensure the user exists
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Object civilId = jwt.getClaims().get("civilId");
+        Optional<UserEntity> bankerUser = userService.getUserByCivilId(civilId.toString());
+        if (bankerUser.isEmpty()) {
+            response.put("status", CreateLoanResponseStatus.FAIL);
+            response.put("message", "User does not exist");
+            return response;
+        }
+
+        Bank bank = bankerUser.get().getBank();
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("statusDate").descending());
+
+        // Determine which filters are applied.
+        boolean isStatusFilterApplied = status != null && !status.isEmpty() && !status.equalsIgnoreCase("all");
+        boolean isSearchFilterApplied = search != null && !search.isEmpty();
+
+        Page<LoanRequestEntity> loanRequestPage;
+        if (!isStatusFilterApplied && !isSearchFilterApplied) {
+            // No filtering—return all requests for the bank.
+            loanRequestPage = loanRequestRepository.findBySelectedBankPageable(bank, pageable);
+        } else if (isStatusFilterApplied && !isSearchFilterApplied) {
+            // Filter only by status.
+            LoanRequestStatus loanRequestStatus = LoanRequestStatus.valueOf(status);
+            loanRequestPage = loanRequestRepository.findBySelectedBankAndStatusPageable(bank, loanRequestStatus, pageable);
+        } else if (!isStatusFilterApplied && isSearchFilterApplied) {
+            // Filter only by search string.
+            loanRequestPage = loanRequestRepository.findBySelectedBankAndSearchPageable(bank, search, pageable);
+        } else {
+            // Filter by both status and search string.
+            LoanRequestStatus loanRequestStatus = LoanRequestStatus.valueOf(status);
+            loanRequestPage = loanRequestRepository.findBySelectedBankAndStatusAndSearchPageable(bank, loanRequestStatus, search, pageable);
+        }
+
+        // Build response: convert entities to a JSON-friendly structure.
+        response.put("status", CreateLoanResponseStatus.SUCCESS);
+        List<Map<String, Object>> requestDetails = loanRequestPage.getContent().stream().map(request -> {
+            Map<String, Object> details = new HashMap<>();
+            details.put("id", request.getId());
+            details.put("businessName", request.getBusiness().getBusinessNickname());
+            details.put("businessOwner", request.getBusiness().getBusinessOwnerUser().getFirstName()
+                    + " " + request.getBusiness().getBusinessOwnerUser().getLastName());
+            details.put("amount", request.getAmount());
+            details.put("paymentPeriod", request.getLoanTerm());
+            details.put("status", request.getStatus());
+            details.put("date", request.getStatusDate());
+            return details;
+        }).collect(Collectors.toList());
+        response.put("requests", requestDetails);
+        response.put("totalRecords", loanRequestPage.getTotalElements());
+
+        return response;
+    }
+
 
     public LoanResponseDTO createLoanResponse(CreateLoanResponse request, Authentication authentication) {
         LoanResponseDTO response = new LoanResponseDTO();
@@ -336,7 +410,6 @@ public class LoanServiceImpl implements LoanService {
     public Optional<LoanRequestEntity> getLoanRequestById(Long id) {
         return loanRequestRepository.findById(id);
     }
-
 
     public void revokePreviousLoanResponses(List<LoanResponseEntity> loanResponsEntities, UserEntity user) {
         // Filter responses belonging to the specific user
