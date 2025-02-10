@@ -98,6 +98,25 @@ public class BusinessServiceImpl implements BusinessService {
         // Add Business Owner user entity
         business.setBusinessOwnerUser(user.get());
 
+
+        // Attempt to store business avatar
+        try {
+            FileEntity entity = fileService.saveFile(request.getBusinessAvatar());
+
+            // Upon successfully saving file, ID pointing to the financial statement file in file repository is added
+            /* Hack:
+                Although it looks disgusting to associate the business entity with the file entity this way,
+                this gets rid of the error message "LOB: unable to stream". This might be revisited later due to how
+                disgusting this looks. The error steams from adding relationships with large files (like images)
+                will look for a way around it.
+             */
+            business.setBusinessAvatarFileId(entity.getId());
+        } catch (Exception e) {
+            response.setStatus(BusinessAdditionStatus.FAIL);
+            response.setMessage("Unable to upload avatar document.");
+            return response;
+        }
+
         // add Business Nickname
         /* REVIEW:
             nickname doesn't have to be lower-cased since it won't be used to search with

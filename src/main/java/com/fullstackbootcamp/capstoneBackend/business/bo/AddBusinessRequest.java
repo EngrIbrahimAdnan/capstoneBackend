@@ -5,6 +5,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class AddBusinessRequest {
 
+    @NotNull(message = "The 'businessAvatar' field is required and it's missing")
+    private MultipartFile businessAvatar;
+
+
     @NotNull(message = "The 'businessNickname' field is required and it's missing")
     private String businessNickname;
 
@@ -19,6 +23,14 @@ public class AddBusinessRequest {
 
     // @Nullable NOTE: Nullable can be changed later to not null once the text scan works perfectly
     private String businessLicenseText;
+
+    public MultipartFile getBusinessAvatar() {
+        return businessAvatar;
+    }
+
+    public void setBusinessAvatar(MultipartFile businessAvatar) {
+        this.businessAvatar = businessAvatar;
+    }
 
     public String getBusinessNickname() {
         return businessNickname;

@@ -28,7 +28,8 @@ public class BusinessController {
 
 
     @PostMapping("/add")
-    public ResponseEntity<AddBusinessDTO> addBusiness(@RequestParam("businessNickname") String businessNickname,
+    public ResponseEntity<AddBusinessDTO> addBusiness(@RequestParam("businessAvatar") MultipartFile businessAvatar,
+                                                      @RequestParam("businessNickname") String businessNickname,
                                                       @RequestParam("financialStatementPDF") MultipartFile financialStatementPDF, // image file
                                                       @RequestParam("businessLicenseImage") MultipartFile businessLicenseImage, // image file
                                                       @RequestParam(value = "financialStatementText", required = false) String financialStatementText, // fields extracted into string
@@ -42,6 +43,7 @@ public class BusinessController {
         */
 
         AddBusinessRequest request = new AddBusinessRequest();
+        request.setBusinessAvatar(businessAvatar);
         request.setBusinessNickname(businessNickname);
 
         // Uploaded files

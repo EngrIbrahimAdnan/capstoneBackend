@@ -1,5 +1,6 @@
 package com.fullstackbootcamp.capstoneBackend.loan.repository;
 
+import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestStatus;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
@@ -16,6 +17,8 @@ import java.util.Optional;
 @Repository
 public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, Long> {
     Optional<LoanRequestEntity> findById(Long id);
+
+    Optional<List<LoanRequestEntity>> findByBusiness(BusinessEntity business);
 
     @Query("SELECT lr FROM LoanRequestEntity lr WHERE :bank MEMBER OF lr.selectedBanks")
     List<LoanRequestEntity> findBySelectedBank(Bank bank);

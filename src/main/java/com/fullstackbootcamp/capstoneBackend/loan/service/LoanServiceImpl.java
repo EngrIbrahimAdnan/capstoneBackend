@@ -5,10 +5,7 @@ import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
 import com.fullstackbootcamp.capstoneBackend.business.service.BusinessService;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanResponse;
-import com.fullstackbootcamp.capstoneBackend.loan.dto.CheckNotificationDTO;
-import com.fullstackbootcamp.capstoneBackend.loan.dto.GetLoanRequestDTO;
-import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanRequestDTO;
-import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanResponseDTO;
+import com.fullstackbootcamp.capstoneBackend.loan.dto.*;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanResponseEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.*;
@@ -331,6 +328,55 @@ public class LoanServiceImpl implements LoanService {
         return response;
     }
 
+
+    public GetAllLoanRequestsDTO getAllLoanRequestsForBusinessOwner(Authentication authentication){
+        GetAllLoanRequestsDTO response = new GetAllLoanRequestsDTO();
+
+        // ensure it's business owner token provided
+        String message = validateToken(Roles.BUSINESS_OWNER, authentication);
+
+        // return a response if a message is returned
+        if (message != null) {
+            response.setStatus(LoanRequestRetrievalStatus.FAIL);
+            response.setMessage(message);
+            return response;
+        }
+
+        // ensure the user in the token exists
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Object civilId = jwt.getClaims().get("civilId"); // user civil id
+        Optional<UserEntity> businessOwner = userService.getUserByCivilId(civilId.toString());
+
+        // if user is not found in repository
+        /* TODO: Instead of Fail, another enum value could be added so that it gets routed to an
+            explicit case in the controller layer to utilize 'HttpStatus.NOT_FOUND' which is more
+             appropriate than 'Bad_Request' when user is not found.
+         */
+        if (businessOwner.isEmpty()) {
+            response.setStatus(LoanRequestRetrievalStatus.FAIL);
+            response.setMessage("user does not exist");
+            return response;
+        }
+
+        // check business exists with user entity obtained
+        Optional<BusinessEntity> businessEntity = businessService.getBusinessOwnerEntity(businessOwner.get());
+
+        if (businessEntity.isEmpty()) {
+            response.setStatus(LoanRequestRetrievalStatus.FAIL);
+            response.setMessage("No business is associated with this user");
+            return response; // If there was an error during validation, return early
+        }
+
+        // retrieve all loan requests associated with business entity
+        Optional<List<LoanRequestEntity>> allLoanRequests = getAllLoanRequest(businessEntity.get());
+
+        response.setStatus(LoanRequestRetrievalStatus.SUCCESS);
+        response.setMessage("Successfully retrieved all requests for business owner.");
+        response.setAllRequests(allLoanRequests.get());
+        return response;
+    }
+
+
     public CheckNotificationDTO viewRequest(Long id, Authentication authentication){
         CheckNotificationDTO response = new CheckNotificationDTO();
 
@@ -410,6 +456,11 @@ public class LoanServiceImpl implements LoanService {
 
     public Optional<LoanRequestEntity> getLoanRequestById(Long id) {
         return loanRequestRepository.findById(id);
+    }
+
+
+    public Optional<List<LoanRequestEntity>> getAllLoanRequest(BusinessEntity business) {
+        return loanRequestRepository.findByBusiness(business);
     }
 
     public void revokePreviousLoanResponses(List<LoanResponseEntity> loanResponsEntities, UserEntity user) {
