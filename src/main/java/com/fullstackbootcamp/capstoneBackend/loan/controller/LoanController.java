@@ -5,10 +5,7 @@ import com.fullstackbootcamp.capstoneBackend.business.dto.AddBusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessAdditionStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanResponse;
-import com.fullstackbootcamp.capstoneBackend.loan.dto.CheckNotificationDTO;
-import com.fullstackbootcamp.capstoneBackend.loan.dto.GetLoanRequestDTO;
-import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanRequestDTO;
-import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanResponseDTO;
+import com.fullstackbootcamp.capstoneBackend.loan.dto.*;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.CheckNotificationStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanRequestStatus;
@@ -115,7 +112,7 @@ public class LoanController {
     public ResponseEntity<CheckNotificationDTO> requestView(@PathVariable Long id,
                                                             Authentication authentication) {
 
-        CheckNotificationDTO response = loanService.viewRequest(id,authentication);
+        CheckNotificationDTO response = loanService.viewRequest(id, authentication);
 
         switch (response.getStatus()) {
             case SUCCESS: // accepted status returned for successfully creating loan request
@@ -134,9 +131,9 @@ public class LoanController {
 
     @GetMapping("/request/{id}")
     public ResponseEntity<GetLoanRequestDTO> getrequestLoan(@PathVariable Long id,
-                                                         Authentication authentication) {
+                                                            Authentication authentication) {
 
-        GetLoanRequestDTO response = loanService.getLoanRequestById(id,authentication);
+        GetLoanRequestDTO response = loanService.getLoanRequestById(id, authentication);
 
         switch (response.getStatus()) {
             case SUCCESS: // accepted status returned for successfully creating loan request
@@ -154,11 +151,15 @@ public class LoanController {
     }
 
 
-
+    /* NOTE:
+     *  - this endpoint is for business owner getting all loan requests for their busienss
+     *  - of course, this assumes each business owner has only one business
+     *  - you don't pass anything aside from token
+     */
     @GetMapping("/request/all")
-    public ResponseEntity<List<LoanRequestEntity>> getAllRequestLoan(Authentication authentication) {
+    public ResponseEntity<GetAllLoanRequestsDTO> getAllRequestLoan(Authentication authentication) {
 
-        GetLoanRequestDTO response = loanService.getLoanRequestById(id,authentication);
+        GetAllLoanRequestsDTO response = loanService.getAllLoanRequestsForBusinessOwner(authentication);
 
         switch (response.getStatus()) {
             case SUCCESS: // accepted status returned for successfully creating loan request
@@ -168,7 +169,7 @@ public class LoanController {
                 return ResponseEntity.badRequest().body(response);
 
             default: // default error
-                GetLoanRequestDTO noResponse = new GetLoanRequestDTO();
+                GetAllLoanRequestsDTO noResponse = new GetAllLoanRequestsDTO();
                 noResponse.setStatus(LoanRequestRetrievalStatus.FAIL);
                 noResponse.setMessage("Error status unrecognized");
                 return ResponseEntity.badRequest().body(noResponse);
