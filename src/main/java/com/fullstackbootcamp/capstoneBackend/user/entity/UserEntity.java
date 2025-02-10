@@ -1,5 +1,6 @@
 package com.fullstackbootcamp.capstoneBackend.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import jakarta.persistence.Entity;
@@ -17,6 +18,7 @@ public class UserEntity {
     private String firstName;
     private String lastName;
     private String username;
+    @JsonIgnore
     private String password;
     private String civilId;
     private String mobileNumber;
