@@ -5,5 +5,4 @@ public enum LoanResponseStatus {
     REJECTED,
     COUNTER_OFFER,
     RESCINDED,
-    PENDING
 }

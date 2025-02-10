@@ -120,8 +120,6 @@ public class UserServiceImpl implements UserService {
     public Map<String, BigDecimal> getPendingReview(Bank bank) {
         List<LoanRequestEntity> loanRequests = loanRequestRepository.findBySelectedBankAndStatusPending(bank);
 
-        Map<String, Object> fiveMostRecentRequests = getFiveMostRecentRequests(loanRequests);
-
         Map<String, BigDecimal> pendingReview = new HashMap<>();
         pendingReview.put("pending", BigDecimal.valueOf(loanRequests.size()));
         pendingReview.put("dinarsInReview", loanRequests.stream()
