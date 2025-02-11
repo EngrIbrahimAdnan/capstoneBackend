@@ -274,6 +274,7 @@ public class LoanServiceImpl implements LoanService {
         loanResponseEntity.setStatus(request.getResponseStatus());
         loanResponseEntity.setStatusDate(LocalDateTime.now());
         loanResponseEntity.setBank(bankerUser.get().getBank());
+        loanResponseEntity.setRejectionReason(request.getReason());
 
         // for notifications view track
         loanResponseEntity.setLoanResponseNotifications(new ArrayList<>());
@@ -359,6 +360,15 @@ public class LoanServiceImpl implements LoanService {
                         .filter(loanResponse -> loanResponse.getBank() == bank)
                         .map(LoanResponseEntity::getStatus)
                         .findFirst();
+
+        // Get rejection reason for this bank
+        Optional<String> rejectionReason =
+                loanRequest.get().getLoanResponses().stream()
+                        .filter(loanResponse -> loanResponse.getBank() == bank)
+                        .map(LoanResponseEntity::getRejectionReason)
+                        .findFirst();
+
+        response.setRejectionReason(rejectionReason.orElse(null));
 
         response.setResponseStatus(loanResponseStatus.orElse(null));
         response.setStatus(LoanRequestRetrievalStatus.SUCCESS);

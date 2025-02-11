@@ -59,6 +59,15 @@ public class LoanResponseEntity {
     @JoinColumn(name = "loan_response_notifications")
     private List<NotificationEntity> loanResponseNotifications;
 
+    private String rejectionReason;
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
 
     public Long getId() {
         return id;

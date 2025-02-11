@@ -9,6 +9,15 @@ public class GetLoanRequestDTO {
     private String message;         // Description of the result (e.g., "Successfully retrieved loan request entity" or error details)
     private LoanRequestEntity entity;
     private LoanResponseStatus responseStatus;
+    private String rejectionReason;
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
 
     public LoanResponseStatus getResponseStatus() {
         return responseStatus;
