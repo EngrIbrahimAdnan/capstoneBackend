@@ -2,12 +2,10 @@ package com.fullstackbootcamp.capstoneBackend.loan.controller;
 
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanResponse;
+import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateOfferResponse;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.*;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
-import com.fullstackbootcamp.capstoneBackend.loan.enums.CheckNotificationStatus;
-import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanRequestStatus;
-import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanResponseStatus;
-import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestRetrievalStatus;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.*;
 import com.fullstackbootcamp.capstoneBackend.loan.service.LoanService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -187,5 +185,69 @@ public class LoanController {
                 return ResponseEntity.badRequest().body(noResponse);
         }
     }
+
+
+    // NOTE: Only for business owner
+    @PostMapping("/offer/accept")
+    public ResponseEntity<OfferResponseDTO> acceptOffer(@Valid @RequestBody CreateOfferResponse request, Authentication authentication) {
+
+
+        OfferResponseDTO response = loanService.acceptOffer(request.getLoanRequestId(), request.getLoanResponseId(), authentication);
+
+        switch (response.getStatus()) {
+            case SUCCESS: // accepted status returned for successfully creating loan request
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+
+            case FAIL: // bad request status returned when field is not in correct format
+                return ResponseEntity.badRequest().body(response);
+
+            default: // default error
+                OfferResponseDTO noResponse = new OfferResponseDTO();
+                noResponse.setStatus(OfferSubmissionStatus.FAIL);
+                noResponse.setMessage("Error status unrecognized");
+                return ResponseEntity.badRequest().body(noResponse);
+        }
+    }
+
+
+    // NOTE: Only for business owner
+    @PostMapping("/offer/withdraw/{id}")
+    public ResponseEntity<OfferResponseDTO> withDraw(@PathVariable Long id, Authentication authentication) {
+
+        System.out.println("id: "+ id);
+        OfferResponseDTO response = loanService.withdrawOffer(id, authentication);
+
+        switch (response.getStatus()) {
+            case SUCCESS: // accepted status returned for successfully creating loan request
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+
+            case FAIL: // bad request status returned when field is not in correct format
+                return ResponseEntity.badRequest().body(response);
+
+            default: // default error
+                OfferResponseDTO noResponse = new OfferResponseDTO();
+                noResponse.setStatus(OfferSubmissionStatus.FAIL);
+                noResponse.setMessage("Error status unrecognized");
+                return ResponseEntity.badRequest().body(noResponse);
+        }
+    }
+
+//
+//
+//
+//        switch (response.getStatus()) {
+//            case SUCCESS: // accepted status returned for successfully creating loan request
+//                return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+//
+//            case FAIL: // bad request status returned when field is not in correct format
+//                return ResponseEntity.badRequest().body(response);
+//
+//            default: // default error
+//                GetAllLoanRequestsDTO noResponse = new GetAllLoanRequestsDTO();
+//                noResponse.setStatus(LoanRequestRetrievalStatus.FAIL);
+//                noResponse.setMessage("Error status unrecognized");
+//                return ResponseEntity.badRequest().body(noResponse);
+//        }
+//    }
 
 }
