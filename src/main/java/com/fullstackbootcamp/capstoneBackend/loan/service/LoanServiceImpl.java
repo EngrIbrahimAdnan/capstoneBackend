@@ -260,6 +260,12 @@ public class LoanServiceImpl implements LoanService {
             return response; // If there was an error during validation, return early
         }
 
+        /* TODO (Important): check the status of the request is not "APPROVED"
+         *  - It shouldn't be possible for a banker to submit a response after it
+         *  - gets approved (the business owner already accepted an offer)
+         */
+
+
         // TODO: switch statement for each option
 
         // first case: the banker approves the request offer straight away
@@ -423,6 +429,105 @@ public class LoanServiceImpl implements LoanService {
         return response;
     }
 
+    // NOTE: For business owner
+    public OfferResponseDTO acceptOffer(Long loanRequestId, Long loanResponseId,Authentication authentication){
+        OfferResponseDTO response = new OfferResponseDTO();
+
+        // ensure it's business owner token provided
+        String message = validateToken(Roles.BUSINESS_OWNER, authentication);
+
+        // return a response if a message is returned
+        if (message != null) {
+            response.setStatus(OfferSubmissionStatus.FAIL);
+            response.setMessage(message);
+            return response;
+        }
+
+        // NOTE: ensure the loan request exists
+        Optional<LoanRequestEntity> loanRequest =loanRequestRepository.findById(loanRequestId);
+
+        if (loanRequest.isEmpty()) {
+            response.setStatus(OfferSubmissionStatus.FAIL);
+            response.setMessage("No loan Request exist with tha provided ID");
+            return response;
+        }
+
+        // NOTE: ensure the loan response exists
+        Optional<LoanResponseEntity> loanResponse =loanResponseRepository.findById(loanResponseId);
+
+        if (loanResponse.isEmpty()) {
+            response.setStatus(OfferSubmissionStatus.FAIL);
+            response.setMessage("No loan response exist with tha provided ID");
+            return response;
+        }
+
+        // REVIEW: we might also need to check 'rejectionSource' and "Status" to ensure it is not rejected yet
+
+        List<LoanResponseEntity> allResponses =loanRequest.get().getLoanResponses();
+
+        for (LoanResponseEntity responseLoop : allResponses) {
+            // Set the time of change for all responses
+            responseLoop.setStatusDate(LocalDateTime.now());
+
+            if (responseLoop.getId().equals(loanResponseId)) {
+                // Keep only the selected response as approved
+                responseLoop.setStatus(LoanResponseStatus.APPROVED);
+            } else {
+                // Change others to rejected
+                responseLoop.setStatus(LoanResponseStatus.REJECTED);
+                responseLoop.setReason("The business owner has accepted a different offer");
+            }
+        }
+
+        LoanRequestEntity loanRequestUpdated = loanRequest.get();
+
+        loanRequestUpdated.setLoanResponses(allResponses);
+        loanRequestUpdated.setAmount(loanResponse.get().getAmount());
+        loanRequestUpdated.setLoanTerm(loanResponse.get().getLoanTerm());
+        loanRequestUpdated.setRepaymentPlan(loanResponse.get().getRepaymentPlan());
+        loanRequestUpdated.setStatus(LoanRequestStatus.APPROVED);
+
+        loanRequestRepository.save(loanRequestUpdated);
+
+        response.setStatus(OfferSubmissionStatus.SUCCESS);
+        response.setMessage("Successfully accepted bank's offer.");
+        return response;
+
+    }
+
+    // NOTE: For business owner
+    public OfferResponseDTO withdrawOffer(Long loanRequestId,Authentication authentication){
+        OfferResponseDTO response = new OfferResponseDTO();
+
+        // ensure it's business owner token provided
+        String message = validateToken(Roles.BUSINESS_OWNER, authentication);
+
+        // return a response if a message is returned
+        if (message != null) {
+            response.setStatus(OfferSubmissionStatus.FAIL);
+            response.setMessage(message);
+            return response;
+        }
+
+        // NOTE: ensure the loan request exists
+        Optional<LoanRequestEntity> loanRequest =loanRequestRepository.findById(loanRequestId);
+
+        if (loanRequest.isEmpty()) {
+            response.setStatus(OfferSubmissionStatus.FAIL);
+            response.setMessage("No loan Request exist with tha provided ID");
+            return response;
+        }
+
+        loanRequestRepository.delete(loanRequest.get());
+
+        response.setStatus(OfferSubmissionStatus.SUCCESS);
+        response.setMessage("Successfully withdrew loan Request.");
+        return response;    }
+
+    // NOTE: For business owner
+    public OfferResponseDTO rejectOffer(Long loanRequestId, Long loanResponseId,Authentication authentication){
+        return null;
+    }
 
     public CheckNotificationDTO viewRequest(Long id, Authentication authentication){
         CheckNotificationDTO response = new CheckNotificationDTO();
@@ -503,6 +608,10 @@ public class LoanServiceImpl implements LoanService {
 
     public Optional<LoanRequestEntity> getLoanRequestById(Long id) {
         return loanRequestRepository.findById(id);
+    }
+
+    public Optional<LoanResponseEntity> getLoanResponseById(Long id) {
+        return loanResponseRepository.findById(id);
     }
 
 
