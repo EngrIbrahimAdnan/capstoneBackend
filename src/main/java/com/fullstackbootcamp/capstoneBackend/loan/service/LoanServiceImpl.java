@@ -344,6 +344,23 @@ public class LoanServiceImpl implements LoanService {
             return response; // If there was an error during validation, return early
         }
 
+        // Ensure the user exists
+        Object civilId = jwt.getClaims().get("civilId");
+        Optional<UserEntity> bankerUser = userService.getUserByCivilId(civilId.toString());
+        if (bankerUser.isEmpty()) {
+            return response;
+        }
+
+        Bank bank = bankerUser.get().getBank();
+
+        // Get loan response status for this bank
+        Optional<LoanResponseStatus> loanResponseStatus =
+                loanRequest.get().getLoanResponses().stream()
+                        .filter(loanResponse -> loanResponse.getBank() == bank)
+                        .map(LoanResponseEntity::getStatus)
+                        .findFirst();
+
+        response.setResponseStatus(loanResponseStatus.orElse(null));
         response.setStatus(LoanRequestRetrievalStatus.SUCCESS);
         response.setMessage("Loan Request entity is successfully retrieved");
         response.setEntity(loanRequest.get());
