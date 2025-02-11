@@ -11,8 +11,8 @@ import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanResponseEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.*;
 import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanRequestRepository;
 import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanResponseRepository;
-import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
-import com.fullstackbootcamp.capstoneBackend.notification.service.NotificationsService;
+import com.fullstackbootcamp.capstoneBackend.loanNotification.entity.LoanNotificationEntity;
+import com.fullstackbootcamp.capstoneBackend.loanNotification.service.LoanNotificationsService;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
@@ -35,7 +35,7 @@ public class LoanServiceImpl implements LoanService {
     private final LoanResponseRepository loanResponseRepository;
     private final UserService userService;
     private final BusinessService businessService;
-    private final NotificationsService notificationsService;
+    private final LoanNotificationsService loanNotificationsService;
 
 
 
@@ -43,12 +43,12 @@ public class LoanServiceImpl implements LoanService {
                            UserService userService,
                            BusinessService businessService,
                            LoanResponseRepository loanResponseRepository,
-                           NotificationsService notificationsService) {
+                           LoanNotificationsService loanNotificationsService) {
         this.loanRequestRepository = loanRequestRepository;
         this.userService = userService;
         this.businessService = businessService;
         this.loanResponseRepository = loanResponseRepository;
-        this.notificationsService = notificationsService;
+        this.loanNotificationsService = loanNotificationsService;
 
     }
 
@@ -461,14 +461,14 @@ public class LoanServiceImpl implements LoanService {
         }
 
 
-        NotificationEntity notification = new NotificationEntity();
+        LoanNotificationEntity notification = new LoanNotificationEntity();
         notification.setUser(user.get());
 
         System.out.println(user.get().getCivilId());
         System.out.println(user.get().getFirstName());
 
 
-        NotificationEntity newNotification=  notificationsService.saveNotificationEntity(notification);
+        LoanNotificationEntity newNotification=  loanNotificationsService.saveNotificationEntity(notification);
 
         loanRequest.get().getLoanRequestNotifications().add(newNotification);
 

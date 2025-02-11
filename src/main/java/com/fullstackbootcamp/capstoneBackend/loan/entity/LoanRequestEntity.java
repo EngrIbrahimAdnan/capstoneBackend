@@ -5,7 +5,7 @@ import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanTerm;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.RejectionSource;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.RepaymentPlan;
-import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
+import com.fullstackbootcamp.capstoneBackend.loanNotification.entity.LoanNotificationEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -87,7 +87,7 @@ public class LoanRequestEntity {
     // Note: keeping track on whether the request is viewed by each user
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "loan_request_notifications")
-    private List<NotificationEntity> loanRequestNotifications;
+    private List<LoanNotificationEntity> loanRequestNotifications;
 
 
     public Long getId() {
@@ -205,11 +205,11 @@ public class LoanRequestEntity {
         this.statusDate = statusDate;
     }
 
-    public List<NotificationEntity> getLoanRequestNotifications() {
+    public List<LoanNotificationEntity> getLoanRequestNotifications() {
         return loanRequestNotifications;
     }
 
-    public void setLoanRequestNotifications(List<NotificationEntity> loanRequestNotifications) {
+    public void setLoanRequestNotifications(List<LoanNotificationEntity> loanRequestNotifications) {
         this.loanRequestNotifications = loanRequestNotifications;
     }
 }
