@@ -186,10 +186,18 @@ public class LoanServiceImpl implements LoanService {
         }
 
         // Build response: convert entities to a JSON-friendly structure.
-        response.put("status", CreateLoanResponseStatus.SUCCESS);
         List<Map<String, Object>> requestDetails = loanRequestPage.getContent().stream().map(request -> {
             Map<String, Object> details = new HashMap<>();
             details.put("id", request.getId());
+            Optional<LoanResponseStatus> loanResponseStatus = request.getLoanResponses().stream()
+                    .filter(loanResponse ->
+                            loanResponse.getBanker() != null &&
+                                    loanResponse.getBanker().getBank() == bank)
+                    .map(LoanResponseEntity::getStatus)
+                    .findFirst();
+
+            details.put("loanResponseStatus", loanResponseStatus.orElse(null));
+
             details.put("businessName", request.getBusiness().getBusinessNickname());
             details.put("businessOwner", request.getBusiness().getBusinessOwnerUser().getFirstName()
                     + " " + request.getBusiness().getBusinessOwnerUser().getLastName());

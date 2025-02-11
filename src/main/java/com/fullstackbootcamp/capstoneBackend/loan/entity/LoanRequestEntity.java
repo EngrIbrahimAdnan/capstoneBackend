@@ -30,8 +30,6 @@ public class LoanRequestEntity {
     @JoinColumn(name = "loan_responses")
     private List<LoanResponseEntity> loanResponseEntities;
 
-
-
     /* Note:
      *  - BusinessOwner User can be obtained from the business entity business
      *  - It would be redundant to include it here as well.
