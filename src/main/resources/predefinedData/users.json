@@ -17,29 +17,30 @@
     "username": "AB",
     "civilId": "111111111111",
     "role": "BANKER",
-    "bank": "KUWAIT_FINANCE_HOUSE"
+    "bank": "BOUBYAN_BANK"
   },
   {
     "mobileNumber": "28041829",
     "firstName": "Fajri",
     "lastName": "Alhussaini",
     "password": "password",
-    "username": "alfredo",
+    "username": "alfredo259",
     "civilId": "222222222222",
-    "role": "ADMIN",
-    "bank": "NOT_BANK"
+    "role": "BANKER",
+    "bank": "KUWAIT_INTERNATIONAL_BANK"
   },
   {
     "mobileNumber": "19402349",
     "firstName": "Salem",
     "lastName": "Almutari",
     "password": "password",
-    "username": "salem",
+    "username": "salem432",
     "civilId": "333333333333",
     "role": "BANKER",
-    "bank": "BOUBYAN_BANK"
+    "bank": "WARBA_BANK"
   }
 ]
+
 
 
 

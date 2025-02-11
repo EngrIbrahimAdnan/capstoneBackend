@@ -22,6 +22,12 @@ public class JwtUtil {
 
     public String generateAccessToken(UserEntity user) {
         String tokenId = UUID.randomUUID().toString();
+
+        // NOTE: Long story short, sat for a bug for a couple of hours only to realize the
+        //  token expired due to the 1 hour expiration. now they last for 12 months
+        ZonedDateTime expirationZonedDateTime = ZonedDateTime.now().plusMonths(12);
+        Date expirationDate = Date.from(expirationZonedDateTime.toInstant());
+
         return Jwts.builder()
                 .setId(tokenId)
                 .setSubject(user.getUsername())
@@ -30,7 +36,12 @@ public class JwtUtil {
                 .claim("civilId", user.getCivilId())
                 .claim("type", TokenTypes.ACCESS.name()) // specify the type to be access
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 hour
+
+                // NOTE: uncomment this for demo since no token on earth lasts 356 days
+//                 .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 hour
+                 .setExpiration(expirationDate) // 12 months
+
+
                 .signWith(secretKey)
                 .compact();
     }
