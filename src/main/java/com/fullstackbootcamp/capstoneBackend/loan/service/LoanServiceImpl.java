@@ -210,7 +210,6 @@ public class LoanServiceImpl implements LoanService {
                           + request.getBusiness().getBusinessOwnerUser().getLastName());
                   details.put("amount", request.getAmount());
                   details.put("paymentPeriod", request.getLoanTerm());
-                  details.put("status", CheckNotificationStatus.SUCCESS);
                   details.put("date", request.getStatusDate());
 
                   return details;
@@ -219,8 +218,10 @@ public class LoanServiceImpl implements LoanService {
 
         response.put("requests", requestDetails);
         response.put("totalRecords", loanRequestPage.getTotalElements());
+        response.put("status", CreateLoanResponseStatus.SUCCESS);
 
-        return response;
+
+      return response;
     }
 
 
