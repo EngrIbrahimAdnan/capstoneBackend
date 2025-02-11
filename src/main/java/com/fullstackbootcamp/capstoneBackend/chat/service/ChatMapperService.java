@@ -1,9 +1,7 @@
 package com.fullstackbootcamp.capstoneBackend.chat.service;
 
-import com.fullstackbootcamp.capstoneBackend.chat.dto.ChatDTO;
-import com.fullstackbootcamp.capstoneBackend.chat.dto.ChatPreviewDTO;
-import com.fullstackbootcamp.capstoneBackend.chat.dto.MessageDTO;
-import com.fullstackbootcamp.capstoneBackend.chat.dto.UserDTO;
+import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
+import com.fullstackbootcamp.capstoneBackend.chat.dto.*;
 import com.fullstackbootcamp.capstoneBackend.chat.entity.ChatEntity;
 import com.fullstackbootcamp.capstoneBackend.chat.entity.MessageEntity;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
