@@ -5,6 +5,7 @@ import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanTerm;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.RepaymentPlan;
 import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
+import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
@@ -28,6 +29,9 @@ public class LoanResponseEntity {
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "banker_user_id", nullable = false)
     private UserEntity banker;
+
+    @Enumerated(EnumType.STRING)
+    private Bank bank;
 
     /* Note: the following fields are all nullable in case status is approve:
      *  - amount, loan term, repayment plan
@@ -62,6 +66,14 @@ public class LoanResponseEntity {
 
     public UserEntity getBanker() {
         return banker;
+    }
+
+    public Bank getBank() {
+        return bank;
+    }
+
+    public void setBank(Bank bank) {
+        this.bank = bank;
     }
 
     public void setBanker(UserEntity banker) {

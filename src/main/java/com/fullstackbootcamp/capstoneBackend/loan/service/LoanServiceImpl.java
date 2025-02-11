@@ -134,79 +134,89 @@ public class LoanServiceImpl implements LoanService {
         return response;
     }
 
-    @Override
-    public Map<String, Object> getLoanRequestsPageable(
-            int page,
-            String status,
-            String search,
-            int limit,
-            Authentication authentication) {
-        Map<String, Object> response = new HashMap<>();
+  @Override
+  public Map<String, Object> getLoanRequestsPageable(
+      int page, String status, String search, int limit, Authentication authentication) {
+    Map<String, Object> response = new HashMap<>();
 
-        // Validate token and ensure user is banker
-        String message = validateToken(Roles.BANKER, authentication);
-        if (message != null) {
-            response.put("status", CreateLoanResponseStatus.FAIL);
-            response.put("message", message);
-            return response;
-        }
+    // Validate token and ensure user is banker
+    String message = validateToken(Roles.BANKER, authentication);
+    if (message != null) {
+      response.put("status", CreateLoanResponseStatus.FAIL);
+      response.put("message", message);
+      return response;
+    }
 
-        // Ensure the user exists
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Object civilId = jwt.getClaims().get("civilId");
-        Optional<UserEntity> bankerUser = userService.getUserByCivilId(civilId.toString());
-        if (bankerUser.isEmpty()) {
-            response.put("status", CreateLoanResponseStatus.FAIL);
-            response.put("message", "User does not exist");
-            return response;
-        }
+    // Ensure the user exists
+    Jwt jwt = (Jwt) authentication.getPrincipal();
+    Object civilId = jwt.getClaims().get("civilId");
+    Optional<UserEntity> bankerUser = userService.getUserByCivilId(civilId.toString());
+    if (bankerUser.isEmpty()) {
+      response.put("status", CreateLoanResponseStatus.FAIL);
+      response.put("message", "User does not exist");
+      return response;
+    }
 
-        Bank bank = bankerUser.get().getBank();
-        Pageable pageable = PageRequest.of(page, limit, Sort.by("statusDate").descending());
+    Bank bank = bankerUser.get().getBank();
+    Pageable pageable = PageRequest.of(page, limit, Sort.by("statusDate").descending());
 
-        // Determine which filters are applied.
-        boolean isStatusFilterApplied = status != null && !status.isEmpty() && !status.equalsIgnoreCase("all");
-        boolean isSearchFilterApplied = search != null && !search.isEmpty();
+    // Get loan requests based on status
+    Page<LoanRequestEntity> loanRequestPage;
+    if (status == null || status.isEmpty() || status.equalsIgnoreCase("all")) {
+      // No status filter - return all requests for the bank
+      // You might want to implement a new method in repository for this case
+      loanRequestPage = loanRequestRepository.findRequestsByBank(bank, pageable);
+    } else {
+      switch (status.toUpperCase()) {
+        case "PENDING":
+          loanRequestPage = loanRequestRepository.findPendingRequestsByBank(bank, pageable);
+          break;
+        case "APPROVED":
+          loanRequestPage =
+              loanRequestRepository.findApprovedRequestsByBank(
+                  bank, LoanResponseStatus.APPROVED, pageable);
+          break;
+        case "REJECTED":
+          loanRequestPage =
+              loanRequestRepository.findRejectedRequestsByBank(
+                  bank, LoanResponseStatus.REJECTED, pageable);
+          break;
+        default:
+          throw new IllegalArgumentException("Invalid status: " + status);
+      }
+    }
 
-        Page<LoanRequestEntity> loanRequestPage;
-        if (!isStatusFilterApplied && !isSearchFilterApplied) {
-            // No filtering—return all requests for the bank.
-            loanRequestPage = loanRequestRepository.findBySelectedBankPageable(bank, pageable);
-        } else if (isStatusFilterApplied && !isSearchFilterApplied) {
-            // Filter only by status.
-            LoanRequestStatus loanRequestStatus = LoanRequestStatus.valueOf(status);
-            loanRequestPage = loanRequestRepository.findBySelectedBankAndStatusPageable(bank, loanRequestStatus, pageable);
-        } else if (!isStatusFilterApplied && isSearchFilterApplied) {
-            // Filter only by search string.
-            loanRequestPage = loanRequestRepository.findBySelectedBankAndSearchPageable(bank, search, pageable);
-        } else {
-            // Filter by both status and search string.
-            LoanRequestStatus loanRequestStatus = LoanRequestStatus.valueOf(status);
-            loanRequestPage = loanRequestRepository.findBySelectedBankAndStatusAndSearchPageable(bank, loanRequestStatus, search, pageable);
-        }
+    // Build response
+    List<Map<String, Object>> requestDetails =
+        loanRequestPage.getContent().stream()
+            .map(
+                request -> {
+                  Map<String, Object> details = new HashMap<>();
+                  details.put("id", request.getId());
 
-        // Build response: convert entities to a JSON-friendly structure.
-        List<Map<String, Object>> requestDetails = loanRequestPage.getContent().stream().map(request -> {
-            Map<String, Object> details = new HashMap<>();
-            details.put("id", request.getId());
-            Optional<LoanResponseStatus> loanResponseStatus = request.getLoanResponses().stream()
-                    .filter(loanResponse ->
-                            loanResponse.getBanker() != null &&
-                                    loanResponse.getBanker().getBank() == bank)
-                    .map(LoanResponseEntity::getStatus)
-                    .findFirst();
+                  // Get loan response status for this bank
+                  Optional<LoanResponseStatus> loanResponseStatus =
+                      request.getLoanResponses().stream()
+                          .filter(loanResponse -> loanResponse.getBank() == bank)
+                          .map(LoanResponseEntity::getStatus)
+                          .findFirst();
 
-            details.put("loanResponseStatus", loanResponseStatus.orElse(null));
+                  details.put("loanResponseStatus", loanResponseStatus.orElse(null));
+                  details.put("businessName", request.getBusiness().getBusinessNickname());
+                  details.put(
+                      "businessOwner",
+                      request.getBusiness().getBusinessOwnerUser().getFirstName()
+                          + " "
+                          + request.getBusiness().getBusinessOwnerUser().getLastName());
+                  details.put("amount", request.getAmount());
+                  details.put("paymentPeriod", request.getLoanTerm());
+                  details.put("status", CheckNotificationStatus.SUCCESS);
+                  details.put("date", request.getStatusDate());
 
-            details.put("businessName", request.getBusiness().getBusinessNickname());
-            details.put("businessOwner", request.getBusiness().getBusinessOwnerUser().getFirstName()
-                    + " " + request.getBusiness().getBusinessOwnerUser().getLastName());
-            details.put("amount", request.getAmount());
-            details.put("paymentPeriod", request.getLoanTerm());
-            details.put("status", request.getStatus());
-            details.put("date", request.getStatusDate());
-            return details;
-        }).collect(Collectors.toList());
+                  return details;
+                })
+            .collect(Collectors.toList());
+
         response.put("requests", requestDetails);
         response.put("totalRecords", loanRequestPage.getTotalElements());
 
@@ -262,6 +272,7 @@ public class LoanServiceImpl implements LoanService {
         loanResponseEntity.setRepaymentPlan(request.getRepaymentPlan());
         loanResponseEntity.setStatus(request.getResponseStatus());
         loanResponseEntity.setStatusDate(LocalDateTime.now());
+        loanResponseEntity.setBank(bankerUser.get().getBank());
 
         // for notifications view track
         loanResponseEntity.setLoanResponseNotifications(new ArrayList<>());
