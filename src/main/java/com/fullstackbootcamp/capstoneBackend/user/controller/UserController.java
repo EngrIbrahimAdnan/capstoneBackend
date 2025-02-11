@@ -72,5 +72,4 @@ public class UserController {
     public ResponseEntity<DashboardResponse> getDashboardData(@RequestHeader("Authorization") String authHeader) {
         return ResponseEntity.ok(userService.getDashboardData(authHeader));
     }
-
 }
