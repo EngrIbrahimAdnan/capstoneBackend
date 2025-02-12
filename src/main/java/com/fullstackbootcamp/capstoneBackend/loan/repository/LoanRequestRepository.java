@@ -160,4 +160,5 @@ public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, 
             Pageable pageable
     );
 
+    Optional<List<LoanRequestEntity>> findByBusiness(BusinessEntity business);
 }
