@@ -38,12 +38,7 @@ public class LoanServiceImpl implements LoanService {
     private final LoanNotificationsService loanNotificationsService;
 
 
-
-    public LoanServiceImpl(LoanRequestRepository loanRequestRepository,
-                           UserService userService,
-                           BusinessService businessService,
-                           LoanResponseRepository loanResponseRepository,
-                           LoanNotificationsService loanNotificationsService) {
+    public LoanServiceImpl(LoanRequestRepository loanRequestRepository, UserService userService, BusinessService businessService, LoanResponseRepository loanResponseRepository, LoanNotificationsService loanNotificationsService) {
         this.loanRequestRepository = loanRequestRepository;
         this.userService = userService;
         this.businessService = businessService;
@@ -132,93 +127,76 @@ public class LoanServiceImpl implements LoanService {
     }
 
     @Override
-    public Map<String, Object> getLoanRequestsPageable(
-      int page, String status, String search, int limit, Authentication authentication) {
-    Map<String, Object> response = new HashMap<>();
+    public Map<String, Object> getLoanRequestsPageable(int page, String status, String search, int limit, Authentication authentication) {
+        Map<String, Object> response = new HashMap<>();
 
-    // Validate token and ensure user is banker
-    String message = validateToken(Roles.BANKER, authentication);
-    if (message != null) {
-      response.put("status", CreateLoanResponseStatus.FAIL);
-      response.put("message", message);
-      return response;
-    }
+        // Validate token and ensure user is banker
+        String message = validateToken(Roles.BANKER, authentication);
+        if (message != null) {
+            response.put("status", CreateLoanResponseStatus.FAIL);
+            response.put("message", message);
+            return response;
+        }
 
-    // Ensure the user exists
-    Jwt jwt = (Jwt) authentication.getPrincipal();
-    Object civilId = jwt.getClaims().get("civilId");
-    Optional<UserEntity> bankerUser = userService.getUserByCivilId(civilId.toString());
-    if (bankerUser.isEmpty()) {
-      response.put("status", CreateLoanResponseStatus.FAIL);
-      response.put("message", "User does not exist");
-      return response;
-    }
+        // Ensure the user exists
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Object civilId = jwt.getClaims().get("civilId");
+        Optional<UserEntity> bankerUser = userService.getUserByCivilId(civilId.toString());
+        if (bankerUser.isEmpty()) {
+            response.put("status", CreateLoanResponseStatus.FAIL);
+            response.put("message", "User does not exist");
+            return response;
+        }
 
-    Bank bank = bankerUser.get().getBank();
-    Pageable pageable = PageRequest.of(page, limit, Sort.by("statusDate").descending());
+        Bank bank = bankerUser.get().getBank();
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("statusDate").descending());
 
-    // Get loan requests based on status
-    Page<LoanRequestEntity> loanRequestPage;
-    if (status == null || status.isEmpty() || status.equalsIgnoreCase("all")) {
-      // No status filter - return all requests for the bank
-      // You might want to implement a new method in repository for this case
-      loanRequestPage = loanRequestRepository.findRequestsByBank(bank, pageable);
-    } else {
-      switch (status.toUpperCase()) {
-        case "PENDING":
-          loanRequestPage = loanRequestRepository.findPendingRequestsByBank(bank, pageable);
-          break;
-        case "APPROVED":
-          loanRequestPage =
-              loanRequestRepository.findApprovedRequestsByBank(
-                  bank, LoanResponseStatus.APPROVED, pageable);
-          break;
-        case "REJECTED":
-          loanRequestPage =
-              loanRequestRepository.findRejectedRequestsByBank(
-                  bank, LoanResponseStatus.REJECTED, pageable);
-          break;
-        default:
-          throw new IllegalArgumentException("Invalid status: " + status);
-      }
-    }
+        // Get loan requests based on status
+        Page<LoanRequestEntity> loanRequestPage;
+        if (status == null || status.isEmpty() || status.equalsIgnoreCase("all")) {
+            // No status filter - return all requests for the bank
+            // You might want to implement a new method in repository for this case
+            loanRequestPage = loanRequestRepository.findRequestsByBank(bank, pageable);
+        } else {
+            switch (status.toUpperCase()) {
+                case "PENDING":
+                    loanRequestPage = loanRequestRepository.findPendingRequestsByBank(bank, pageable);
+                    break;
+                case "APPROVED":
+                    loanRequestPage = loanRequestRepository.findApprovedRequestsByBank(bank, LoanResponseStatus.APPROVED, pageable);
+                    break;
+                case "REJECTED":
+                    loanRequestPage = loanRequestRepository.findRejectedRequestsByBank(bank, LoanResponseStatus.REJECTED, pageable);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid status: " + status);
+            }
+        }
 
-    // Build response
-    List<Map<String, Object>> requestDetails =
-        loanRequestPage.getContent().stream()
-            .map(
-                request -> {
-                  Map<String, Object> details = new HashMap<>();
-                  details.put("id", request.getId());
+        // Build response
+        List<Map<String, Object>> requestDetails = loanRequestPage.getContent().stream().map(request -> {
+            Map<String, Object> details = new HashMap<>();
+            details.put("id", request.getId());
 
-                  // Get loan response status for this bank
-                  Optional<LoanResponseStatus> loanResponseStatus =
-                      request.getLoanResponses().stream()
-                          .filter(loanResponse -> loanResponse.getBank() == bank)
-                          .map(LoanResponseEntity::getStatus)
-                          .findFirst();
+            // Get loan response status for this bank
+            Optional<LoanResponseStatus> loanResponseStatus = request.getLoanResponses().stream().filter(loanResponse -> loanResponse.getBank() == bank).map(LoanResponseEntity::getStatus).findFirst();
 
-                  details.put("loanResponseStatus", loanResponseStatus.orElse(null));
-                  details.put("businessName", request.getBusiness().getBusinessNickname());
-                  details.put(
-                      "businessOwner",
-                      request.getBusiness().getBusinessOwnerUser().getFirstName()
-                          + " "
-                          + request.getBusiness().getBusinessOwnerUser().getLastName());
-                  details.put("amount", request.getAmount());
-                  details.put("paymentPeriod", request.getLoanTerm());
-                  details.put("date", request.getStatusDate());
+            details.put("loanResponseStatus", loanResponseStatus.orElse(null));
+            details.put("businessName", request.getBusiness().getBusinessNickname());
+            details.put("businessOwner", request.getBusiness().getBusinessOwnerUser().getFirstName() + " " + request.getBusiness().getBusinessOwnerUser().getLastName());
+            details.put("amount", request.getAmount());
+            details.put("paymentPeriod", request.getLoanTerm());
+            details.put("date", request.getStatusDate());
 
-                  return details;
-                })
-            .collect(Collectors.toList());
+            return details;
+        }).collect(Collectors.toList());
 
         response.put("requests", requestDetails);
         response.put("totalRecords", loanRequestPage.getTotalElements());
         response.put("status", CreateLoanResponseStatus.SUCCESS);
 
 
-      return response;
+        return response;
     }
 
     @Override
@@ -281,13 +259,18 @@ public class LoanServiceImpl implements LoanService {
             return response; // If there was an error during validation, return early
         }
 
+
+        // update the original loan request upon the new loan response
+        // submitted by banker
+        LoanRequestEntity updateLoanRequestEntity = loanRequest.get();
+
+        // Ensure banker's previous responses are revoked first
+        revokePreviousLoanResponses(updateLoanRequestEntity.getLoanResponses(), bankerUser.get());
+
         /* TODO (Important): check the status of the request is not "APPROVED"
          *  - It shouldn't be possible for a banker to submit a response after it
          *  - gets approved (the business owner already accepted an offer)
          */
-
-
-        // TODO: switch statement for each option
 
         // first case: the banker approves the request offer straight away
         LoanResponseEntity loanResponseEntity = new LoanResponseEntity();
@@ -304,41 +287,33 @@ public class LoanServiceImpl implements LoanService {
         // for notifications view track
         loanResponseEntity.setLoanResponseNotifications(new ArrayList<>());
 
-        // update the original loan request upon the new loan response
-        // submitted by banker
-        LoanRequestEntity updateLoanRequestEntity = loanRequest.get();
 
         // Add the new loanResponse to the loanResponses list
         updateLoanRequestEntity.getLoanResponses().add(loanResponseEntity);
         updateLoanRequestEntity.setLoanResponses(updateLoanRequestEntity.getLoanResponses());
 
         /* Note:
-         *  - NEW_RESPONSE means the user has received an offer that he is either going to accept or negotiates
+         *  - NEW_RESPONSE means the user has received an offer that he is either going to accept or negotiate
          */
         updateLoanRequestEntity.setStatus(LoanRequestStatus.NEW_RESPONSE);
         updateLoanRequestEntity.setStatusDate(LocalDateTime.now());
 
         /* Note:
          *  - reset the arrayList to be new.
-         *  - this way all notifications associated with this loanResponse is reseted
+         *  - this way all notifications associated with this loanResponse are reset
          *  - this results in all users having to view the notifications
          */
-
         updateLoanRequestEntity.setLoanRequestNotifications(new ArrayList<>());
 
-
         /* REVIEW:
-         *  - here, We may also reassign requestAnalysis field as well and feed it back into
-         *  - AI endpoint with new information so that it acts as a
+         *  - here, We may also reassign the requestAnalysis field as well and feed it back into
+         *  - the AI endpoint with new information so that it acts as a
          *  - history analysis, encompassing all responses obtained so far
          */
 
-        // save both entities together once no error is encountered
+        // Save both entities together once no error is encountered
         loanResponseRepository.save(loanResponseEntity);
-        LoanRequestEntity loanRequestsEntity = loanRequestRepository.save(updateLoanRequestEntity);
-
-        // Ensure banker's previous responses are revoked
-        revokePreviousLoanResponses(loanRequestsEntity.getLoanResponses(), bankerUser.get());
+        loanRequestRepository.save(updateLoanRequestEntity);
 
         // if all is well, return success
         response.setStatus(CreateLoanResponseStatus.SUCCESS);
@@ -380,18 +355,10 @@ public class LoanServiceImpl implements LoanService {
         Bank bank = bankerUser.get().getBank();
 
         // Get loan response status for this bank
-        Optional<LoanResponseStatus> loanResponseStatus =
-                loanRequest.get().getLoanResponses().stream()
-                        .filter(loanResponse -> loanResponse.getBank() == bank)
-                        .map(LoanResponseEntity::getStatus)
-                        .findFirst();
+        Optional<LoanResponseStatus> loanResponseStatus = loanRequest.get().getLoanResponses().stream().filter(loanResponse -> loanResponse.getBank() == bank).map(LoanResponseEntity::getStatus).findFirst();
 
         // Get rejection reason for this bank
-        Optional<String> rejectionReason =
-                loanRequest.get().getLoanResponses().stream()
-                        .filter(loanResponse -> loanResponse.getBank() == bank)
-                        .map(LoanResponseEntity::getRejectionReason)
-                        .findFirst();
+        Optional<String> rejectionReason = loanRequest.get().getLoanResponses().stream().filter(loanResponse -> loanResponse.getBank() == bank).map(LoanResponseEntity::getRejectionReason).findFirst();
 
         response.setRejectionReason(rejectionReason.orElse(null));
 
@@ -403,7 +370,7 @@ public class LoanServiceImpl implements LoanService {
     }
 
 
-    public GetAllLoanRequestsDTO getAllLoanRequestsForBusinessOwner(Authentication authentication){
+    public GetAllLoanRequestsDTO getAllLoanRequestsForBusinessOwner(Authentication authentication) {
         GetAllLoanRequestsDTO response = new GetAllLoanRequestsDTO();
 
         // ensure it's business owner token provided
@@ -451,7 +418,7 @@ public class LoanServiceImpl implements LoanService {
     }
 
     // NOTE: For business owner
-    public OfferResponseDTO acceptOffer(Long loanRequestId, Long loanResponseId,Authentication authentication){
+    public OfferResponseDTO acceptOffer(Long loanRequestId, Long loanResponseId, Authentication authentication) {
         OfferResponseDTO response = new OfferResponseDTO();
 
         // ensure it's business owner token provided
@@ -465,7 +432,7 @@ public class LoanServiceImpl implements LoanService {
         }
 
         // NOTE: ensure the loan request exists
-        Optional<LoanRequestEntity> loanRequest =loanRequestRepository.findById(loanRequestId);
+        Optional<LoanRequestEntity> loanRequest = loanRequestRepository.findById(loanRequestId);
 
         if (loanRequest.isEmpty()) {
             response.setStatus(OfferSubmissionStatus.FAIL);
@@ -474,7 +441,7 @@ public class LoanServiceImpl implements LoanService {
         }
 
         // NOTE: ensure the loan response exists
-        Optional<LoanResponseEntity> loanResponse =loanResponseRepository.findById(loanResponseId);
+        Optional<LoanResponseEntity> loanResponse = loanResponseRepository.findById(loanResponseId);
 
         if (loanResponse.isEmpty()) {
             response.setStatus(OfferSubmissionStatus.FAIL);
@@ -484,7 +451,7 @@ public class LoanServiceImpl implements LoanService {
 
         // REVIEW: we might also need to check 'rejectionSource' and "Status" to ensure it is not rejected yet
 
-        List<LoanResponseEntity> allResponses =loanRequest.get().getLoanResponses();
+        List<LoanResponseEntity> allResponses = loanRequest.get().getLoanResponses();
 
         for (LoanResponseEntity responseLoop : allResponses) {
             // Set the time of change for all responses
@@ -517,7 +484,7 @@ public class LoanServiceImpl implements LoanService {
     }
 
     // NOTE: For business owner
-    public OfferResponseDTO withdrawOffer(Long loanRequestId,Authentication authentication){
+    public OfferResponseDTO withdrawOffer(Long loanRequestId, Authentication authentication) {
         OfferResponseDTO response = new OfferResponseDTO();
 
         // ensure it's business owner token provided
@@ -531,7 +498,7 @@ public class LoanServiceImpl implements LoanService {
         }
 
         // NOTE: ensure the loan request exists
-        Optional<LoanRequestEntity> loanRequest =loanRequestRepository.findById(loanRequestId);
+        Optional<LoanRequestEntity> loanRequest = loanRequestRepository.findById(loanRequestId);
 
         if (loanRequest.isEmpty()) {
             response.setStatus(OfferSubmissionStatus.FAIL);
@@ -548,11 +515,11 @@ public class LoanServiceImpl implements LoanService {
     }
 
     // NOTE: For business owner
-    public OfferResponseDTO rejectOffer(Long loanRequestId, Long loanResponseId,Authentication authentication){
+    public OfferResponseDTO rejectOffer(Long loanRequestId, Long loanResponseId, Authentication authentication) {
         return null;
     }
 
-    public CheckNotificationDTO viewRequest(Long id, Authentication authentication){
+    public CheckNotificationDTO viewRequest(Long id, Authentication authentication) {
         CheckNotificationDTO response = new CheckNotificationDTO();
 
         Jwt jwt = (Jwt) authentication.getPrincipal();
@@ -596,7 +563,7 @@ public class LoanServiceImpl implements LoanService {
         System.out.println(user.get().getFirstName());
 
 
-        LoanNotificationEntity newNotification=  loanNotificationsService.saveNotificationEntity(notification);
+        LoanNotificationEntity newNotification = loanNotificationsService.saveNotificationEntity(notification);
 
         loanRequest.get().getLoanRequestNotifications().add(newNotification);
 
@@ -640,28 +607,22 @@ public class LoanServiceImpl implements LoanService {
     public Optional<List<LoanRequestEntity>> getAllLoanRequest(BusinessEntity business) {
         return loanRequestRepository.findByBusiness(business);
     }
+
     public Optional<List<LoanRequestEntity>> getAllLoanRequestByStatus(BusinessEntity business, LoanRequestStatus status) {
         return loanRequestRepository.findByBusinessAndStatusNot(business, status);
     }
 
-    public void revokePreviousLoanResponses(List<LoanResponseEntity> loanResponsEntities, UserEntity user) {
-        // Filter responses belonging to the specific user
-        List<LoanResponseEntity> userLoans = loanResponsEntities.stream()
-                .filter(response -> response.getBanker().equals(user))
-                .sorted(Comparator.comparing(LoanResponseEntity::getStatusDate).thenComparing(LoanResponseEntity::getId).reversed()) // Sort by Date first, then ID
-                .collect(Collectors.toList());
-
-        // Ensure at least one exists
-        if (userLoans.isEmpty()) {
-            return;
+    public void revokePreviousLoanResponses(List<LoanResponseEntity> loanResponseEntities, UserEntity user) {
+        // Loop through all loan responses and update those with the specified user
+        for (LoanResponseEntity response : loanResponseEntities) {
+            if (response.getBanker().equals(user)) {
+                response.setStatus(LoanResponseStatus.RESCINDED); // Set status to RESCINDED
+                response.setStatusDate(LocalDateTime.now()); // Set the current date/time
+            }
         }
 
-        for (int i = 1; i < userLoans.size(); i++) {
-            userLoans.get(i).setStatus(LoanResponseStatus.RESCINDED);
-        }
-
-        // If you are using a database, persist the changes
-        loanResponseRepository.saveAll(userLoans.subList(1, userLoans.size())); // Save only revoked ones
+        // Persist changes to the database
+        loanResponseRepository.saveAll(loanResponseEntities); // Save all updated responses
     }
 
 
