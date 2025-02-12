@@ -131,8 +131,8 @@ public class LoanServiceImpl implements LoanService {
         return response;
     }
 
-  @Override
-  public Map<String, Object> getLoanRequestsPageable(
+    @Override
+    public Map<String, Object> getLoanRequestsPageable(
       int page, String status, String search, int limit, Authentication authentication) {
     Map<String, Object> response = new HashMap<>();
 
@@ -221,6 +221,27 @@ public class LoanServiceImpl implements LoanService {
       return response;
     }
 
+    @Override
+    public List<GetLoanRequestsOfBusinessDTO> getLoanRequestsOfBusiness(Long businessId, Authentication authentication) {
+        // Get bank of logged in banker
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Object civilId = jwt.getClaims().get("civilId");
+        Optional<UserEntity> bankerUser = userService.getUserByCivilId(civilId.toString());
+        if (bankerUser.isEmpty()) {
+            throw new IllegalArgumentException("User does not exist");
+        }
+
+        Bank bank = bankerUser.get().getBank();
+
+        // Get loan requests of business pageable
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("statusDate").descending());
+
+        Page<LoanRequestEntity> loanRequestEntities = loanRequestRepository.findPendingRequestsByBankAndBusinessOwner(bank, businessId, pageable);
+
+        return loanRequestEntities.getContent().stream()
+                .map(loanRequest -> new GetLoanRequestsOfBusinessDTO(loanRequest, bank))
+                .collect(Collectors.toList());
+    }
 
     public LoanResponseDTO createLoanResponse(CreateLoanResponse request, Authentication authentication) {
         LoanResponseDTO response = new LoanResponseDTO();

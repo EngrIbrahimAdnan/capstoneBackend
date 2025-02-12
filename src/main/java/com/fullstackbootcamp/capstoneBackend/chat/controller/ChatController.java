@@ -2,6 +2,7 @@ package com.fullstackbootcamp.capstoneBackend.chat.controller;
 
 import com.fullstackbootcamp.capstoneBackend.chat.bo.CreateChatRequest;
 import com.fullstackbootcamp.capstoneBackend.chat.bo.SendMessageRequest;
+import com.fullstackbootcamp.capstoneBackend.chat.dto.BusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.chat.dto.ChatDTO;
 import com.fullstackbootcamp.capstoneBackend.chat.dto.MessageDTO;
 import com.fullstackbootcamp.capstoneBackend.chat.entity.ChatEntity;
@@ -41,6 +42,13 @@ public class ChatController {
             @Valid @RequestBody CreateChatRequest request
     ) {
         return ResponseEntity.ok(chatService.createChat(authHeader, request.getChatTargetId()));
+    }
+
+    @GetMapping("/businesses")
+    public ResponseEntity<List<BusinessDTO>> getBusinessesToChatWith(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        return ResponseEntity.ok(chatService.getBusinessesToChatWith(authHeader));
     }
 
     @PostMapping("/{chatId}/message")

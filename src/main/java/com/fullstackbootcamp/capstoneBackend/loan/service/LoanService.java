@@ -6,6 +6,7 @@ import com.fullstackbootcamp.capstoneBackend.loan.dto.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -20,11 +21,12 @@ public interface LoanService {
             String search,
             int limit,
             Authentication authentication);
+
+    List<GetLoanRequestsOfBusinessDTO> getLoanRequestsOfBusiness(Long businessId, Authentication authentication);
     GetAllLoanRequestsDTO getAllLoanRequestsForBusinessOwner(Authentication authentication);
 
     OfferResponseDTO acceptOffer(Long loanRequestId, Long loanResponseId,Authentication authentication);
     OfferResponseDTO withdrawOffer(Long loanRequestId,Authentication authentication);
     OfferResponseDTO rejectOffer(Long loanRequestId, Long loanResponseId,Authentication authentication);
-
 }
 
