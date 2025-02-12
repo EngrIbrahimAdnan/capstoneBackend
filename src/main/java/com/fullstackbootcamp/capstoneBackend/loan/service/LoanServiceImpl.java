@@ -11,8 +11,8 @@ import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanResponseEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.*;
 import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanRequestRepository;
 import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanResponseRepository;
-import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
-import com.fullstackbootcamp.capstoneBackend.notification.service.NotificationsService;
+import com.fullstackbootcamp.capstoneBackend.loanNotification.entity.LoanNotificationEntity;
+import com.fullstackbootcamp.capstoneBackend.loanNotification.service.LoanNotificationsService;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
@@ -35,7 +35,7 @@ public class LoanServiceImpl implements LoanService {
     private final LoanResponseRepository loanResponseRepository;
     private final UserService userService;
     private final BusinessService businessService;
-    private final NotificationsService notificationsService;
+    private final LoanNotificationsService loanNotificationsService;
 
 
 
@@ -43,12 +43,12 @@ public class LoanServiceImpl implements LoanService {
                            UserService userService,
                            BusinessService businessService,
                            LoanResponseRepository loanResponseRepository,
-                           NotificationsService notificationsService) {
+                           LoanNotificationsService loanNotificationsService) {
         this.loanRequestRepository = loanRequestRepository;
         this.userService = userService;
         this.businessService = businessService;
         this.loanResponseRepository = loanResponseRepository;
-        this.notificationsService = notificationsService;
+        this.loanNotificationsService = loanNotificationsService;
 
     }
 
@@ -281,12 +281,19 @@ public class LoanServiceImpl implements LoanService {
             return response; // If there was an error during validation, return early
         }
 
+        /* TODO (Important): check the status of the request is not "APPROVED"
+         *  - It shouldn't be possible for a banker to submit a response after it
+         *  - gets approved (the business owner already accepted an offer)
+         */
+
+
         // TODO: switch statement for each option
 
         // first case: the banker approves the request offer straight away
         LoanResponseEntity loanResponseEntity = new LoanResponseEntity();
         loanResponseEntity.setBanker(bankerUser.get());
         loanResponseEntity.setAmount(request.getAmount());
+        loanResponseEntity.setReason(request.getReason());
         loanResponseEntity.setLoanTerm(request.getLoanTerm());
         loanResponseEntity.setRepaymentPlan(request.getRepaymentPlan());
         loanResponseEntity.setStatus(request.getResponseStatus());
@@ -395,6 +402,154 @@ public class LoanServiceImpl implements LoanService {
         return response;
     }
 
+
+    public GetAllLoanRequestsDTO getAllLoanRequestsForBusinessOwner(Authentication authentication){
+        GetAllLoanRequestsDTO response = new GetAllLoanRequestsDTO();
+
+        // ensure it's business owner token provided
+        String message = validateToken(Roles.BUSINESS_OWNER, authentication);
+
+        // return a response if a message is returned
+        if (message != null) {
+            response.setStatus(LoanRequestRetrievalStatus.FAIL);
+            response.setMessage(message);
+            return response;
+        }
+
+        // ensure the user in the token exists
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Object civilId = jwt.getClaims().get("civilId"); // user civil id
+        Optional<UserEntity> businessOwner = userService.getUserByCivilId(civilId.toString());
+
+        // if user is not found in repository
+        /* TODO: Instead of Fail, another enum value could be added so that it gets routed to an
+            explicit case in the controller layer to utilize 'HttpStatus.NOT_FOUND' which is more
+             appropriate than 'Bad_Request' when user is not found.
+         */
+        if (businessOwner.isEmpty()) {
+            response.setStatus(LoanRequestRetrievalStatus.FAIL);
+            response.setMessage("user does not exist");
+            return response;
+        }
+
+        // check business exists with user entity obtained
+        Optional<BusinessEntity> businessEntity = businessService.getBusinessOwnerEntity(businessOwner.get());
+
+        if (businessEntity.isEmpty()) {
+            response.setStatus(LoanRequestRetrievalStatus.FAIL);
+            response.setMessage("No business is associated with this user");
+            return response; // If there was an error during validation, return early
+        }
+
+        // retrieve all loan requests associated with business entity
+        Optional<List<LoanRequestEntity>> allLoanRequests = getAllLoanRequest(businessEntity.get());
+
+        response.setStatus(LoanRequestRetrievalStatus.SUCCESS);
+        response.setMessage("Successfully retrieved all requests for business owner.");
+        response.setAllRequests(allLoanRequests.get());
+        return response;
+    }
+
+    // NOTE: For business owner
+    public OfferResponseDTO acceptOffer(Long loanRequestId, Long loanResponseId,Authentication authentication){
+        OfferResponseDTO response = new OfferResponseDTO();
+
+        // ensure it's business owner token provided
+        String message = validateToken(Roles.BUSINESS_OWNER, authentication);
+
+        // return a response if a message is returned
+        if (message != null) {
+            response.setStatus(OfferSubmissionStatus.FAIL);
+            response.setMessage(message);
+            return response;
+        }
+
+        // NOTE: ensure the loan request exists
+        Optional<LoanRequestEntity> loanRequest =loanRequestRepository.findById(loanRequestId);
+
+        if (loanRequest.isEmpty()) {
+            response.setStatus(OfferSubmissionStatus.FAIL);
+            response.setMessage("No loan Request exist with tha provided ID");
+            return response;
+        }
+
+        // NOTE: ensure the loan response exists
+        Optional<LoanResponseEntity> loanResponse =loanResponseRepository.findById(loanResponseId);
+
+        if (loanResponse.isEmpty()) {
+            response.setStatus(OfferSubmissionStatus.FAIL);
+            response.setMessage("No loan response exist with tha provided ID");
+            return response;
+        }
+
+        // REVIEW: we might also need to check 'rejectionSource' and "Status" to ensure it is not rejected yet
+
+        List<LoanResponseEntity> allResponses =loanRequest.get().getLoanResponses();
+
+        for (LoanResponseEntity responseLoop : allResponses) {
+            // Set the time of change for all responses
+            responseLoop.setStatusDate(LocalDateTime.now());
+
+            if (responseLoop.getId().equals(loanResponseId)) {
+                // Keep only the selected response as approved
+                responseLoop.setStatus(LoanResponseStatus.APPROVED);
+            } else {
+                // Change others to rejected
+                responseLoop.setStatus(LoanResponseStatus.REJECTED);
+                responseLoop.setReason("The business owner has accepted a different offer");
+            }
+        }
+
+        LoanRequestEntity loanRequestUpdated = loanRequest.get();
+
+        loanRequestUpdated.setLoanResponses(allResponses);
+        loanRequestUpdated.setAmount(loanResponse.get().getAmount());
+        loanRequestUpdated.setLoanTerm(loanResponse.get().getLoanTerm());
+        loanRequestUpdated.setRepaymentPlan(loanResponse.get().getRepaymentPlan());
+        loanRequestUpdated.setStatus(LoanRequestStatus.APPROVED);
+
+        loanRequestRepository.save(loanRequestUpdated);
+
+        response.setStatus(OfferSubmissionStatus.SUCCESS);
+        response.setMessage("Successfully accepted bank's offer.");
+        return response;
+
+    }
+
+    // NOTE: For business owner
+    public OfferResponseDTO withdrawOffer(Long loanRequestId,Authentication authentication){
+        OfferResponseDTO response = new OfferResponseDTO();
+
+        // ensure it's business owner token provided
+        String message = validateToken(Roles.BUSINESS_OWNER, authentication);
+
+        // return a response if a message is returned
+        if (message != null) {
+            response.setStatus(OfferSubmissionStatus.FAIL);
+            response.setMessage(message);
+            return response;
+        }
+
+        // NOTE: ensure the loan request exists
+        Optional<LoanRequestEntity> loanRequest =loanRequestRepository.findById(loanRequestId);
+
+        if (loanRequest.isEmpty()) {
+            response.setStatus(OfferSubmissionStatus.FAIL);
+            response.setMessage("No loan Request exist with tha provided ID");
+            return response;
+        }
+
+        loanRequestRepository.delete(loanRequest.get());
+
+        response.setStatus(OfferSubmissionStatus.SUCCESS);
+        response.setMessage("Successfully withdrew loan Request.");
+        return response;    }
+
+    // NOTE: For business owner
+    public OfferResponseDTO rejectOffer(Long loanRequestId, Long loanResponseId,Authentication authentication){
+        return null;
+    }
+
     public CheckNotificationDTO viewRequest(Long id, Authentication authentication){
         CheckNotificationDTO response = new CheckNotificationDTO();
 
@@ -432,14 +587,14 @@ public class LoanServiceImpl implements LoanService {
         }
 
 
-        NotificationEntity notification = new NotificationEntity();
+        LoanNotificationEntity notification = new LoanNotificationEntity();
         notification.setUser(user.get());
 
         System.out.println(user.get().getCivilId());
         System.out.println(user.get().getFirstName());
 
 
-        NotificationEntity newNotification=  notificationsService.saveNotificationEntity(notification);
+        LoanNotificationEntity newNotification=  loanNotificationsService.saveNotificationEntity(notification);
 
         loanRequest.get().getLoanRequestNotifications().add(newNotification);
 
@@ -474,6 +629,15 @@ public class LoanServiceImpl implements LoanService {
 
     public Optional<LoanRequestEntity> getLoanRequestById(Long id) {
         return loanRequestRepository.findById(id);
+    }
+
+    public Optional<LoanResponseEntity> getLoanResponseById(Long id) {
+        return loanResponseRepository.findById(id);
+    }
+
+
+    public Optional<List<LoanRequestEntity>> getAllLoanRequest(BusinessEntity business) {
+        return loanRequestRepository.findByBusiness(business);
     }
 
     public void revokePreviousLoanResponses(List<LoanResponseEntity> loanResponsEntities, UserEntity user) {

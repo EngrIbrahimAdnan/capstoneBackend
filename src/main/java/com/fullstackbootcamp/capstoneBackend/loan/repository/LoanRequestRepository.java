@@ -1,5 +1,6 @@
 package com.fullstackbootcamp.capstoneBackend.loan.repository;
 
+import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanRequestStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanResponseStatus;

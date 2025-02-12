@@ -23,4 +23,10 @@ public interface LoanService {
             Authentication authentication);
 
     List<GetLoanRequestsOfBusinessDTO> getLoanRequestsOfBusiness(Long businessId, Authentication authentication);
+    GetAllLoanRequestsDTO getAllLoanRequestsForBusinessOwner(Authentication authentication);
+
+    OfferResponseDTO acceptOffer(Long loanRequestId, Long loanResponseId,Authentication authentication);
+    OfferResponseDTO withdrawOffer(Long loanRequestId,Authentication authentication);
+    OfferResponseDTO rejectOffer(Long loanRequestId, Long loanResponseId,Authentication authentication);
 }
+

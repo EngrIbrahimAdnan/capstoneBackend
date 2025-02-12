@@ -13,6 +13,9 @@ public class BusinessEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JoinColumn(name = "business_Avatar_Image", nullable = false)
+    private Long businessAvatarFileId;
+
     @OneToOne
     @JoinColumn(name = "business_owner_user_id", nullable = false)
     private UserEntity businessOwnerUser;
@@ -46,6 +49,15 @@ public class BusinessEntity {
 
     @Column(name = "financial_score")
     private Double financialScore;
+
+
+    public Long getBusinessAvatarFileId() {
+        return businessAvatarFileId;
+    }
+
+    public void setBusinessAvatarFileId(Long businessAvatarFileId) {
+        this.businessAvatarFileId = businessAvatarFileId;
+    }
 
     public Long getId() {
         return id;

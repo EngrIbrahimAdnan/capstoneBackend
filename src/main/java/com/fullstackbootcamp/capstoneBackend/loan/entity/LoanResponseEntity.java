@@ -3,7 +3,7 @@ package com.fullstackbootcamp.capstoneBackend.loan.entity;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanResponseStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanTerm;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.RepaymentPlan;
-import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
+import com.fullstackbootcamp.capstoneBackend.loanNotification.entity.LoanNotificationEntity;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import jakarta.persistence.*;
@@ -38,6 +38,8 @@ public class LoanResponseEntity {
      */
     private BigDecimal amount;
 
+    private String reason;
+
     /* Note: standard loanTerms in banks:
      *  - SIX_MONTHS, ONE_YEAR, TWO_YEARS, FIVE_YEARS
      */
@@ -50,6 +52,8 @@ public class LoanResponseEntity {
     @NotNull(message = "The 'status' field is required and it's missing")
     private LoanResponseStatus status;
 
+
+
     // Note: data of the last request status update
     @Column(name = "data_status", nullable = false)
     private LocalDateTime statusDate;
@@ -57,7 +61,7 @@ public class LoanResponseEntity {
     // Note: keeping track on whether the request is viewed by each user
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "loan_response_notifications")
-    private List<NotificationEntity> loanResponseNotifications;
+    private List<LoanNotificationEntity> loanResponseNotifications;
 
     private String rejectionReason;
 
@@ -67,6 +71,14 @@ public class LoanResponseEntity {
 
     public void setRejectionReason(String rejectionReason) {
         this.rejectionReason = rejectionReason;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     public Long getId() {
@@ -133,11 +145,11 @@ public class LoanResponseEntity {
         this.statusDate = statusDate;
     }
 
-    public List<NotificationEntity> getLoanResponseNotifications() {
+    public List<LoanNotificationEntity> getLoanResponseNotifications() {
         return loanResponseNotifications;
     }
 
-    public void setLoanResponseNotifications(List<NotificationEntity> loanResponseNotifications) {
+    public void setLoanResponseNotifications(List<LoanNotificationEntity> loanResponseNotifications) {
         this.loanResponseNotifications = loanResponseNotifications;
     }
 }
