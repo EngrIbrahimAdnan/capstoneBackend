@@ -5,6 +5,7 @@ import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
 import com.fullstackbootcamp.capstoneBackend.business.service.BusinessService;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanResponse;
+import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateOfferResponse;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.*;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanResponseEntity;
@@ -514,9 +515,48 @@ public class LoanServiceImpl implements LoanService {
         return response;
     }
 
-    // NOTE: For business owner
-    public OfferResponseDTO rejectOffer(Long loanRequestId, Long loanResponseId, Authentication authentication) {
-        return null;
+    // NOTE: for business owners rejecting loan offers
+    public OfferResponseDTO rejectOffer(CreateOfferResponse request, Authentication authentication) {
+        OfferResponseDTO response = new OfferResponseDTO();
+
+        // ensure it's business owner token provided
+        String message = validateToken(Roles.BUSINESS_OWNER, authentication);
+
+        // return a response if a message is returned
+        if (message != null) {
+            response.setStatus(OfferSubmissionStatus.FAIL);
+            response.setMessage(message);
+            return response;
+        }
+
+        // NOTE: ensure the loan request exists
+        Optional<LoanRequestEntity> loanRequest = loanRequestRepository.findById(request.getLoanRequestId());
+
+        if (loanRequest.isEmpty()) {
+            response.setStatus(OfferSubmissionStatus.FAIL);
+            response.setMessage("No loan Request exist with tha provided ID");
+            return response;
+        }
+
+        // NOTE: ensure the loan response exists
+        Optional<LoanResponseEntity> loanResponse = loanResponseRepository.findById(request.getLoanResponseId());
+
+        if (loanResponse.isEmpty()) {
+            response.setStatus(OfferSubmissionStatus.FAIL);
+            response.setMessage("No loan response exist with tha provided ID");
+            return response;
+        }
+
+        // REVIEW: we might also need to check 'rejectionSource' and "Status" to ensure it is not rejected yet
+
+        loanResponse.get().setStatus(LoanResponseStatus.REJECTED);
+        loanResponse.get().setReason("Loan Offer rejected by Business Owner");
+
+        loanResponseRepository.save(loanResponse.get());
+
+        response.setStatus(OfferSubmissionStatus.SUCCESS);
+        response.setMessage("Successfully rejected bank's offer.");
+        return response;
     }
 
     public CheckNotificationDTO viewRequest(Long id, Authentication authentication) {
