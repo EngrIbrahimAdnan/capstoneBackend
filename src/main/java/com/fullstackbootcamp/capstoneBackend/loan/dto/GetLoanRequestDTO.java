@@ -11,6 +11,14 @@ public class GetLoanRequestDTO {
     private LoanResponseStatus responseStatus;
     private String rejectionReason;
 
+    public GetLoanRequestDTO() {}
+
+    public GetLoanRequestDTO(LoanRequestRetrievalStatus status, String message, LoanRequestEntity entity) {
+        this.status = status;
+        this.message = message;
+        this.entity = entity;
+    }
+
     public String getRejectionReason() {
         return rejectionReason;
     }

@@ -1,6 +1,7 @@
 package com.fullstackbootcamp.capstoneBackend.chat.service;
 
 import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
+import com.fullstackbootcamp.capstoneBackend.business.repository.BusinessRepository;
 import com.fullstackbootcamp.capstoneBackend.chat.dto.*;
 import com.fullstackbootcamp.capstoneBackend.chat.entity.ChatEntity;
 import com.fullstackbootcamp.capstoneBackend.chat.entity.MessageEntity;
@@ -9,10 +10,17 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class ChatMapperService {
+
+    private final BusinessRepository businessRepository;
+
+    public ChatMapperService(BusinessRepository businessRepository) {
+        this.businessRepository = businessRepository;
+    }
 
     public ChatDTO convertToDTO(ChatEntity chatEntity, String username) {
         if (chatEntity == null) {
@@ -34,11 +42,17 @@ public class ChatMapperService {
         if (user == null) {
             return null;
         }
+
+        Optional<BusinessEntity> business = businessRepository.findByBusinessOwnerUser(user);
+
         return new UserDTO(
                 user.getId(),
                 user.getFirstName(),
-                user.getBank().toString(),
-                isYou
+                user.getBank().name(),
+                isYou,
+                business.map(businessEntity -> businessEntity.getBusinessNickname()).orElse(null),
+                // TODO: Once this is an actual profile picture, put it here
+                ""
         );
     }
 

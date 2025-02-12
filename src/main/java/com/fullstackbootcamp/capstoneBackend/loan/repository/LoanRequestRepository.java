@@ -18,6 +18,21 @@ import java.util.Optional;
 public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, Long> {
     Optional<LoanRequestEntity> findById(Long id);
 
+    @Query("""
+    SELECT lr FROM LoanRequestEntity lr 
+    WHERE :bank MEMBER OF lr.selectedBanks 
+    AND lr.business.businessOwnerUser.id = :ownerId
+    AND NOT EXISTS (
+        SELECT resp FROM lr.loanResponseEntities resp 
+        WHERE resp.bank = :bank
+    )
+""")
+    Page<LoanRequestEntity> findPendingRequestsByBankAndBusinessOwner(
+            @Param("bank") Bank bank,
+            @Param("ownerId") Long businessOwnerId,
+            Pageable pageable
+    );
+
     @Query("SELECT lr FROM LoanRequestEntity lr WHERE :bank MEMBER OF lr.selectedBanks")
     List<LoanRequestEntity> findBySelectedBank(Bank bank);
 

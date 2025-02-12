@@ -2,10 +2,7 @@ package com.fullstackbootcamp.capstoneBackend.loan.controller;
 
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanResponse;
-import com.fullstackbootcamp.capstoneBackend.loan.dto.CheckNotificationDTO;
-import com.fullstackbootcamp.capstoneBackend.loan.dto.GetLoanRequestDTO;
-import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanRequestDTO;
-import com.fullstackbootcamp.capstoneBackend.loan.dto.LoanResponseDTO;
+import com.fullstackbootcamp.capstoneBackend.loan.dto.*;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.CheckNotificationStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanRequestStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.CreateLoanResponseStatus;
@@ -141,6 +138,20 @@ public class LoanController {
                 noResponse.setMessage("Error status unrecognized");
                 return ResponseEntity.badRequest().body(noResponse);
         }
+    }
+
+    // Get all loan requests of business made to bank
+    @GetMapping("/requests/business/{businessId}")
+    public ResponseEntity<List<GetLoanRequestsOfBusinessDTO>> getLoanRequestsOfBusiness(@PathVariable Long businessId,
+                                                            Authentication authentication) {
+        try {
+            List<GetLoanRequestsOfBusinessDTO> response = loanService.getLoanRequestsOfBusiness(businessId,authentication);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+
     }
 
     @GetMapping("/request/{id}")
