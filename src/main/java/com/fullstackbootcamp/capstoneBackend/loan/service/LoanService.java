@@ -2,6 +2,7 @@ package com.fullstackbootcamp.capstoneBackend.loan.service;
 
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanResponse;
+import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateOfferResponse;
 import com.fullstackbootcamp.capstoneBackend.loan.dto.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,6 @@ public interface LoanService {
 
     OfferResponseDTO acceptOffer(Long loanRequestId, Long loanResponseId,Authentication authentication);
     OfferResponseDTO withdrawOffer(Long loanRequestId,Authentication authentication);
-    OfferResponseDTO rejectOffer(Long loanRequestId, Long loanResponseId,Authentication authentication);
+    OfferResponseDTO rejectOffer(CreateOfferResponse request, Authentication authentication);
 }
 
