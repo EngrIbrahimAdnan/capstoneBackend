@@ -420,8 +420,8 @@ public class LoanServiceImpl implements LoanService {
             return response; // If there was an error during validation, return early
         }
 
-        // retrieve all loan requests associated with business entity
-        Optional<List<LoanRequestEntity>> allLoanRequests = getAllLoanRequest(businessEntity.get());
+        // retrieve all loan requests associated with business entity (only those that are not withdrawn are returned)
+        Optional<List<LoanRequestEntity>> allLoanRequests = getAllLoanRequestByStatus(businessEntity.get(), LoanRequestStatus.WITHDRAWN);
 
         response.setStatus(LoanRequestRetrievalStatus.SUCCESS);
         response.setMessage("Successfully retrieved all requests for business owner.");
@@ -518,11 +518,13 @@ public class LoanServiceImpl implements LoanService {
             return response;
         }
 
-        loanRequestRepository.delete(loanRequest.get());
+        loanRequest.get().setStatus(LoanRequestStatus.WITHDRAWN);
+        loanRequestRepository.save(loanRequest.get());
 
         response.setStatus(OfferSubmissionStatus.SUCCESS);
         response.setMessage("Successfully withdrew loan Request.");
-        return response;    }
+        return response;
+    }
 
     // NOTE: For business owner
     public OfferResponseDTO rejectOffer(Long loanRequestId, Long loanResponseId,Authentication authentication){
@@ -614,9 +616,11 @@ public class LoanServiceImpl implements LoanService {
         return loanResponseRepository.findById(id);
     }
 
-
     public Optional<List<LoanRequestEntity>> getAllLoanRequest(BusinessEntity business) {
         return loanRequestRepository.findByBusiness(business);
+    }
+    public Optional<List<LoanRequestEntity>> getAllLoanRequestByStatus(BusinessEntity business, LoanRequestStatus status) {
+        return loanRequestRepository.findByBusinessAndStatusNot(business, status);
     }
 
     public void revokePreviousLoanResponses(List<LoanResponseEntity> loanResponsEntities, UserEntity user) {

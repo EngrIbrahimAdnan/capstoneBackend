@@ -18,6 +18,7 @@ import java.util.Optional;
 @Repository
 public interface LoanRequestRepository extends JpaRepository<LoanRequestEntity, Long> {
     Optional<LoanRequestEntity> findById(Long id);
+    Optional<List<LoanRequestEntity>> findByBusinessAndStatusNot(BusinessEntity business, LoanRequestStatus status);
 
     Optional<List<LoanRequestEntity>> findByBusiness(BusinessEntity business);
 
