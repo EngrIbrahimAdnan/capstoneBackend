@@ -223,10 +223,9 @@ public class LoanController {
         }
     }
 
-
     // NOTE: Only for business owner
     @PostMapping("/offer/withdraw/{id}")
-    public ResponseEntity<OfferResponseDTO> withDraw(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<OfferResponseDTO> withdrawLoanRequest(@PathVariable Long id, Authentication authentication) {
 
         System.out.println("id: "+ id);
         OfferResponseDTO response = loanService.withdrawOffer(id, authentication);
