@@ -52,7 +52,8 @@ public class ChatMapperService {
                 isYou,
                 business.map(businessEntity -> businessEntity.getBusinessNickname()).orElse(null),
                 // TODO: Once this is an actual profile picture, put it here
-                ""
+                "",
+                user.getUsername()
         );
     }
 

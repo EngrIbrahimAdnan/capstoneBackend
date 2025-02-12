@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class UserDTO {
     private Long id;
     private String firstName;
+    private String username;
     private String bank;
     private String business;
     private String profilePicture;
@@ -13,13 +14,22 @@ public class UserDTO {
     public UserDTO() {
     }
 
-    public UserDTO(Long id, String firstName, String bank, Boolean isYou, String business, String profilePicture) {
+    public UserDTO(Long id, String firstName, String bank, Boolean isYou, String business, String profilePicture, String username) {
         this.id = id;
         this.firstName = firstName;
         this.bank = bank;
         this.isYou = isYou;
         this.business = business;
         this.profilePicture = profilePicture;
+        this.username = username;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getProfilePicture() {
