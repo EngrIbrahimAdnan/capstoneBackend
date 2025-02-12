@@ -1,0 +1,4 @@
+package com.example.capstoneBackendNotifications.enums;
+
+public enum Bank {
+}

@@ -1,0 +1,45 @@
+//package com.fullstackbootcamp.capstoneBackend.notifications.config;
+//
+//import com.fullstackbootcamp.capstoneBackend.auth.util.JwtUtil;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.http.server.ServerHttpRequest;
+//import org.springframework.http.server.ServerHttpResponse;
+//import org.springframework.http.server.ServletServerHttpRequest;
+//import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+//import org.springframework.security.core.context.SecurityContextHolder;
+//import org.springframework.web.socket.WebSocketHandler;
+//import org.springframework.web.socket.server.HandshakeInterceptor;
+//
+//import java.util.Map;
+//
+//public class TokenHandshakeInterceptor implements HandshakeInterceptor {
+//
+//    private JwtUtil jwtUtil;
+//
+//    public TokenHandshakeInterceptor() {}
+//
+//    public TokenHandshakeInterceptor(JwtUtil jwtUtil) {
+//        this.jwtUtil = jwtUtil;
+//    }
+//
+//    @Override
+//    public boolean beforeHandshake(ServerHttpRequest request,
+//                                   ServerHttpResponse response,
+//                                   WebSocketHandler wsHandler,
+//                                   Map<String, Object> attributes) throws Exception {
+//
+//        if (request instanceof ServletServerHttpRequest servletRequest) {
+//            String token = servletRequest.getServletRequest().getParameter("token");
+//            // parse the token, verify JWT, and if valid, set authentication:
+//            String username = jwtUtil.extractUserUsernameFromToken(token);
+//            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(token, null);
+//            SecurityContextHolder.getContext().setAuthentication(authentication);
+//        }
+//        return true;
+//    }
+//
+//    @Override
+//    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
+//                               WebSocketHandler wsHandler, Exception ex) {
+//    }
+//}
