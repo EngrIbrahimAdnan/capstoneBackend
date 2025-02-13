@@ -1,17 +1,11 @@
-package com.fullstackbootcamp.capstoneBackend.notifications.config;
+package com.fullstackbootcamp.capstoneBackend.notification.config;
 
 import java.security.Principal;
 import java.util.Map;
 
-import com.fullstackbootcamp.capstoneBackend.auth.bo.CustomUserDetails;
 import com.fullstackbootcamp.capstoneBackend.auth.util.JwtUtil;
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 

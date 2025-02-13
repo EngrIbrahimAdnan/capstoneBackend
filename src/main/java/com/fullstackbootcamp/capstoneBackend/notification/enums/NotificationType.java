@@ -1,4 +1,4 @@
-package com.fullstackbootcamp.capstoneBackend.notifications.enums;
+package com.fullstackbootcamp.capstoneBackend.notification.enums;
 
 public enum NotificationType {
     NEW_LOAN_REQUEST,

@@ -1,15 +1,11 @@
-package com.fullstackbootcamp.capstoneBackend.notifications.controller;
+package com.fullstackbootcamp.capstoneBackend.notification.controller;
 
-import com.fullstackbootcamp.capstoneBackend.notifications.bo.NotificationRequest;
-import com.fullstackbootcamp.capstoneBackend.notifications.bo.NotificationTest;
-import com.fullstackbootcamp.capstoneBackend.notifications.service.NotificationService;
-import org.springframework.http.ResponseEntity;
+import com.fullstackbootcamp.capstoneBackend.notification.bo.NotificationRequest;
+import com.fullstackbootcamp.capstoneBackend.notification.service.NotificationService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
-import java.security.Principal;
 
 @Controller
 public class NotificationController {
