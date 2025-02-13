@@ -245,6 +245,7 @@ public class LoanController {
         }
     }
 
+    // NOTE: Only for business owner
     @PostMapping("/offer/reject")
     public ResponseEntity<OfferResponseDTO> rejectOffer(@Valid @RequestBody CreateOfferResponse request, Authentication authentication) {
 
@@ -264,24 +265,4 @@ public class LoanController {
                 return ResponseEntity.badRequest().body(noResponse);
         }
     }
-
-
-//
-//
-//
-//        switch (response.getStatus()) {
-//            case SUCCESS: // accepted status returned for successfully creating loan request
-//                return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
-//
-//            case FAIL: // bad request status returned when field is not in correct format
-//                return ResponseEntity.badRequest().body(response);
-//
-//            default: // default error
-//                GetAllLoanRequestsDTO noResponse = new GetAllLoanRequestsDTO();
-//                noResponse.setStatus(LoanRequestRetrievalStatus.FAIL);
-//                noResponse.setMessage("Error status unrecognized");
-//                return ResponseEntity.badRequest().body(noResponse);
-//        }
-//    }
-
 }

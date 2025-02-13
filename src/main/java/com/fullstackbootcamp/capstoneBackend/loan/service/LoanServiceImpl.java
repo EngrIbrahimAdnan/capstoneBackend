@@ -549,10 +549,22 @@ public class LoanServiceImpl implements LoanService {
 
         // REVIEW: we might also need to check 'rejectionSource' and "Status" to ensure it is not rejected yet
 
-        loanResponse.get().setStatus(LoanResponseStatus.REJECTED);
+        // TODO: give business owner option to state reason for rejection, instead of template
         loanResponse.get().setReason("Loan Offer rejected by Business Owner");
+        loanResponse.get().setStatus(LoanResponseStatus.REJECTED);
+        loanResponse.get().setRejectionSource(RejectionSource.BUSINESS_OWNER);
 
+        // if there are no pending loan responses (APPROVED or COUNTER_OFFER), change loan request back to pending
+        // instead of New response
+        boolean hasValidResponse = loanRequest.get().getLoanResponses().stream()
+                .anyMatch(loanResponseEntity -> loanResponseEntity.getStatus() == LoanResponseStatus.APPROVED
+                        || loanResponseEntity.getStatus() == LoanResponseStatus.COUNTER_OFFER);
+
+        if (!hasValidResponse) {
+            loanRequest.get().setStatus(LoanRequestStatus.PENDING);
+        }
         loanResponseRepository.save(loanResponse.get());
+        loanRequestRepository.save(loanRequest.get());
 
         response.setStatus(OfferSubmissionStatus.SUCCESS);
         response.setMessage("Successfully rejected bank's offer.");
