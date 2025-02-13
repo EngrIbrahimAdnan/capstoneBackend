@@ -10,13 +10,23 @@ public class GetLoanRequestDTO {
     private LoanRequestEntity entity;
     private LoanResponseStatus responseStatus;
     private String rejectionReason;
+    private Long chatId;
 
     public GetLoanRequestDTO() {}
 
-    public GetLoanRequestDTO(LoanRequestRetrievalStatus status, String message, LoanRequestEntity entity) {
+    public GetLoanRequestDTO(LoanRequestRetrievalStatus status, String message, LoanRequestEntity entity, Long chatId) {
         this.status = status;
         this.message = message;
         this.entity = entity;
+        this.chatId = chatId;
+    }
+
+    public Long getChatId() {
+        return chatId;
+    }
+
+    public void setChatId(Long chatId) {
+        this.chatId = chatId;
     }
 
     public String getRejectionReason() {

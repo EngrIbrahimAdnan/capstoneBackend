@@ -3,7 +3,9 @@ package com.fullstackbootcamp.capstoneBackend.notification.controller;
 import com.fullstackbootcamp.capstoneBackend.notification.bo.NotificationRequest;
 import com.fullstackbootcamp.capstoneBackend.notification.service.NotificationService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 
 
@@ -30,5 +32,15 @@ public class NotificationController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @MessageMapping("/hello")
+    @SendToUser("/queue/reply")
+    public String processMessage(@Payload String message) {
+        // Add debug logging
+        System.out.println("Server received message at /hello endpoint: " + message);
+        String response = "{\"response\": \"Server received: " + message + "\"}";
+        System.out.println("Server sending response: " + response);
+        return response;
     }
 }

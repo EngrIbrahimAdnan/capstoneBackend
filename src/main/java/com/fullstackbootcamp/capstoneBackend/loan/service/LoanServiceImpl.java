@@ -3,6 +3,8 @@ package com.fullstackbootcamp.capstoneBackend.loan.service;
 import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenTypes;
 import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
 import com.fullstackbootcamp.capstoneBackend.business.service.BusinessService;
+import com.fullstackbootcamp.capstoneBackend.chat.entity.ChatEntity;
+import com.fullstackbootcamp.capstoneBackend.chat.repository.ChatRepository;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanResponse;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateOfferResponse;
@@ -35,13 +37,15 @@ public class LoanServiceImpl implements LoanService {
     private final LoanRequestRepository loanRequestRepository;
     private final LoanResponseRepository loanResponseRepository;
     private final UserService userService;
+    private final ChatRepository chatRepository;
     private final BusinessService businessService;
     private final LoanNotificationsService loanNotificationsService;
 
 
-    public LoanServiceImpl(LoanRequestRepository loanRequestRepository, UserService userService, BusinessService businessService, LoanResponseRepository loanResponseRepository, LoanNotificationsService loanNotificationsService) {
+    public LoanServiceImpl(LoanRequestRepository loanRequestRepository, ChatRepository chatRepository, UserService userService, BusinessService businessService, LoanResponseRepository loanResponseRepository, LoanNotificationsService loanNotificationsService) {
         this.loanRequestRepository = loanRequestRepository;
         this.userService = userService;
+        this.chatRepository = chatRepository;
         this.businessService = businessService;
         this.loanResponseRepository = loanResponseRepository;
         this.loanNotificationsService = loanNotificationsService;
@@ -367,6 +371,21 @@ public class LoanServiceImpl implements LoanService {
         response.setStatus(LoanRequestRetrievalStatus.SUCCESS);
         response.setMessage("Loan Request entity is successfully retrieved");
         response.setEntity(loanRequest.get());
+
+        // Get the business owner from the loan request
+        UserEntity businessOwner = loanRequest.get().getBusiness().getBusinessOwnerUser();
+
+        // Find existing chats for both the banker and business owner
+        List<ChatEntity> bankerChats = chatRepository.findByBankerId(bankerUser.get().getId());
+        List<ChatEntity> businessOwnerChats = chatRepository.findByBusinessOwnerId(businessOwner.getId());
+
+        // Find intersection of chats (the chat between these two users if it exists)
+        Optional<ChatEntity> existingChat = bankerChats.stream()
+                .filter(businessOwnerChats::contains)
+                .findFirst();
+
+        response.setChatId(existingChat.map(ChatEntity::getId).orElse(null));
+
         return response;
     }
 
