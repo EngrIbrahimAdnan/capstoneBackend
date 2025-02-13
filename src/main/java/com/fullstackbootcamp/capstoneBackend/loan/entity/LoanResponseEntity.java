@@ -2,6 +2,7 @@ package com.fullstackbootcamp.capstoneBackend.loan.entity;
 
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanResponseStatus;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.LoanTerm;
+import com.fullstackbootcamp.capstoneBackend.loan.enums.RejectionSource;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.RepaymentPlan;
 import com.fullstackbootcamp.capstoneBackend.loanNotification.entity.LoanNotificationEntity;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
@@ -52,7 +53,8 @@ public class LoanResponseEntity {
     @NotNull(message = "The 'status' field is required and it's missing")
     private LoanResponseStatus status;
 
-
+    // NOTE: has to be nullable since this will only be assigned in the case of rejection
+    private RejectionSource rejectionSource;
 
     // Note: data of the last request status update
     @Column(name = "data_status", nullable = false)
@@ -64,6 +66,14 @@ public class LoanResponseEntity {
     private List<LoanNotificationEntity> loanResponseNotifications;
 
     private String rejectionReason;
+
+    public RejectionSource getRejectionSource() {
+        return rejectionSource;
+    }
+
+    public void setRejectionSource(RejectionSource rejectionSource) {
+        this.rejectionSource = rejectionSource;
+    }
 
     public String getRejectionReason() {
         return rejectionReason;
