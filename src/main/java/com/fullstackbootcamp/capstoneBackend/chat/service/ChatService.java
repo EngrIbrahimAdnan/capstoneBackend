@@ -110,6 +110,19 @@ public class ChatService {
         return chatMapperService.convertToDTO(chatEntity.get(), username);
     }
 
+
+    public List<ChatEntity> getBusinessOwnerChats(String authHeader) {
+
+        // TODO: add error handling
+
+        String username = jwtUtil.extractUserUsernameFromToken(authHeader);
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return chatRepository.findByBusinessOwnerId(user.getId());
+    }
+
+
     public List<BusinessDTO> getBusinessesToChatWith(String authHeader) {
         // Gets businesses that have sent a loan to the banker that the user is logged in as
         String username = jwtUtil.extractUserUsernameFromToken(authHeader);

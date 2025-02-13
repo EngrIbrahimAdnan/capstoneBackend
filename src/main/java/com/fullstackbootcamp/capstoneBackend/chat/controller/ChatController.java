@@ -51,6 +51,13 @@ public class ChatController {
         return ResponseEntity.ok(chatService.getBusinessesToChatWith(authHeader));
     }
 
+    @GetMapping("/bankers")
+    public ResponseEntity<List<ChatEntity>> getBusinessOwnerChats(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        return ResponseEntity.ok(chatService.getBusinessOwnerChats(authHeader));
+    }
+
     @PostMapping("/{chatId}/message")
     public ResponseEntity<Void> sendMessage(
             @RequestHeader("Authorization") String authHeader,
