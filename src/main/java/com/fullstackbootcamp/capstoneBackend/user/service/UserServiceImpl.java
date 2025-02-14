@@ -4,19 +4,23 @@ import com.fullstackbootcamp.capstoneBackend.auth.util.JwtUtil;
 import com.fullstackbootcamp.capstoneBackend.chat.dto.ChatDTO;
 import com.fullstackbootcamp.capstoneBackend.chat.dto.ChatPreviewDTO;
 import com.fullstackbootcamp.capstoneBackend.chat.entity.ChatEntity;
+import com.fullstackbootcamp.capstoneBackend.chat.enums.NotificationType;
 import com.fullstackbootcamp.capstoneBackend.chat.repository.ChatRepository;
 import com.fullstackbootcamp.capstoneBackend.chat.service.ChatMapperService;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanRequestRepository;
+import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
 import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
 import com.fullstackbootcamp.capstoneBackend.auth.dto.SignupResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.user.dto.DashboardResponse;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
+import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import com.fullstackbootcamp.capstoneBackend.user.repository.UserRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -100,8 +104,83 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         DashboardResponse response = new DashboardResponse();
-        // Get and set notifications
-        response.setNotifications(null);
+    // Get and set notifications
+    // TODO make a real implementation of this
+        // Create test notifications
+        LocalDateTime now = LocalDateTime.now();
+
+// First notification - New loan request
+        Map<String, Object> loanRequestData = new HashMap<>();
+        loanRequestData.put("loanAmount", 250000);
+        loanRequestData.put("loanType", "Business Expansion");
+        loanRequestData.put("requestId", "LOAN-2024-001");
+
+        NotificationEntity notification1 = new NotificationEntity(
+                "New loan request from ABC Manufacturing",
+                NotificationType.NEW_LOAN_REQUEST,
+                "john.smith",              // sender username
+                "John",                    // sender first name
+                "banker.jones",           // recipient username (banker)
+                Roles.BUSINESS_OWNER,     // sender role
+                "ABC Manufacturing",      // business name
+                false,                    // isRead
+                now,                      // created at
+                loanRequestData           // additional data
+        );
+
+// Second notification - New message in chat
+        Map<String, Object> messageData = new HashMap<>();
+        messageData.put("chatId", "CHAT-2024-123");
+        messageData.put("messageId", "MSG-456");
+
+        NotificationEntity notification2 = new NotificationEntity(
+                "You have a new message regarding loan application LOAN-2024-001",
+                NotificationType.NEW_MESSAGE,
+                "sarah.williams",         // sender username
+                "Sarah",                  // sender first name
+                "banker.jones",          // recipient username (banker)
+                Roles.BUSINESS_OWNER,    // sender role
+                "XYZ Enterprises",       // business name
+                false,                   // isRead
+                LocalDateTime.now().minusHours(2),      // created 2 hours ago
+                messageData              // additional data
+        );
+
+// Third notification - Counter offer response
+        Map<String, Object> counterOfferData = new HashMap<>();
+        counterOfferData.put("originalAmount", 500000);
+        counterOfferData.put("counterOfferAmount", 400000);
+        counterOfferData.put("loanId", "LOAN-2024-002");
+        counterOfferData.put("interestRate", 5.5);
+
+        NotificationEntity notification3 = new NotificationEntity(
+                "You have a new message regarding loan application LOAN-2024-0021",
+                NotificationType.NEW_MESSAGE,
+                "sarah.williams",         // sender username
+                "Sarah",                  // sender first name
+                "banker.jones",          // recipient username (banker)
+                Roles.BUSINESS_OWNER,    // sender role
+                "Fajris Foods",       // business name
+                false,                   // isRead
+                LocalDateTime.now().minusHours(2),      // created 2 hours ago
+                messageData              // additional data
+        );
+
+        List<NotificationEntity> notifications = new ArrayList<>();
+        notifications.add(notification1);
+        notifications.add(notification2);
+        notifications.add(notification3);
+
+        // Create notifications map with metadata
+        Map<String, Object> notificationsMap = new HashMap<>();
+        notificationsMap.put("notifications", notifications);
+        notificationsMap.put("totalCount", notifications.size());
+        notificationsMap.put("unreadCount", notifications.stream()
+                .filter(n -> !n.isRead())
+                .count());
+        notificationsMap.put("lastUpdated", now);
+
+        response.setNotifications(notificationsMap);
         // Get and set pending review
         response.setPendingReview(getPendingReview(user.getBank()));
         // Get and set five most recent requests
