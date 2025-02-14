@@ -484,10 +484,14 @@ public class LoanServiceImpl implements LoanService {
             if (responseLoop.getId().equals(loanResponseId)) {
                 // Keep only the selected response as approved
                 responseLoop.setStatus(LoanResponseStatus.APPROVED);
-            } else {
-                // Change others to rejected
-                responseLoop.setStatus(LoanResponseStatus.REJECTED);
-                responseLoop.setReason("The business owner has accepted a different offer");
+            }
+            else {
+                if (responseLoop.getStatus() == LoanResponseStatus.APPROVED ||
+                        responseLoop.getStatus() == LoanResponseStatus.COUNTER_OFFER) {
+                    // Change others to rejected
+                    responseLoop.setStatus(LoanResponseStatus.REJECTED);
+                    responseLoop.setReason("The business owner has accepted a different offer");
+                }
             }
         }
 
@@ -690,7 +694,9 @@ public class LoanServiceImpl implements LoanService {
     public void revokePreviousLoanResponses(List<LoanResponseEntity> loanResponseEntities, UserEntity user) {
         // Loop through all loan responses and update those with the specified user
         for (LoanResponseEntity response : loanResponseEntities) {
-            if (response.getBanker().equals(user)) {
+            if (response.getBanker().equals(user) &&
+                    (response.getStatus() == LoanResponseStatus.APPROVED ||
+                            response.getStatus() == LoanResponseStatus.COUNTER_OFFER)) {
                 response.setStatus(LoanResponseStatus.RESCINDED); // Set status to RESCINDED
                 response.setStatusDate(LocalDateTime.now()); // Set the current date/time
             }
