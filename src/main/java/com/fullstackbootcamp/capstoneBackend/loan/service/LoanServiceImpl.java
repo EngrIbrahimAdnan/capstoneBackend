@@ -189,6 +189,7 @@ public class LoanServiceImpl implements LoanService {
             boolean otherBanksHaveMadeACounterResponse = request.getLoanResponses().stream().filter(loanResponse -> loanResponse.getBank() != bank).anyMatch(loanResponse -> loanResponse.getStatus() != null);
 
             details.put("otherBanksHaveMadeCounterResponse", otherBanksHaveMadeACounterResponse);
+            details.put("loanRequestStatus", request.getStatus());
             details.put("loanResponseStatus", loanResponseStatus.orElse(null));
             details.put("businessName", request.getBusiness().getBusinessNickname());
             details.put("businessOwner", request.getBusiness().getBusinessOwnerUser().getFirstName() + " " + request.getBusiness().getBusinessOwnerUser().getLastName());
