@@ -15,10 +15,12 @@ public class ZegoTokenService {
         this.jwtUtil = jwtUtil;
     }
 
-    @Value("${myapp.zego.app.id:12345}")
+    //${myapp.zego.app.id:12345} for quick testing
+    @Value("${myapp.zego.app.id}")
     private long appId;
 
-    @Value("${myapp.zego.server.secret:placeholder-secret}")
+    //myapp.zego.server.secret:placeholder-secret} for quick testing
+    @Value("${myapp.zego.server.secret}")
     private String serverSecret;
 
     public String generateToken(String authHeader) {
