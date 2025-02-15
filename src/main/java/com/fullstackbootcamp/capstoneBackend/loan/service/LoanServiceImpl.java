@@ -5,6 +5,8 @@ import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
 import com.fullstackbootcamp.capstoneBackend.business.service.BusinessService;
 import com.fullstackbootcamp.capstoneBackend.chat.entity.ChatEntity;
 import com.fullstackbootcamp.capstoneBackend.chat.repository.ChatRepository;
+import com.fullstackbootcamp.capstoneBackend.file.entity.FileEntity;
+import com.fullstackbootcamp.capstoneBackend.file.service.FileService;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanRequest;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateLoanResponse;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateOfferResponse;
@@ -24,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.MessagingException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -40,16 +43,18 @@ public class LoanServiceImpl implements LoanService {
     private final ChatRepository chatRepository;
     private final BusinessService businessService;
     private final LoanNotificationsService loanNotificationsService;
+    private final EmailService emailService;
+    private final FileService fileService;
 
-
-    public LoanServiceImpl(LoanRequestRepository loanRequestRepository, ChatRepository chatRepository, UserService userService, BusinessService businessService, LoanResponseRepository loanResponseRepository, LoanNotificationsService loanNotificationsService) {
+    public LoanServiceImpl(LoanRequestRepository loanRequestRepository, ChatRepository chatRepository, UserService userService, BusinessService businessService, LoanResponseRepository loanResponseRepository, LoanNotificationsService loanNotificationsService, EmailService emailService, FileService fileService) {
         this.loanRequestRepository = loanRequestRepository;
         this.userService = userService;
         this.chatRepository = chatRepository;
         this.businessService = businessService;
         this.loanResponseRepository = loanResponseRepository;
         this.loanNotificationsService = loanNotificationsService;
-
+        this.emailService = emailService;
+        this.fileService = fileService;
     }
 
     /* Note:
@@ -121,6 +126,24 @@ public class LoanServiceImpl implements LoanService {
 
         // for notifications view track
         loanRequestEntity.setLoanRequestNotifications(new ArrayList<>()); // empty array for future loan responses
+
+        // Get business avatar to display in email
+        Optional<FileEntity> file = fileService.getFile(loanRequestEntity.getBusiness().getBusinessAvatarFileId());
+
+        for (Bank bank: request.getSelectedBanks()){
+            if (bank==Bank.BOUBYAN_BANK){
+                String targetEmail = "mohamed.baqer.banker@gmail.com";
+
+                try {
+                    emailService.sendVerificationEmail(targetEmail, "Mohamed", loanRequestEntity, file.get());
+                } catch (MessagingException e) {
+                    response.setStatus(CreateLoanRequestStatus.FAIL);
+                    response.setMessage("Unable to send Verification email to the address provided. Please ensure it is entered correctly.");
+                    return response;
+                }
+            }
+
+        }
 
 
         loanRequestRepository.save(loanRequestEntity);
@@ -484,8 +507,7 @@ public class LoanServiceImpl implements LoanService {
             if (responseLoop.getId().equals(loanResponseId)) {
                 // Keep only the selected response as approved
                 responseLoop.setStatus(LoanResponseStatus.APPROVED);
-            }
-            else {
+            } else {
                 if (responseLoop.getStatus() == LoanResponseStatus.APPROVED ||
                         responseLoop.getStatus() == LoanResponseStatus.COUNTER_OFFER) {
                     // Change others to rejected
