@@ -4,6 +4,7 @@ package com.fullstackbootcamp.capstoneBackend.loan.service;
 import com.fullstackbootcamp.capstoneBackend.file.entity.FileEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -21,16 +22,17 @@ public class EmailService {
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
+
     }
 
-    public void sendVerificationEmail(String toEmail, String recieverName, LoanRequestEntity loanRequest, FileEntity file) throws MessagingException {
+    public void sendVerificationEmail(String toEmail, String recieverName, LoanRequestEntity loanRequest, FileEntity businessAvatar) throws MessagingException {
 
         String ButtonLink = "http://localhost:3000/";
 
         // Ensures error is handled if mailSender faces an issue sending an email
         try {
             if (isValidEmail(toEmail)) {
-                String subject = "New Loan Request Submitted to [Bank Name]";
+                String subject = "New Loan Request Submitted to Boubyan Bank";
                 String emailContent = "<html>"
                         + "<head>"
                         + "<style>"
@@ -45,27 +47,29 @@ public class EmailService {
                         + "</style>"
                         + "</head>"
                         + "<body>"
-                        + "<h1>Dear [Banker's Name],</h1>"
-                        + "<p>We have received a new loan request at [Bank Name]. Please review the details below:</p>"
+                        + "<h1>Dear " + recieverName + ",</h1>"
+                        + "<p>We have received a new loan request at Boubyan Bank. Please review the details below:</p>"
 
                         + "<div class='content'>"
                         + "<div class='section-title'>Loan Request Details</div>"
-                        + "<div class='section-content'><strong>Loan Title:</strong> [loan Title]</div>"
-                        + "<div class='section-content'><strong>Loan Purpose:</strong> [loan purpose]</div>"
-                        + "<div class='section-content'><strong>Loan Amount:</strong> [loan amount]</div>"
-                        + "<div class='section-content'><strong>Loan Term:</strong> [Loan term]</div>"
-                        + "<div class='section-content'><strong>Repayment Plan:</strong> [repayment plan]</div>"
-                        + "<div class='section-content'><strong>Date Submitted:</strong> [Date]</div>"
+                        + "<div class='section-content'><strong>Loan Title:</strong> " + loanRequest.getLoanTitle() + "</div>"
+                        + "<div class='section-content'><strong>Loan Purpose:</strong> " + loanRequest.getLoanPurpose() + " </div>"
+                        + "<div class='section-content'><strong>Loan Amount:</strong> " + loanRequest.getAmount() + " </div>"
+                        + "<div class='section-content'><strong>Loan Term:</strong> " + loanRequest.getLoanTerm() + " </div>"
+                        + "<div class='section-content'><strong>Repayment Plan:</strong> " + loanRequest.getRepaymentPlan() + " </div>"
+                        + "<div class='section-content'><strong>Date Submitted:</strong> " + loanRequest.getStatusDate() + " </div>"
                         + "</div>"
 
                         + "<div class='content'>"
                         + "<div class='section-title'>Business and Owner Details</div>"
-                        + "<div class='section-content'><strong>Business Owner:</strong> <img class='avatar' src='cid:ownerAvatar' alt='Owner Avatar' /> [business owner first name and last name]</div>"
-                        + "<div class='section-content'><strong>Civil ID:</strong> [civil id]</div>"
-                        + "<div class='section-content'><strong>Mobile Number:</strong> [mobile number]</div>"
-                        + "<div class='section-content'><strong>Business Name:</strong> [business Nickname]</div>"
-                        + "<div class='section-content'><strong>AI Analysis:</strong> [business ai analysis]</div>"
-                        + "<div class='section-content'><strong>Financial Score:</strong> [financial score]</div>"
+                        + "<div class='section-content'><strong>Business Owner:</strong> <img class='avatar' src='cid:ownerAvatar' alt='Owner Avatar' /> " + loanRequest.getBusiness().getBusinessOwnerUser().getLastName() + "</div>"
+                        + "<div class='section-content'><strong>Civil ID:</strong> " + loanRequest.getBusiness().getBusinessOwnerUser().getCivilId() + " </div>"
+                        + "<div class='section-content'><strong>Mobile Number:</strong> " + loanRequest.getBusiness().getBusinessOwnerUser().getMobileNumber() + " </div>"
+
+                        + "<div class='section-content'><strong>Business Owner:</strong> <img class='avatar' src='cid:businessAvatar' alt='Owner Avatar' /> " + loanRequest.getBusiness().getBusinessOwnerUser().getLastName() + " </div>"
+                        + "<div class='section-content'><strong>Business Name:</strong> " + loanRequest.getBusiness().getBusinessOwnerUser().getFirstName() + " " + loanRequest.getBusiness().getBusinessOwnerUser().getLastName() + " </div>"
+                        + "<div class='section-content'><strong>AI Analysis:</strong> " + loanRequest.getBusiness().getFinancialAnalysis() + " </div>"
+                        + "<div class='section-content'><strong>Financial Score:</strong> " + loanRequest.getBusiness().getFinancialScore() + " </div>"
                         + "</div>"
 
                         + "<div class='content' style='background-color: #ffeb3b;'>"
@@ -73,19 +77,34 @@ public class EmailService {
                         + "<div class='section-content'>This loan request has been submitted to other banks. Please act swiftly to review and approve the request.</div>"
                         + "</div>"
 
-                        + "<div class='image-container'>"
-                        + "<p><a href='" + ButtonLink + "' class='button'>Click here to view more information</a></p>"
-                        + "</div>"
-
-                        + "<div class='image-container'>"
-                        + "<p><strong>Animated Preview:</strong></p>"
-                        + "<img src='cid:lottieAnimation' alt='Lottie Animation' />"
-                        + "</div>"
+                        + "<div class='image-container'>\n" +
+                        "    <p>\n" +
+                        "        <a href='" + ButtonLink + "' class='button' style='\n" +
+                        "            background-color: #FF5733; /* Red/Orange background */\n" +
+                        "            color: white; /* White text */\n" +
+                        "            padding: 12px 24px; /* Padding for a better size */\n" +
+                        "            text-align: center; /* Center text */\n" +
+                        "            text-decoration: none; /* Remove underline */\n" +
+                        "            font-size: 16px; /* Adjust font size */\n" +
+                        "            border-radius: 8px; /* Rounded corners */\n" +
+                        "            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */\n" +
+                        "            transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transitions */\n" +
+                        "        '\n" +
+                        "        onmouseover='this.style.backgroundColor=\"#FF9500\"; this.style.transform=\"scale(1.05)\";' /* Hover effect */\n" +
+                        "        onmouseout='this.style.backgroundColor=\"#FF5733\"; this.style.transform=\"scale(1)\";' /* Hover out effect */\n" +
+                        "        >\n" +
+                        "            Click here to view more information\n" +
+                        "        </a>\n" +
+                        "    </p>\n" +
+                        "</div>\n"
 
                         + "<p>Best regards,</p>"
-                        + "<p>[Your Company Name] Team</p>"
+                        + "<p>Shloanik Team</p>"
                         + "</body>"
                         + "</html>";
+
+                // Inside the email-sending method
+                File pdfFile = PdfGeneratorService.generateLoanRequestPdf(loanRequest, "src/main/resources/static/ibrahim.png", businessAvatar);
 
 
                 MimeMessage message = mailSender.createMimeMessage();
@@ -95,14 +114,18 @@ public class EmailService {
                 helper.setSubject(subject);
                 helper.setText(emailContent, true); // `true` indicates HTML content
 
+                FileSystemResource pdfAttachment = new FileSystemResource(pdfFile);
+                helper.addAttachment("LoanRequestDetails.pdf", pdfAttachment);
+
                 // Adding the business owner avatar image
                 FileSystemResource ownerAvatar = new FileSystemResource(new File("src/main/resources/static/ibrahim.png"));
                 helper.addInline("ownerAvatar", ownerAvatar);  // This will match the 'src' in the <img> tag
 
-                // Adding the Lottie animation (usually a JSON file, but here, we'll treat it like an image for demonstration)
-                FileSystemResource lottieAnimation = new FileSystemResource(new File("src/main/resources/static/animation.json"));
-                helper.addInline("lottieAnimation", lottieAnimation);  // This will match the 'src' in the <img> tag
-
+                // Add inline image for the business avatar (if desired)
+                if (businessAvatar != null && businessAvatar.getData() != null) {
+                    ByteArrayResource avatarResource = new ByteArrayResource(businessAvatar.getData());
+                    helper.addInline("businessAvatar", avatarResource, "image/png"); // or the appropriate type
+                }
                 mailSender.send(message);
             } else {
                 // if email address doesn't conform to an email address structure
