@@ -22,7 +22,7 @@ public class ZegoTokenService {
     private String serverSecret;
 
     public String generateToken(String authHeader) {
-        int effectiveTimeInSeconds = 300000000;
+        int effectiveTimeInSeconds = 3000;
         String userId = jwtUtil.extractUserUsernameFromToken(authHeader);
 
         if (userId == null) {

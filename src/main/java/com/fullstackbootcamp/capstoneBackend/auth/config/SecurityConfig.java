@@ -45,7 +45,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/setup/**").permitAll()
-                        // For websocket
                         .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -54,23 +53,28 @@ public class SecurityConfig {
                         .jwtAuthenticationConverter(jwtAuthenticationConverter())
                 ))
                 .headers(headers -> headers
-                                // Option 1: Disable frame options entirely
-                                .frameOptions(frameOptions -> frameOptions.disable())
-                        // Option 2 (more secure): Allow framing only from the same origin
-                        // .frameOptions(frameOptions -> frameOptions.sameOrigin())
+                        .frameOptions(frameOptions -> frameOptions.disable())
                 )
+                .requiresChannel(channel -> channel
+                        .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
+                        .requiresSecure())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
-
     @Bean
     UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000",
+                "https://localhost:3000",
+                "https://*.ngrok-free.app",
+                "http://*.ngrok-free.app"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
