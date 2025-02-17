@@ -33,75 +33,238 @@ public class EmailService {
         try {
             if (isValidEmail(toEmail)) {
                 String subject = "New Loan Request Submitted to Boubyan Bank";
-                String emailContent = "<html>"
-                        + "<head>"
-                        + "<style>"
-                        + "body { font-family: Arial, sans-serif; color: #333; padding: 20px; }"
-                        + "h1 { color: #0056b3; }"
-                        + ".content { border: 1px solid #ddd; padding: 20px; background-color: #f9f9f9; border-radius: 8px; }"
-                        + ".section-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }"
-                        + ".section-content { margin-bottom: 15px; }"
-                        + ".button { display: inline-block; padding: 10px 20px; background-color: #0056b3; color: white; text-decoration: none; border-radius: 5px; }"
-                        + ".avatar { width: 80px; height: 80px; border-radius: 50%; margin-right: 10px; }"
-                        + ".image-container { margin-top: 20px; }"
-                        + "</style>"
-                        + "</head>"
-                        + "<body>"
-                        + "<h1>Dear " + recieverName + ",</h1>"
-                        + "<p>We have received a new loan request at Boubyan Bank. Please review the details below:</p>"
-
-                        + "<div class='content'>"
-                        + "<div class='section-title'>Loan Request Details</div>"
-                        + "<div class='section-content'><strong>Loan Title:</strong> " + loanRequest.getLoanTitle() + "</div>"
-                        + "<div class='section-content'><strong>Loan Purpose:</strong> " + loanRequest.getLoanPurpose() + " </div>"
-                        + "<div class='section-content'><strong>Loan Amount:</strong> " + loanRequest.getAmount() + " </div>"
-                        + "<div class='section-content'><strong>Loan Term:</strong> " + loanRequest.getLoanTerm() + " </div>"
-                        + "<div class='section-content'><strong>Repayment Plan:</strong> " + loanRequest.getRepaymentPlan() + " </div>"
-                        + "<div class='section-content'><strong>Date Submitted:</strong> " + loanRequest.getStatusDate() + " </div>"
-                        + "</div>"
-
-                        + "<div class='content'>"
-                        + "<div class='section-title'>Business and Owner Details</div>"
-                        + "<div class='section-content'><strong>Business Owner:</strong> <img class='avatar' src='cid:ownerAvatar' alt='Owner Avatar' /> " + loanRequest.getBusiness().getBusinessOwnerUser().getLastName() + "</div>"
-                        + "<div class='section-content'><strong>Civil ID:</strong> " + loanRequest.getBusiness().getBusinessOwnerUser().getCivilId() + " </div>"
-                        + "<div class='section-content'><strong>Mobile Number:</strong> " + loanRequest.getBusiness().getBusinessOwnerUser().getMobileNumber() + " </div>"
-
-                        + "<div class='section-content'><strong>Business Owner:</strong> <img class='avatar' src='cid:businessAvatar' alt='Owner Avatar' /> " + loanRequest.getBusiness().getBusinessOwnerUser().getLastName() + " </div>"
-                        + "<div class='section-content'><strong>Business Name:</strong> " + loanRequest.getBusiness().getBusinessOwnerUser().getFirstName() + " " + loanRequest.getBusiness().getBusinessOwnerUser().getLastName() + " </div>"
-                        + "<div class='section-content'><strong>AI Analysis:</strong> " + loanRequest.getBusiness().getFinancialAnalysis() + " </div>"
-                        + "<div class='section-content'><strong>Financial Score:</strong> " + loanRequest.getBusiness().getFinancialScore() + " </div>"
-                        + "</div>"
-
-                        + "<div class='content' style='background-color: #ffeb3b;'>"
-                        + "<div class='section-title'>Important Notice</div>"
-                        + "<div class='section-content'>This loan request has been submitted to other banks. Please act swiftly to review and approve the request.</div>"
-                        + "</div>"
-
-                        + "<div class='image-container'>\n" +
-                        "    <p>\n" +
-                        "        <a href='" + ButtonLink + "' class='button' style='\n" +
-                        "            background-color: #FF5733; /* Red/Orange background */\n" +
-                        "            color: white; /* White text */\n" +
-                        "            padding: 12px 24px; /* Padding for a better size */\n" +
-                        "            text-align: center; /* Center text */\n" +
-                        "            text-decoration: none; /* Remove underline */\n" +
-                        "            font-size: 16px; /* Adjust font size */\n" +
-                        "            border-radius: 8px; /* Rounded corners */\n" +
-                        "            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */\n" +
-                        "            transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transitions */\n" +
-                        "        '\n" +
-                        "        onmouseover='this.style.backgroundColor=\"#FF9500\"; this.style.transform=\"scale(1.05)\";' /* Hover effect */\n" +
-                        "        onmouseout='this.style.backgroundColor=\"#FF5733\"; this.style.transform=\"scale(1)\";' /* Hover out effect */\n" +
-                        "        >\n" +
-                        "            Click here to view more information\n" +
-                        "        </a>\n" +
-                        "    </p>\n" +
-                        "</div>\n"
-
-                        + "<p>Best regards,</p>"
-                        + "<p>Shloanik Team</p>"
-                        + "</body>"
-                        + "</html>";
+                String emailContent = "<!DOCTYPE html>\n" +
+                        "<html>\n" +
+                        "<head>\n" +
+                        "    <meta charset=\"utf-8\">\n" +
+                        "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                        "    <title>Loan Request Notification</title>\n" +
+                        "    <style>\n" +
+                        "        /* Reset styles for email clients */\n" +
+                        "        body, table, td, div, p, a {\n" +
+                        "            font-family: Arial, Helvetica, sans-serif;\n" +
+                        "            -webkit-text-size-adjust: 100%;\n" +
+                        "            -ms-text-size-adjust: 100%;\n" +
+                        "        }\n" +
+                        "        \n" +
+                        "        body {\n" +
+                        "            margin: 0;\n" +
+                        "            padding: 0;\n" +
+                        "            background-color: #1a1a1a;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        /* Container styles */\n" +
+                        "        .container {\n" +
+                        "            max-width: 600px;\n" +
+                        "            margin: 0 auto;\n" +
+                        "            background-color: #242424;\n" +
+                        "            padding: 20px;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        /* Header styles */\n" +
+                        "        .header {\n" +
+                        "            padding: 20px;\n" +
+                        "            text-align: left;\n" +
+                        "            background-color: #2a2a2a;\n" +
+                        "            border-radius: 10px;\n" +
+                        "            margin-bottom: 20px;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        .header h1 {\n" +
+                        "            color: #ffffff;\n" +
+                        "            margin: 0;\n" +
+                        "            font-size: 24px;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        /* Card styles */\n" +
+                        "        .card {\n" +
+                        "            background-color: #2a2a2a;\n" +
+                        "            border-radius: 10px;\n" +
+                        "            padding: 20px;\n" +
+                        "            margin-bottom: 20px;\n" +
+                        "            border: 1px solid #333333;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        .card-title {\n" +
+                        "            color: #FFD700;\n" +
+                        "            font-size: 18px;\n" +
+                        "            font-weight: bold;\n" +
+                        "            margin-bottom: 15px;\n" +
+                        "            border-bottom: 1px solid #333333;\n" +
+                        "            padding-bottom: 10px;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        .card-content {\n" +
+                        "            color: #ffffff;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        /* Data row styles */\n" +
+                        "        .data-row {\n" +
+                        "            margin-bottom: 10px;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        .data-label {\n" +
+                        "            color: #999999;\n" +
+                        "            font-weight: bold;\n" +
+                        "            display: inline-block;\n" +
+                        "            width: 140px;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        .data-value {\n" +
+                        "            color: #ffffff;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        /* Avatar styles */\n" +
+                        "        .avatar-container {\n" +
+                        "            display: inline-block;\n" +
+                        "            vertical-align: middle;\n" +
+                        "            margin-right: 10px;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        .avatar {\n" +
+                        "            width: 50px;\n" +
+                        "            height: 50px;\n" +
+                        "            border-radius: 25px;\n" +
+                        "            border: 2px solid #FFD700;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        /* Notice card styles */\n" +
+                        "        .notice-card {\n" +
+                        "            background-color: #FFD700;\n" +
+                        "            color: #000000;\n" +
+                        "            border-radius: 10px;\n" +
+                        "            padding: 20px;\n" +
+                        "            margin-bottom: 20px;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        /* Button styles */\n" +
+                        "        .button-container {\n" +
+                        "            text-align: center;\n" +
+                        "            margin: 30px 0;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        .button {\n" +
+                        "            background-color: #FFD700;\n" +
+                        "            color: #000000;\n" +
+                        "            padding: 15px 30px;\n" +
+                        "            text-decoration: none;\n" +
+                        "            border-radius: 25px;\n" +
+                        "            font-weight: bold;\n" +
+                        "            display: inline-block;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        /* Footer styles */\n" +
+                        "        .footer {\n" +
+                        "            color: #666666;\n" +
+                        "            text-align: center;\n" +
+                        "            padding-top: 20px;\n" +
+                        "            border-top: 1px solid #333333;\n" +
+                        "        }\n" +
+                        "\n" +
+                        "        /* Responsive styles */\n" +
+                        "        @media screen and (max-width: 600px) {\n" +
+                        "            .container {\n" +
+                        "                width: 100% !important;\n" +
+                        "                padding: 10px !important;\n" +
+                        "            }\n" +
+                        "            \n" +
+                        "            .data-label {\n" +
+                        "                display: block;\n" +
+                        "                width: 100%;\n" +
+                        "                margin-bottom: 5px;\n" +
+                        "            }\n" +
+                        "        }\n" +
+                        "    </style>\n" +
+                        "</head>\n" +
+                        "<body>\n" +
+                        "    <div class=\"container\">\n" +
+                        "        <div class=\"header\">\n" +
+                        "            <h1>Dear ${recieverName},</h1>\n" +
+                        "        </div>\n" +
+                        "\n" +
+                        "        <p style=\"color: #ffffff; margin-bottom: 20px;\">We have received a new loan request at Boubyan Bank. Please review the details below:</p>\n" +
+                        "\n" +
+                        "        <div class=\"card\">\n" +
+                        "            <div class=\"card-title\">Loan Request Details</div>\n" +
+                        "            <div class=\"card-content\">\n" +
+                        "                <div class=\"data-row\">\n" +
+                        "                    <span class=\"data-label\">Loan Title:</span>\n" +
+                        "                    <span class=\"data-value\">${loanRequest.getLoanTitle()}</span>\n" +
+                        "                </div>\n" +
+                        "                <div class=\"data-row\">\n" +
+                        "                    <span class=\"data-label\">Loan Purpose:</span>\n" +
+                        "                    <span class=\"data-value\">${loanRequest.getLoanPurpose()}</span>\n" +
+                        "                </div>\n" +
+                        "                <div class=\"data-row\">\n" +
+                        "                    <span class=\"data-label\">Loan Amount:</span>\n" +
+                        "                    <span class=\"data-value\">${loanRequest.getAmount()}</span>\n" +
+                        "                </div>\n" +
+                        "                <div class=\"data-row\">\n" +
+                        "                    <span class=\"data-label\">Loan Term:</span>\n" +
+                        "                    <span class=\"data-value\">${loanRequest.getLoanTerm()}</span>\n" +
+                        "                </div>\n" +
+                        "                <div class=\"data-row\">\n" +
+                        "                    <span class=\"data-label\">Repayment Plan:</span>\n" +
+                        "                    <span class=\"data-value\">${loanRequest.getRepaymentPlan()}</span>\n" +
+                        "                </div>\n" +
+                        "                <div class=\"data-row\">\n" +
+                        "                    <span class=\"data-label\">Date Submitted:</span>\n" +
+                        "                    <span class=\"data-value\">${loanRequest.getStatusDate()}</span>\n" +
+                        "                </div>\n" +
+                        "            </div>\n" +
+                        "        </div>\n" +
+                        "\n" +
+                        "        <div class=\"card\">\n" +
+                        "            <div class=\"card-title\">Business and Owner Details</div>\n" +
+                        "            <div class=\"card-content\">\n" +
+                        "                <div class=\"data-row\">\n" +
+                        "                    <span class=\"data-label\">Business Owner:</span>\n" +
+                        "                    <div class=\"avatar-container\">\n" +
+                        "                        <img class=\"avatar\" src=\"cid:ownerAvatar\" alt=\"Owner Avatar\" />\n" +
+                        "                    </div>\n" +
+                        "                    <span class=\"data-value\">${loanRequest.getBusiness().getBusinessOwnerUser().getLastName()}</span>\n" +
+                        "                </div>\n" +
+                        "                <div class=\"data-row\">\n" +
+                        "                    <span class=\"data-label\">Civil ID:</span>\n" +
+                        "                    <span class=\"data-value\">${loanRequest.getBusiness().getBusinessOwnerUser().getCivilId()}</span>\n" +
+                        "                </div>\n" +
+                        "                <div class=\"data-row\">\n" +
+                        "                    <span class=\"data-label\">Mobile Number:</span>\n" +
+                        "                    <span class=\"data-value\">${loanRequest.getBusiness().getBusinessOwnerUser().getMobileNumber()}</span>\n" +
+                        "                </div>\n" +
+                        "                <div class=\"data-row\">\n" +
+                        "                    <span class=\"data-label\">Business Name:</span>\n" +
+                        "                    <span class=\"data-value\">${loanRequest.getBusiness().getBusinessOwnerUser().getFirstName()} ${loanRequest.getBusiness().getBusinessOwnerUser().getLastName()}</span>\n" +
+                        "                </div>\n" +
+                        "                <div class=\"data-row\">\n" +
+                        "                    <span class=\"data-label\">Financial Score:</span>\n" +
+                        "                    <span class=\"data-value\">${loanRequest.getBusiness().getFinancialScore()}</span>\n" +
+                        "                </div>\n" +
+                        "            </div>\n" +
+                        "        </div>\n" +
+                        "\n" +
+                        "        <div class=\"card\">\n" +
+                        "            <div class=\"card-title\">AI Analysis</div>\n" +
+                        "            <div class=\"card-content\">\n" +
+                        "                ${loanRequest.getBusiness().getFinancialAnalysis()}\n" +
+                        "            </div>\n" +
+                        "        </div>\n" +
+                        "\n" +
+                        "        <div class=\"notice-card\">\n" +
+                        "            <strong>Important Notice</strong>\n" +
+                        "            <p style=\"margin: 10px 0 0 0;\">This loan request has been submitted to other banks. Please act swiftly to review and approve the request.</p>\n" +
+                        "        </div>\n" +
+                        "\n" +
+                        "        <div class=\"button-container\">\n" +
+                        "            <a href=\"${ButtonLink}\" class=\"button\">View More Information</a>\n" +
+                        "        </div>\n" +
+                        "\n" +
+                        "        <div class=\"footer\">\n" +
+                        "            <p>Best regards,<br>Shloanik Team</p>\n" +
+                        "        </div>\n" +
+                        "    </div>\n" +
+                        "</body>\n" +
+                        "</html>";
 
                 // Inside the email-sending method
                 File pdfFile = PdfGeneratorService.generateLoanRequestPdf(loanRequest, "src/main/resources/static/ibrahim.png", businessAvatar);
