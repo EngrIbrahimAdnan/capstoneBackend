@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface FileService {
     FileEntity saveFile(MultipartFile file) throws Exception;
+    FileEntity convertAndSaveAsPDF(MultipartFile imageFile) throws Exception;
     Optional<FileEntity> getFile(Long id);
 }
