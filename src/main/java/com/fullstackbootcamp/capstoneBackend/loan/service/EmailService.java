@@ -4,19 +4,29 @@ package com.fullstackbootcamp.capstoneBackend.loan.service;
 import com.fullstackbootcamp.capstoneBackend.file.entity.FileEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 import jakarta.mail.internet.MimeMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.util.Properties;
 
 
 @Service
 public class EmailService {
+
+    @Value("${spring.mail.username}")  // Add this to get the email from properties
+    private String fromEmail;
+
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
     private final JavaMailSender mailSender;
 
@@ -25,9 +35,43 @@ public class EmailService {
 
     }
 
+    public boolean testEmailConnection() {
+        try {
+            // Create a test message
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            helper.setFrom(fromEmail);
+            helper.setTo(fromEmail); // Send to self for testing
+            helper.setSubject("SMTP Connection Test");
+            helper.setText("This is a test email to verify SMTP connection.");
+
+            // Try to send the message
+            mailSender.send(message);
+            logger.info("SMTP test successful - Connected to {} with username {}",
+                    ((JavaMailSenderImpl)mailSender).getHost(),
+                    ((JavaMailSenderImpl)mailSender).getUsername());
+            return true;
+        } catch (Exception e) {
+            logger.error("SMTP test failed: {}", e.getMessage());
+            // Log detailed error information
+            if (mailSender instanceof JavaMailSenderImpl) {
+                JavaMailSenderImpl impl = (JavaMailSenderImpl) mailSender;
+                logger.error("Mail configuration: Host={}, Port={}, Username={}",
+                        impl.getHost(),
+                        impl.getPort(),
+                        impl.getUsername());
+
+                Properties props = impl.getJavaMailProperties();
+                logger.error("Mail properties: {}", props);
+            }
+            return false;
+        }
+    }
+
     public void sendVerificationEmail(String toEmail, String recieverName, LoanRequestEntity loanRequest, FileEntity businessAvatar) throws MessagingException {
 
-        String ButtonLink = "http://localhost:3000/";
+        String ButtonLink = "https://cornerstone-frontend.vercel.app/dashboard";
 
         // Ensures error is handled if mailSender faces an issue sending an email
         try {
@@ -104,28 +148,29 @@ public class EmailService {
                         + "</html>";
 
                 // Inside the email-sending method
-                File pdfFile = PdfGeneratorService.generateLoanRequestPdf(loanRequest, "src/main/resources/static/ibrahim.png", businessAvatar);
+//                File pdfFile = PdfGeneratorService.generateLoanRequestPdf(loanRequest, "src/main/resources/static/ibrahim.png", businessAvatar);
 
 
                 MimeMessage message = mailSender.createMimeMessage();
                 MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
+                helper.setFrom(fromEmail);  // Add this line
                 helper.setTo(toEmail);
                 helper.setSubject(subject);
                 helper.setText(emailContent, true); // `true` indicates HTML content
 
-                FileSystemResource pdfAttachment = new FileSystemResource(pdfFile);
-                helper.addAttachment("LoanRequestDetails.pdf", pdfAttachment);
+//                FileSystemResource pdfAttachment = new FileSystemResource(pdfFile);
+//                helper.addAttachment("LoanRequestDetails.pdf", pdfAttachment);
 
                 // Adding the business owner avatar image
-                FileSystemResource ownerAvatar = new FileSystemResource(new File("src/main/resources/static/ibrahim.png"));
-                helper.addInline("ownerAvatar", ownerAvatar);  // This will match the 'src' in the <img> tag
+//                FileSystemResource ownerAvatar = new FileSystemResource(new File("src/main/resources/static/ibrahim.png"));
+//                helper.addInline("ownerAvatar", ownerAvatar);  // This will match the 'src' in the <img> tag
 
                 // Add inline image for the business avatar (if desired)
-                if (businessAvatar != null && businessAvatar.getData() != null) {
-                    ByteArrayResource avatarResource = new ByteArrayResource(businessAvatar.getData());
-                    helper.addInline("businessAvatar", avatarResource, "image/png"); // or the appropriate type
-                }
+//                if (businessAvatar != null && businessAvatar.getData() != null) {
+//                    ByteArrayResource avatarResource = new ByteArrayResource(businessAvatar.getData());
+//                    helper.addInline("businessAvatar", avatarResource, "image/png"); // or the appropriate type
+//                }
                 mailSender.send(message);
             } else {
                 // if email address doesn't conform to an email address structure

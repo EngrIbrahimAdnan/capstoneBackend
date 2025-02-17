@@ -6,6 +6,7 @@ import com.fullstackbootcamp.capstoneBackend.loan.dto.*;
 import com.fullstackbootcamp.capstoneBackend.loan.bo.CreateOfferResponse;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.*;
+import com.fullstackbootcamp.capstoneBackend.loan.service.EmailService;
 import com.fullstackbootcamp.capstoneBackend.loan.service.LoanService;
 import jakarta.validation.Valid;
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,9 +23,12 @@ import java.util.Map;
 @RestController
 public class LoanController {
     private final LoanService loanService;
+    private final EmailService emailService;
 
-    public LoanController(LoanService loanService) {
+    public LoanController(LoanService loanService,
+                          EmailService emailService) {
         this.loanService = loanService;
+        this.emailService = emailService;
     }
 
     @GetMapping("/bank/history")
@@ -49,6 +53,17 @@ public class LoanController {
     @CacheEvict(value = "loanRequests", allEntries = true)
     public void clearAllLoanRequestsPageable() {
         // Method can be empty
+    }
+
+    @GetMapping("/testemail")
+    public ResponseEntity<String> testEmailConnection() {
+        boolean isConnected = emailService.testEmailConnection();
+        if (isConnected) {
+            return ResponseEntity.ok("Email configuration is working correctly!");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Email configuration test failed. Check server logs for details.");
+        }
     }
 
     // endpoint for business owners to request loan offers from bankers
