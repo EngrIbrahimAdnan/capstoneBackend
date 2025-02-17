@@ -2,19 +2,24 @@ package com.fullstackbootcamp.capstoneBackend.chat.service;
 
 import com.fullstackbootcamp.capstoneBackend.auth.util.JwtUtil;
 import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
+import com.fullstackbootcamp.capstoneBackend.business.repository.BusinessRepository;
 import com.fullstackbootcamp.capstoneBackend.chat.dto.BusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.chat.dto.ChatDTO;
 import com.fullstackbootcamp.capstoneBackend.chat.dto.MessageDTO;
 import com.fullstackbootcamp.capstoneBackend.chat.entity.ChatEntity;
 import com.fullstackbootcamp.capstoneBackend.chat.entity.MessageEntity;
+import com.fullstackbootcamp.capstoneBackend.chat.enums.NotificationType;
 import com.fullstackbootcamp.capstoneBackend.chat.repository.ChatRepository;
 import com.fullstackbootcamp.capstoneBackend.chat.repository.MessageRepository;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanRequestRepository;
+import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
+import com.fullstackbootcamp.capstoneBackend.notification.service.NotificationService;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import com.fullstackbootcamp.capstoneBackend.user.repository.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +41,8 @@ public class ChatService {
     private final LoanRequestRepository loanRequestRepository;
     private final ChatMapperService chatMapperService;
     private final JwtUtil jwtUtil;
+    private final NotificationService notificationService;
+    private final BusinessRepository businessRepository;
 
     public ChatService(
             ChatRepository chatRepository,
@@ -43,12 +50,16 @@ public class ChatService {
             UserRepository userRepository,
             LoanRequestRepository loanRequestRepository,
             ChatMapperService chatMapperService,
+            NotificationService notificationService,
+            BusinessRepository businessRepository,
             JwtUtil jwtUtil) {
         this.chatRepository = chatRepository;
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
         this.loanRequestRepository = loanRequestRepository;
         this.chatMapperService = chatMapperService;
+        this.notificationService = notificationService;
+        this.businessRepository = businessRepository;
         this.jwtUtil = jwtUtil;
     }
 
@@ -84,6 +95,15 @@ public class ChatService {
         return chatMapperService.convertToDTO(chatEntity, username);
     }
 
+    @CacheEvict(value = "dashboardData", allEntries = true)
+    public void clearAllDashboardCache() {
+        // Method can be empty
+    }
+    @CacheEvict(value = "loanRequests", allEntries = true)
+    public void clearAllLoanRequestsPageable() {
+        // Method can be empty
+    }
+
     @Transactional
     public void sendMessage(Long chatId, String authHeader, String messageContent) {
         String username = jwtUtil.extractUserUsernameFromToken(authHeader);
@@ -91,6 +111,8 @@ public class ChatService {
                 .orElseThrow(() -> new RuntimeException("Chat not found"));
         UserEntity sender = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Sender not found"));
+
+
 
         MessageEntity message = new MessageEntity();
         message.setChat(chat);
@@ -102,6 +124,32 @@ public class ChatService {
 
         chat.setLastMessage(message);
         chatRepository.save(chat);
+
+        clearAllDashboardCache();
+
+        // Send notification
+        NotificationEntity notification = new NotificationEntity();
+        notification.setMessage(messageContent);
+        notification.setType(NotificationType.NEW_MESSAGE);
+        notification.setSenderName(sender.getUsername());
+        notification.setSenderFirstName(sender.getFirstName());
+        // If sender is banker
+        if (sender.getRole().equals(Roles.BANKER)) {
+            notification.setRecipientName(chat.getBusinessOwner().getUsername());
+            notification.setRecipient(chat.getBusinessOwner());
+            notification.setSenderRole(sender.getRole());
+            String businessName = businessRepository.findByBusinessOwnerUser(chat.getBusinessOwner()).get().getBusinessNickname();
+            notification.setBusinessName(businessName);
+            notificationService.sendNotification(notification);
+        }
+        else {
+            notification.setRecipientName(chat.getBanker().getUsername());
+            notification.setRecipient(chat.getBanker());
+            notification.setSenderRole(sender.getRole());
+            String businessName = businessRepository.findByBusinessOwnerUser(chat.getBusinessOwner()).get().getBusinessNickname();
+            notification.setBusinessName(businessName);
+            notificationService.sendNotification(notification);
+        }
     }
 
     public ChatDTO getChatMessages(String authHeader, Long chatId) {

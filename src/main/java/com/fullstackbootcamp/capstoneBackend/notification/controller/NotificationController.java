@@ -1,15 +1,21 @@
 package com.fullstackbootcamp.capstoneBackend.notification.controller;
 
 import com.fullstackbootcamp.capstoneBackend.notification.bo.NotificationRequest;
+import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
 import com.fullstackbootcamp.capstoneBackend.notification.service.NotificationService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 
-@Controller
+@RestController
 public class NotificationController {
 
     private final SimpMessagingTemplate messagingTemplate;
@@ -21,26 +27,9 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
-    /**
-     * Listens for messages on /app/chat
-     * Then re-broadcasts them to /topic/queue
-     */
-    @MessageMapping("/chat")
-    public void send(NotificationRequest request) {
-        try {
-            notificationService.sendNotification(request);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @GetMapping("/notifications")
+    public List<NotificationEntity> notifications(@RequestHeader("Authorization") String authHeader) {
+        return notificationService.getAllNotificationsForUser(authHeader);
     }
 
-    @MessageMapping("/hello")
-    @SendToUser("/queue/reply")
-    public String processMessage(@Payload String message) {
-        // Add debug logging
-        System.out.println("Server received message at /hello endpoint: " + message);
-        String response = "{\"response\": \"Server received: " + message + "\"}";
-        System.out.println("Server sending response: " + response);
-        return response;
-    }
 }

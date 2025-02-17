@@ -9,7 +9,9 @@ import com.fullstackbootcamp.capstoneBackend.chat.repository.ChatRepository;
 import com.fullstackbootcamp.capstoneBackend.chat.service.ChatMapperService;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanRequestRepository;
+//import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
 import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
+import com.fullstackbootcamp.capstoneBackend.notification.service.NotificationService;
 import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
 import com.fullstackbootcamp.capstoneBackend.auth.dto.SignupResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.user.dto.DashboardResponse;
@@ -24,7 +26,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -35,17 +40,20 @@ public class UserServiceImpl implements UserService {
     private final ChatRepository chatRepository;
     private final JwtUtil jwtUtil;
     private final ChatMapperService chatMapperService;
+    private final NotificationService notificationService;
 
     public UserServiceImpl(UserRepository userRepository,
                            LoanRequestRepository loanRequestRepository,
                            ChatRepository chatRepository,
                            JwtUtil jwtUtil,
-                           ChatMapperService chatMapperService) {
+                           ChatMapperService chatMapperService,
+                           NotificationService notificationService) {
         this.userRepository = userRepository;
         this.loanRequestRepository = loanRequestRepository;
         this.chatRepository = chatRepository;
         this.jwtUtil = jwtUtil;
         this.chatMapperService = chatMapperService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -97,79 +105,18 @@ public class UserServiceImpl implements UserService {
     // For bankers
     // TODO
     @Override
+    @Cacheable(value = "dashboardData", key = "#token")
     public DashboardResponse getDashboardData(String token) {
+        System.out.println("Getting dashboard data");
         // Get user from token
         String username = jwtUtil.extractUserUsernameFromToken(token);
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         DashboardResponse response = new DashboardResponse();
-    // Get and set notifications
-    // TODO make a real implementation of this
-        // Create test notifications
         LocalDateTime now = LocalDateTime.now();
 
-// First notification - New loan request
-        Map<String, Object> loanRequestData = new HashMap<>();
-        loanRequestData.put("loanAmount", 250000);
-        loanRequestData.put("loanType", "Business Expansion");
-        loanRequestData.put("requestId", "LOAN-2024-001");
-
-        NotificationEntity notification1 = new NotificationEntity(
-                "New loan request from ABC Manufacturing",
-                NotificationType.NEW_LOAN_REQUEST,
-                "john.smith",              // sender username
-                "John",                    // sender first name
-                "banker.jones",           // recipient username (banker)
-                Roles.BUSINESS_OWNER,     // sender role
-                "ABC Manufacturing",      // business name
-                false,                    // isRead
-                now,                      // created at
-                loanRequestData           // additional data
-        );
-
-// Second notification - New message in chat
-        Map<String, Object> messageData = new HashMap<>();
-        messageData.put("chatId", "CHAT-2024-123");
-        messageData.put("messageId", "MSG-456");
-
-        NotificationEntity notification2 = new NotificationEntity(
-                "You have a new message regarding loan application LOAN-2024-001",
-                NotificationType.NEW_MESSAGE,
-                "sarah.williams",         // sender username
-                "Sarah",                  // sender first name
-                "banker.jones",          // recipient username (banker)
-                Roles.BUSINESS_OWNER,    // sender role
-                "XYZ Enterprises",       // business name
-                false,                   // isRead
-                LocalDateTime.now().minusHours(2),      // created 2 hours ago
-                messageData              // additional data
-        );
-
-// Third notification - Counter offer response
-        Map<String, Object> counterOfferData = new HashMap<>();
-        counterOfferData.put("originalAmount", 500000);
-        counterOfferData.put("counterOfferAmount", 400000);
-        counterOfferData.put("loanId", "LOAN-2024-002");
-        counterOfferData.put("interestRate", 5.5);
-
-        NotificationEntity notification3 = new NotificationEntity(
-                "You have a new message regarding loan application LOAN-2024-0021",
-                NotificationType.NEW_MESSAGE,
-                "sarah.williams",         // sender username
-                "Sarah",                  // sender first name
-                "banker.jones",          // recipient username (banker)
-                Roles.BUSINESS_OWNER,    // sender role
-                "Fajris Foods",       // business name
-                false,                   // isRead
-                LocalDateTime.now().minusHours(2),      // created 2 hours ago
-                messageData              // additional data
-        );
-
-        List<NotificationEntity> notifications = new ArrayList<>();
-        notifications.add(notification1);
-        notifications.add(notification2);
-        notifications.add(notification3);
+        List<NotificationEntity> notifications = notificationService.getAllNotificationsForUser(token);
 
         // Create notifications map with metadata
         Map<String, Object> notificationsMap = new HashMap<>();

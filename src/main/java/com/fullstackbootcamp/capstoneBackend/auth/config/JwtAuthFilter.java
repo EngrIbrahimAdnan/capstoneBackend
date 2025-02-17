@@ -38,13 +38,27 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         this.customUserDetailsService = customUserDetailsService;
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/auth/") ||
+                path.startsWith("/setup/") ||
+                path.startsWith("/ws/");
+    }
+
     /*
     This method doFilterInternal is the heart of the filter. It is called for each HTTP request to process JWT authentication.
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
-        // Retrieve Authorization header
+        // Skip OPTIONS requests
+        if (request.getMethod().equals("OPTIONS")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authorizationHeader = request.getHeader(AUTHORIZATION);
         LOGGER.info("Authorization Header: {}", authorizationHeader);
 
@@ -54,27 +68,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
+        try {
+            String username = jwtUtil.extractUserUsernameFromToken(authorizationHeader);
+            UserDetails user = customUserDetailsService.loadUserByUsername(username);
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER)) {
-            filterChain.doFilter(request, response);
-            return;
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (Exception e) {
+            LOGGER.error("Authentication failed: ", e);
+            // Don't set the security context if authentication fails
         }
 
-        String username = jwtUtil.extractUserUsernameFromToken(authorizationHeader);
-
-        // Load custom user details
-        UserDetails user = customUserDetailsService.loadUserByUsername(username);
-
-        // This line creates an Authentication object (UsernamePasswordAuthenticationToken) with the user details and authorities (roles and permissions) obtained from the database.
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-
-        // It sets the authentication details, including the remote address and session ID, using WebAuthenticationDetailsSource.
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-        // Finally, it sets the authenticated Authentication object in the Spring Security SecurityContextHolder, indicating that the user is authenticated and authorized to access protected resources.
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // This line allows the request to continue processing by passing it along the filter chain.
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
     }
 }

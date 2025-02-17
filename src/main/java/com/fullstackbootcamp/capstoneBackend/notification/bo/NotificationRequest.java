@@ -1,6 +1,8 @@
 package com.fullstackbootcamp.capstoneBackend.notification.bo;
 
 import com.fullstackbootcamp.capstoneBackend.chat.enums.NotificationType;
+import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
+import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 
 import java.util.HashMap;
@@ -15,6 +17,19 @@ public class NotificationRequest {
     private Roles senderRole;  // "BANKER" or "BUSINESS_OWNER"
     private String businessName; // Bank or business name
     private Map<String, Object> additionalData = new HashMap<>();
+
+    public NotificationEntity toNotificationEntity(UserEntity recipient) {
+        NotificationEntity notification = new NotificationEntity();
+        notification.setMessage(message);
+        notification.setType(type);
+        notification.setSenderName(senderName);
+        notification.setSenderFirstName(senderFirstName);
+        notification.setRecipientName(recipient.getUsername());
+        notification.setRecipient(recipient);
+        notification.setSenderRole(senderRole);
+        notification.setBusinessName(businessName);
+        return notification;
+    }
 
     public String getSenderFirstName() {
         return senderFirstName;

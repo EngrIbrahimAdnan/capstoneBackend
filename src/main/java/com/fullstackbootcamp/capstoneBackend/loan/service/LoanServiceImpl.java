@@ -1,9 +1,11 @@
 package com.fullstackbootcamp.capstoneBackend.loan.service;
 
+import com.fullstackbootcamp.capstoneBackend.auth.bo.CustomUserDetails;
 import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenTypes;
 import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
 import com.fullstackbootcamp.capstoneBackend.business.service.BusinessService;
 import com.fullstackbootcamp.capstoneBackend.chat.entity.ChatEntity;
+import com.fullstackbootcamp.capstoneBackend.chat.enums.NotificationType;
 import com.fullstackbootcamp.capstoneBackend.chat.repository.ChatRepository;
 import com.fullstackbootcamp.capstoneBackend.file.entity.FileEntity;
 import com.fullstackbootcamp.capstoneBackend.file.service.FileService;
@@ -18,10 +20,14 @@ import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanRequestReposito
 import com.fullstackbootcamp.capstoneBackend.loan.repository.LoanResponseRepository;
 import com.fullstackbootcamp.capstoneBackend.loanNotification.entity.LoanNotificationEntity;
 import com.fullstackbootcamp.capstoneBackend.loanNotification.service.LoanNotificationsService;
+import com.fullstackbootcamp.capstoneBackend.notification.entity.NotificationEntity;
+import com.fullstackbootcamp.capstoneBackend.notification.service.NotificationService;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
+import com.fullstackbootcamp.capstoneBackend.user.repository.UserRepository;
 import com.fullstackbootcamp.capstoneBackend.user.service.UserService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,12 +47,23 @@ public class LoanServiceImpl implements LoanService {
     private final LoanResponseRepository loanResponseRepository;
     private final UserService userService;
     private final ChatRepository chatRepository;
+    private final UserRepository userRepository;
     private final BusinessService businessService;
     private final LoanNotificationsService loanNotificationsService;
     private final EmailService emailService;
     private final FileService fileService;
+    private final NotificationService notificationService;
 
-    public LoanServiceImpl(LoanRequestRepository loanRequestRepository, ChatRepository chatRepository, UserService userService, BusinessService businessService, LoanResponseRepository loanResponseRepository, LoanNotificationsService loanNotificationsService, EmailService emailService, FileService fileService) {
+    public LoanServiceImpl(LoanRequestRepository loanRequestRepository,
+                           ChatRepository chatRepository,
+                           UserService userService,
+                           BusinessService businessService,
+                           LoanResponseRepository loanResponseRepository,
+                           LoanNotificationsService loanNotificationsService,
+                           EmailService emailService,
+                           FileService fileService,
+                           NotificationService notificationService,
+                           UserRepository userRepository) {
         this.loanRequestRepository = loanRequestRepository;
         this.userService = userService;
         this.chatRepository = chatRepository;
@@ -55,6 +72,8 @@ public class LoanServiceImpl implements LoanService {
         this.loanNotificationsService = loanNotificationsService;
         this.emailService = emailService;
         this.fileService = fileService;
+        this.notificationService = notificationService;
+        this.userRepository = userRepository;
     }
 
     /* Note:
@@ -76,8 +95,8 @@ public class LoanServiceImpl implements LoanService {
         }
 
         // ensure the user in the token exists
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Object civilId = jwt.getClaims().get("civilId"); // user civil id
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        String civilId = userDetails.getCivilId();
         Optional<UserEntity> user = userService.getUserByCivilId(civilId.toString());
 
         // if user is not found in repository
@@ -145,6 +164,34 @@ public class LoanServiceImpl implements LoanService {
 
         }
 
+        // Send notification
+        NotificationEntity notificationEntity = new NotificationEntity();
+        notificationEntity.setType(NotificationType.NEW_LOAN_REQUEST);
+        notificationEntity.setCreatedAt(LocalDateTime.now());
+
+        // Set sender details (business owner)
+        notificationEntity.setSenderName(user.get().getUsername());
+        notificationEntity.setSenderFirstName(user.get().getFirstName());
+        notificationEntity.setSenderRole(user.get().getRole());
+
+        // Set business details
+        String businessName = businessEntity.get().getBusinessNickname();
+        notificationEntity.setBusinessName(businessName);
+
+        // Set message content
+        String messageContent = "New loan request: " + request.getLoanTitle() + " for " + request.getAmount();
+        notificationEntity.setMessage(messageContent);
+
+        // Send to each selected bank
+        for (Bank bank : request.getSelectedBanks()) {
+            Optional<UserEntity> banker = userRepository.findByBank(bank);
+            if (banker.isEmpty()) {
+                continue;
+            }
+            notificationEntity.setRecipient(banker.get());
+            notificationEntity.setRecipientName(banker.get().getFirstName());
+            notificationService.sendNotification(notificationEntity);
+        }
 
         loanRequestRepository.save(loanRequestEntity);
 
@@ -155,6 +202,7 @@ public class LoanServiceImpl implements LoanService {
     }
 
     @Override
+    @Cacheable(value = "loanRequests", key = "#page + '_' + #status + '_' + #search + '_' + #limit" + " + '_' + #authentication")
     public Map<String, Object> getLoanRequestsPageable(int page, String status, String search, int limit, Authentication authentication) {
         Map<String, Object> response = new HashMap<>();
 
@@ -166,10 +214,22 @@ public class LoanServiceImpl implements LoanService {
             return response;
         }
 
+        // Get civilId based on authentication type
+        String civilId;
+        if (authentication.getPrincipal() instanceof Jwt) {
+            Jwt jwt = (Jwt) authentication.getPrincipal();
+            civilId = jwt.getClaims().get("civilId").toString();
+        } else if (authentication.getPrincipal() instanceof CustomUserDetails) {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            civilId = userDetails.getCivilId();
+        } else {
+            response.put("status", CreateLoanResponseStatus.FAIL);
+            response.put("message", "Invalid authentication type");
+            return response;
+        }
+
         // Ensure the user exists
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Object civilId = jwt.getClaims().get("civilId");
-        Optional<UserEntity> bankerUser = userService.getUserByCivilId(civilId.toString());
+        Optional<UserEntity> bankerUser = userService.getUserByCivilId(civilId);
         if (bankerUser.isEmpty()) {
             response.put("status", CreateLoanResponseStatus.FAIL);
             response.put("message", "User does not exist");
@@ -182,22 +242,26 @@ public class LoanServiceImpl implements LoanService {
         // Get loan requests based on status
         Page<LoanRequestEntity> loanRequestPage;
         if (status == null || status.isEmpty() || status.equalsIgnoreCase("all")) {
-            // No status filter - return all requests for the bank
-            // You might want to implement a new method in repository for this case
             loanRequestPage = loanRequestRepository.findRequestsByBank(bank, pageable);
         } else {
-            switch (status.toUpperCase()) {
-                case "PENDING":
-                    loanRequestPage = loanRequestRepository.findPendingRequestsByBank(bank, pageable);
-                    break;
-                case "APPROVED":
-                    loanRequestPage = loanRequestRepository.findApprovedRequestsByBank(bank, LoanResponseStatus.APPROVED, pageable);
-                    break;
-                case "REJECTED":
-                    loanRequestPage = loanRequestRepository.findRejectedRequestsByBank(bank, LoanResponseStatus.REJECTED, pageable);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid status: " + status);
+            try {
+                switch (status.toUpperCase()) {
+                    case "PENDING":
+                        loanRequestPage = loanRequestRepository.findPendingRequestsByBank(bank, pageable);
+                        break;
+                    case "APPROVED":
+                        loanRequestPage = loanRequestRepository.findApprovedRequestsByBank(bank, LoanResponseStatus.APPROVED, pageable);
+                        break;
+                    case "REJECTED":
+                        loanRequestPage = loanRequestRepository.findRejectedRequestsByBank(bank, LoanResponseStatus.REJECTED, pageable);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Invalid status: " + status);
+                }
+            } catch (IllegalArgumentException e) {
+                response.put("status", CreateLoanResponseStatus.FAIL);
+                response.put("message", e.getMessage());
+                return response;
             }
         }
 
@@ -207,15 +271,21 @@ public class LoanServiceImpl implements LoanService {
             details.put("id", request.getId());
 
             // Get loan response status for this bank
-            Optional<LoanResponseStatus> loanResponseStatus = request.getLoanResponses().stream().filter(loanResponse -> loanResponse.getBank() == bank).map(LoanResponseEntity::getStatus).findFirst();
+            Optional<LoanResponseStatus> loanResponseStatus = request.getLoanResponses().stream()
+                    .filter(loanResponse -> loanResponse.getBank().equals(bank))
+                    .map(LoanResponseEntity::getStatus)
+                    .findFirst();
 
-            boolean otherBanksHaveMadeACounterResponse = request.getLoanResponses().stream().filter(loanResponse -> loanResponse.getBank() != bank).anyMatch(loanResponse -> loanResponse.getStatus() != null);
+            boolean otherBanksHaveMadeACounterResponse = request.getLoanResponses().stream()
+                    .filter(loanResponse -> !loanResponse.getBank().equals(bank))
+                    .anyMatch(loanResponse -> loanResponse.getStatus() != null);
 
             details.put("otherBanksHaveMadeCounterResponse", otherBanksHaveMadeACounterResponse);
             details.put("loanRequestStatus", request.getStatus());
             details.put("loanResponseStatus", loanResponseStatus.orElse(null));
             details.put("businessName", request.getBusiness().getBusinessNickname());
-            details.put("businessOwner", request.getBusiness().getBusinessOwnerUser().getFirstName() + " " + request.getBusiness().getBusinessOwnerUser().getLastName());
+            details.put("businessOwner", request.getBusiness().getBusinessOwnerUser().getFirstName() +
+                    " " + request.getBusiness().getBusinessOwnerUser().getLastName());
             details.put("amount", request.getAmount());
             details.put("paymentPeriod", request.getLoanTerm());
             details.put("date", request.getStatusDate());
@@ -227,15 +297,14 @@ public class LoanServiceImpl implements LoanService {
         response.put("totalRecords", loanRequestPage.getTotalElements());
         response.put("status", CreateLoanResponseStatus.SUCCESS);
 
-
         return response;
     }
 
     @Override
     public List<GetLoanRequestsOfBusinessDTO> getLoanRequestsOfBusiness(Long businessId, Authentication authentication) {
         // Get bank of logged in banker
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Object civilId = jwt.getClaims().get("civilId");
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Object civilId = userDetails.getCivilId();
         Optional<UserEntity> bankerUser = userService.getUserByCivilId(civilId.toString());
         if (bankerUser.isEmpty()) {
             throw new IllegalArgumentException("User does not exist");
@@ -267,8 +336,8 @@ public class LoanServiceImpl implements LoanService {
         }
 
         // ensure the user in the token exists
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Object civilId = jwt.getClaims().get("civilId"); // user civil id
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        String civilId = userDetails.getCivilId();
         Optional<UserEntity> bankerUser = userService.getUserByCivilId(civilId.toString());
 
         // if user is not found in repository
@@ -358,15 +427,7 @@ public class LoanServiceImpl implements LoanService {
     public GetLoanRequestDTO getLoanRequestById(Long id, Authentication authentication) {
         GetLoanRequestDTO response = new GetLoanRequestDTO();
 
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-
-        // To ensure the access token is provided and NOT the refresh token
-        if (jwt.getClaims().get("type").equals(TokenTypes.REFRESH.name())) {
-            response.setStatus(LoanRequestRetrievalStatus.FAIL);
-            response.setMessage("Incorrect Token provided. Please provide access token");
-            return response;
-        }
-
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
         // ensure the loan request exists using the id
         Optional<LoanRequestEntity> loanRequest = getLoanRequestById(id);
@@ -378,7 +439,7 @@ public class LoanServiceImpl implements LoanService {
         }
 
         // Ensure the user exists
-        Object civilId = jwt.getClaims().get("civilId");
+        String civilId = userDetails.getCivilId();
         Optional<UserEntity> bankerUser = userService.getUserByCivilId(civilId.toString());
         if (bankerUser.isEmpty()) {
             return response;
@@ -431,8 +492,8 @@ public class LoanServiceImpl implements LoanService {
         }
 
         // ensure the user in the token exists
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Object civilId = jwt.getClaims().get("civilId"); // user civil id
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        String civilId = userDetails.getCivilId();
         Optional<UserEntity> businessOwner = userService.getUserByCivilId(civilId.toString());
 
         // if user is not found in repository
@@ -623,17 +684,8 @@ public class LoanServiceImpl implements LoanService {
     public CheckNotificationDTO viewRequest(Long id, Authentication authentication) {
         CheckNotificationDTO response = new CheckNotificationDTO();
 
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-
-        // To ensure the access token is provided and NOT the refresh token
-        if (jwt.getClaims().get("type").equals(TokenTypes.REFRESH.name())) {
-            response.setStatus(CheckNotificationStatus.FAIL);
-            response.setMessage("Incorrect Token provided. Please provide access token");
-            return response;
-        }
-
-        // ensure the user in the token exists
-        Object civilId = jwt.getClaims().get("civilId"); // user civil id
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        String civilId = userDetails.getCivilId();
         Optional<UserEntity> user = userService.getUserByCivilId(civilId.toString());
 
         // if user is not found in repository
@@ -682,19 +734,19 @@ public class LoanServiceImpl implements LoanService {
     }
 
     public String validateToken(Roles role, Authentication authentication) {
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-
-        // To ensure the access token is provided and NOT the refresh token
-        if (jwt.getClaims().get("type").equals(TokenTypes.REFRESH.name())) {
-            return "Incorrect Token provided. Please provide access token";
+        if (!(authentication.getPrincipal() instanceof CustomUserDetails)) {
+            return "Invalid authentication type";
         }
 
-        // returns message if the user is anything but the passed 'role'
-        if (!jwt.getClaims().get("roles").equals(role.name())) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        // Instead of checking jwt claims, check the user's roles
+        if (!userDetails.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals(role.name()))) {
             return "Not allowed for provided role. This endpoint is only for " + role.name();
         }
 
-        return null; // No errors, return null to continue the flow
+        return null;
     }
 
     public Optional<LoanRequestEntity> getLoanRequestById(Long id) {

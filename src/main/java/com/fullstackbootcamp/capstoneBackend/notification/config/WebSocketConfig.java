@@ -40,38 +40,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // Use the Bean instead of creating a new instance
-        registry.addEndpoint("/ws")
-                .setHandshakeHandler(customHandshakeHandler())  // Use the Bean method
-                .setAllowedOrigins("http://localhost:3000")
-                .withSockJS();
-
-        // Add a native WebSocket endpoint for React Native
         registry.addEndpoint("/ws")
                 .setHandshakeHandler(customHandshakeHandler())
-                .setAllowedOrigins("*")
-                .addInterceptors(new HandshakeInterceptor() {
-                    @Override
-                    public boolean beforeHandshake(ServerHttpRequest request,
-                                                   ServerHttpResponse response,
-                                                   WebSocketHandler wsHandler,
-                                                   Map<String, Object> attributes) throws Exception {
-                        System.out.println("Handshake attempt from: " + request.getRemoteAddress());
-                        System.out.println("Request URI: " + request.getURI());
-                        return true;
-                    }
+                .setAllowedOrigins("http://localhost:3000", "*")  // Combined origins
+                .withSockJS()
+                .setWebSocketEnabled(true)
+                .setSessionCookieNeeded(false);
 
-                    @Override
-                    public void afterHandshake(ServerHttpRequest request,
-                                               ServerHttpResponse response,
-                                               WebSocketHandler wsHandler,
-                                               Exception exception) {
-                        if (exception != null) {
-                            System.out.println("Handshake failed: " + exception.getMessage());
-                        } else {
-                            System.out.println("Handshake successful");
-                        }
-                    }
-                });
+        // For native WebSocket
+        registry.addEndpoint("/ws")
+                .setHandshakeHandler(customHandshakeHandler())
+                .setAllowedOrigins("*");
     }
 }

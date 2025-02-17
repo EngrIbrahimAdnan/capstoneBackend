@@ -1,0 +1,51 @@
+[
+  {
+    "username": "engribrahimadnan",
+    "businessNickname": "Ibrahim Trading Co.",
+    "businessAvatarFileId": 1,
+    "financialStatementFileId": 1,
+    "businessLicenseImageFileId": 1
+  },
+  {
+    "username": "ahmedsabah23",
+    "businessNickname": "Al-Sabah Electronics",
+    "businessAvatarFileId": 2,
+    "financialStatementFileId": 2,
+    "businessLicenseImageFileId": 2
+  },
+  {
+    "username": "fatimaq",
+    "businessNickname": "Fatima Fashion House",
+    "businessAvatarFileId": 3,
+    "financialStatementFileId": 3,
+    "businessLicenseImageFileId": 3
+  },
+  {
+    "username": "khalidbiz",
+    "businessNickname": "Al-Mutawa Real Estate",
+    "businessAvatarFileId": 4,
+    "financialStatementFileId": 4,
+    "businessLicenseImageFileId": 4
+  },
+  {
+    "username": "maryamk",
+    "businessNickname": "Maryam's Beauty Salon",
+    "businessAvatarFileId": 5,
+    "financialStatementFileId": 5,
+    "businessLicenseImageFileId": 5
+  },
+  {
+    "username": "abdullahs",
+    "businessNickname": "Al-Shatti Construction",
+    "businessAvatarFileId": 6,
+    "financialStatementFileId": 6,
+    "businessLicenseImageFileId": 6
+  },
+  {
+    "username": "nourag",
+    "businessNickname": "Al-Ghanim Investments",
+    "businessAvatarFileId": 7,
+    "financialStatementFileId": 7,
+    "businessLicenseImageFileId": 7
+  }
+]

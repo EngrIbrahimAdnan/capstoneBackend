@@ -4,8 +4,10 @@ import com.fullstackbootcamp.capstoneBackend.auth.util.JwtKeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -17,10 +19,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import java.util.Arrays;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     private final JwtKeyGenerator jwtKeyGenerator;
@@ -37,21 +41,29 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(10); // Recommended strength
     }
 
+//    @Bean
+//    public HandlerMappingIntrospector mvcHandlerMappingIntrospector() {
+//        return new HandlerMappingIntrospector();
+//    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf().disable()
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/auth/v1/**").permitAll()  // Add this line
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/setup/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
+//                        .anyRequest().permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt
-                        .decoder(jwtDecoder())
-                        .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                ))
+//                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt
+//                        .decoder(jwtDecoder())
+//                        .jwtAuthenticationConverter(jwtAuthenticationConverter())
+//                ))
                 .headers(headers -> headers
                         .frameOptions(frameOptions -> frameOptions.disable())
                 )
@@ -65,12 +77,14 @@ public class SecurityConfig {
     @Bean
     UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",
-                "https://localhost:3000",
-                "https://*.ngrok-free.app",
-                "http://*.ngrok-free.app"
-        ));
+//        configuration.setAllowedOrigins(Arrays.asList(
+//                "http://localhost:3000",
+//                "https://localhost:3000",
+//                "https://*.ngrok-free.app",
+//                "http://*.ngrok-free.app",
+//                "*"
+//        ));
+        configuration.setAllowedOriginPatterns(Arrays.asList("*")); // Allows all origins
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

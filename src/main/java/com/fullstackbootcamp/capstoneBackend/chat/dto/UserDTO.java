@@ -2,7 +2,9 @@ package com.fullstackbootcamp.capstoneBackend.chat.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class UserDTO {
+import java.io.Serializable;
+
+public class UserDTO implements Serializable {
     private Long id;
     private String firstName;
     private String username;

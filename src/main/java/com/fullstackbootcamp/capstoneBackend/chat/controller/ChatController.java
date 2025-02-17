@@ -1,35 +1,20 @@
 package com.fullstackbootcamp.capstoneBackend.chat.controller;
 
 import com.fullstackbootcamp.capstoneBackend.chat.bo.CreateChatRequest;
-import com.fullstackbootcamp.capstoneBackend.chat.bo.NotificationRequest;
 import com.fullstackbootcamp.capstoneBackend.chat.bo.SendMessageRequest;
 import com.fullstackbootcamp.capstoneBackend.chat.dto.BusinessDTO;
 import com.fullstackbootcamp.capstoneBackend.chat.dto.ChatDTO;
-import com.fullstackbootcamp.capstoneBackend.chat.dto.MessageDTO;
 import com.fullstackbootcamp.capstoneBackend.chat.entity.ChatEntity;
-import com.fullstackbootcamp.capstoneBackend.chat.entity.MessageEntity;
-import com.fullstackbootcamp.capstoneBackend.chat.repository.ChatRepository;
-import com.fullstackbootcamp.capstoneBackend.chat.repository.MessageRepository;
 import com.fullstackbootcamp.capstoneBackend.chat.service.ChatService;
-import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
-import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
-import com.fullstackbootcamp.capstoneBackend.user.repository.UserRepository;
 import jakarta.validation.Valid;
-import com.fullstackbootcamp.capstoneBackend.chat.enums.NotificationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.messaging.simp.stomp.*;
-import org.springframework.security.core.Authentication;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;

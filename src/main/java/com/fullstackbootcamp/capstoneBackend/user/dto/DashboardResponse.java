@@ -5,18 +5,19 @@ import com.fullstackbootcamp.capstoneBackend.chat.entity.ChatEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.Serializable;
 
-public class DashboardResponse {
-    // TODO: Make this its own object perhaps
-    Map<String, Object> notifications;
-    // pendingReview format:
-    // { "pending": 0, "dinarsInReview": 0 }
-    Map<String, BigDecimal> pendingReview;
-    Map<String, Object> fiveMostRecentRequests;
-    List<ChatPreviewDTO>  fourMostRecentChats;
-    List<Map<String, Object>> recentHistory;
+public class DashboardResponse implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private Map<String, Object> notifications = new HashMap<>();
+    private Map<String, BigDecimal> pendingReview = new HashMap<>();
+    private Map<String, Object> fiveMostRecentRequests = new HashMap<>();
+    private List<ChatPreviewDTO> fourMostRecentChats = new ArrayList<>();
+    private List<Map<String, Object>> recentHistory = new ArrayList<>();
 
     public Map<String, Object> getNotifications() {
         return notifications;

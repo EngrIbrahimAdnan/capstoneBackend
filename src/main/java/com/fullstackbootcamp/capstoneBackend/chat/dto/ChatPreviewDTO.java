@@ -1,10 +1,15 @@
 package com.fullstackbootcamp.capstoneBackend.chat.dto;
 
-public class ChatPreviewDTO {
+import java.io.Serializable;
+
+public class ChatPreviewDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Long id;
     private UserDTO otherUser;
     private String latestMessage;
     private boolean latestMessageSenderIsYou;
+
+    public ChatPreviewDTO() {}
 
     public ChatPreviewDTO(Long id,
                           UserDTO otherUser,

@@ -8,6 +8,7 @@ import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.*;
 import com.fullstackbootcamp.capstoneBackend.loan.service.LoanService;
 import jakarta.validation.Valid;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -41,12 +42,22 @@ public class LoanController {
         }
     }
 
+    @CacheEvict(value = "dashboardData", allEntries = true)
+    public void clearAllDashboardCache() {
+        // Method can be empty
+    }
+    @CacheEvict(value = "loanRequests", allEntries = true)
+    public void clearAllLoanRequestsPageable() {
+        // Method can be empty
+    }
 
     // endpoint for business owners to request loan offers from bankers
     @PostMapping("/request")
     public ResponseEntity<LoanRequestDTO> requestLoan(@Valid @RequestBody CreateLoanRequest request,
                                                       BindingResult bindingResult,
                                                       Authentication authentication) {
+        clearAllDashboardCache();
+        clearAllLoanRequestsPageable();
 
         // ensures no field is missing and typos of field name. the field missing is returned before service layer
         if (bindingResult.hasErrors()) {

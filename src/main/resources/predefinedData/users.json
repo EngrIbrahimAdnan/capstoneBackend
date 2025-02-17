@@ -4,7 +4,7 @@
     "firstName": "Ibrahim",
     "lastName": "Alibrahim",
     "password": "password",
-    "username": "EngrIbrahimAdnan",
+    "username": "engribrahimadnan",
     "civilId": "000000000000",
     "role": "BUSINESS_OWNER",
     "bank": "NOT_BANK"
@@ -14,7 +14,7 @@
     "firstName": "Mohamed",
     "lastName": "Baqer",
     "password": "password",
-    "username": "AB",
+    "username": "ab",
     "civilId": "111111111111",
     "role": "BANKER",
     "bank": "BOUBYAN_BANK"
@@ -38,6 +38,66 @@
     "civilId": "333333333333",
     "role": "BANKER",
     "bank": "WARBA_BANK"
+  },
+  {
+    "mobileNumber": "91234567",
+    "firstName": "Maryam",
+    "lastName": "Al-Kandari",
+    "password": "password",
+    "username": "maryamk",
+    "civilId": "777777777777",
+    "role": "BUSINESS_OWNER",
+    "bank": "NOT_BANK"
+  },
+  {
+    "mobileNumber": "92876543",
+    "firstName": "Abdullah",
+    "lastName": "Al-Shatti",
+    "password": "password",
+    "username": "abdullahs",
+    "civilId": "888888888888",
+    "role": "BUSINESS_OWNER",
+    "bank": "NOT_BANK"
+  },
+  {
+    "mobileNumber": "93456789",
+    "firstName": "Noura",
+    "lastName": "Al-Ghanim",
+    "password": "password",
+    "username": "nourag",
+    "civilId": "999999999999",
+    "role": "BUSINESS_OWNER",
+    "bank": "NOT_BANK"
+  },
+  {
+    "mobileNumber": "94556723",
+    "firstName": "Ahmed",
+    "lastName": "Al-Sabah",
+    "password": "password",
+    "username": "ahmedsabah23",
+    "civilId": "444444444444",
+    "role": "BUSINESS_OWNER",
+    "bank": "NOT_BANK"
+  },
+  {
+    "mobileNumber": "95778234",
+    "firstName": "Fatima",
+    "lastName": "Al-Qatami",
+    "password": "password",
+    "username": "fatimaq",
+    "civilId": "555555555555",
+    "role": "BUSINESS_OWNER",
+    "bank": "NOT_BANK"
+  },
+  {
+    "mobileNumber": "92345167",
+    "firstName": "Khalid",
+    "lastName": "Al-Mutawa",
+    "password": "password",
+    "username": "khalidbiz",
+    "civilId": "666666666666",
+    "role": "BUSINESS_OWNER",
+    "bank": "NOT_BANK"
   }
 ]
 

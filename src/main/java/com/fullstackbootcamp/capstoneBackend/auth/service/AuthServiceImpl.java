@@ -2,17 +2,24 @@ package com.fullstackbootcamp.capstoneBackend.auth.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fullstackbootcamp.capstoneBackend.auth.bo.CreateBusinessRequest;
 import com.fullstackbootcamp.capstoneBackend.auth.config.SecurityConfig;
 import com.fullstackbootcamp.capstoneBackend.auth.dto.LoadUsersResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.auth.dto.TokenResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenServiceStatus;
 import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenTypes;
 import com.fullstackbootcamp.capstoneBackend.auth.util.JwtUtil;
+import com.fullstackbootcamp.capstoneBackend.business.entity.BusinessEntity;
+import com.fullstackbootcamp.capstoneBackend.business.entity.FinancialStatementEntity;
+import com.fullstackbootcamp.capstoneBackend.business.enums.BusinessState;
+import com.fullstackbootcamp.capstoneBackend.business.repository.BusinessRepository;
 import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
 import com.fullstackbootcamp.capstoneBackend.auth.dto.SignupResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.user.bo.LoginRequest;
 import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.CreateUserStatus;
+import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
+import com.fullstackbootcamp.capstoneBackend.user.repository.UserRepository;
 import com.fullstackbootcamp.capstoneBackend.user.service.UserService;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.BeanUtils;
@@ -35,14 +42,20 @@ import java.util.Optional;
 public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final BusinessRepository businessRepository;
     private final JwtUtil jwtUtil;
     private final JwtDecoder jwtDecoder;
 
-    public AuthServiceImpl(UserService userService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, JwtDecoder jwtDecoder) {
+    public AuthServiceImpl(UserService userService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, JwtDecoder jwtDecoder,
+                           UserRepository userRepository,
+                           BusinessRepository businessRepository) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.jwtDecoder = jwtDecoder;
+        this.userRepository = userRepository;
+        this.businessRepository = businessRepository;
     }
 
     // forward request to user service
@@ -68,15 +81,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     // load users from predefined file
-    public <T> LoadUsersResponseDTO loadEntites(
-            String file,
-            TypeReference<List<T>> typeReference
-    ) {
-
-        // Load entities from the JSON file
+    public <T> LoadUsersResponseDTO loadEntites(String file, TypeReference<List<T>> typeReference) {
         List<T> entities = loadEntities(file, typeReference);
-
-        // Returns here only when the file is not found
         if (entities == null) {
             LoadUsersResponseDTO response = new LoadUsersResponseDTO();
             response.setStatus(CreateUserStatus.FAIL);
@@ -85,61 +91,108 @@ public class AuthServiceImpl implements AuthService {
         }
 
         try {
-            // Loop through and save each entity
-            for (T entity : entities) {
-                switch (file) {
-
-
-                    case "users.json":
-                        CreateUserRequest user = new CreateUserRequest();
-                        BeanUtils.copyProperties(entity, user);
-
-                        LoadUsersResponseDTO response = new LoadUsersResponseDTO();
-                        SignupResponseDTO singupResponse = processSignupRequest(user);
-                        BeanUtils.copyProperties(singupResponse, response);
-
-                        if (response.getStatus() != CreateUserStatus.SUCCESS) {
-                            response.setMessage(singupResponse.getMessage() + "(REF: Username: " + user.getUsername() + "/ Civil ID: " + user.getCivilId() + ')');
-                            return response;
-                        } else {
-                            continue;
-                        }
-
-                    case "anotherFile.json":
-                        break;
-
-                    default:
-                        LoadUsersResponseDTO responseDefault = new LoadUsersResponseDTO();
-                        responseDefault.setStatus(CreateUserStatus.FAIL);
-                        responseDefault.setMessage("Unable to find the file.");
-                        return responseDefault;
-                }
+            switch (file) {
+                case "users.json":
+                    return processUsers(entities);
+                case "businesses.json":
+                    return processBusinesses(entities);
+                default:
+                    LoadUsersResponseDTO responseDefault = new LoadUsersResponseDTO();
+                    responseDefault.setStatus(CreateUserStatus.FAIL);
+                    responseDefault.setMessage("Unrecognized file type: " + file);
+                    return responseDefault;
             }
-            LoadUsersResponseDTO response = new LoadUsersResponseDTO();
-            response.setStatus(CreateUserStatus.SUCCESS);
-            response.setMessage("Added all users successfully.");
-            return response;
-
         } catch (Exception e) {
             LoadUsersResponseDTO response = new LoadUsersResponseDTO();
             response.setStatus(CreateUserStatus.FAIL);
             response.setMessage("Unable to add data to database. Ensure they are in the expected JSON structure");
-
-            // Return an error string if there is an issue saving to the database
             return response;
         }
     }
 
+    private <T> LoadUsersResponseDTO processUsers(List<T> entities) {
+        for (T entity : entities) {
+            CreateUserRequest user = new CreateUserRequest();
+            BeanUtils.copyProperties(entity, user);
+            LoadUsersResponseDTO response = new LoadUsersResponseDTO();
+            SignupResponseDTO signupResponse = processSignupRequest(user);
+            BeanUtils.copyProperties(signupResponse, response);
+
+            if (response.getStatus() != CreateUserStatus.SUCCESS) {
+                response.setMessage(signupResponse.getMessage() +
+                        "(REF: Username: " + user.getUsername() +
+                        "/ Civil ID: " + user.getCivilId() + ')');
+                return response;
+            }
+        }
+
+        LoadUsersResponseDTO response = new LoadUsersResponseDTO();
+        response.setStatus(CreateUserStatus.SUCCESS);
+        response.setMessage("Added all users successfully.");
+        return response;
+    }
+
+    private <T> LoadUsersResponseDTO processBusinesses(List<T> entities) {
+        for (T entity : entities) {
+            CreateBusinessRequest business = new CreateBusinessRequest();
+            BeanUtils.copyProperties(entity, business);
+
+            // Find the associated user
+            UserEntity user = userRepository.findByUsername(business.getUsername())
+                    .orElse(null);
+
+            if (user == null) {
+                LoadUsersResponseDTO response = new LoadUsersResponseDTO();
+                response.setStatus(CreateUserStatus.FAIL);
+                response.setMessage("User not found for business: " + business.getUsername());
+                return response;
+            }
+
+            // Only create business for non-banker users
+            if (user.getRole() != Roles.BANKER) {
+                BusinessEntity businessEntity = new BusinessEntity();
+                businessEntity.setBusinessOwnerUser(user);
+                businessEntity.setBusinessNickname(business.getBusinessNickname());
+                businessEntity.setBusinessAvatarFileId(business.getBusinessAvatarFileId());
+                businessEntity.setFinancialStatementFileId(business.getFinancialStatementFileId());
+                businessEntity.setBusinessLicenseImageFileId(business.getBusinessLicenseImageFileId());
+                businessEntity.setBusinessState(BusinessState.STABLE);
+                businessEntity.setFinancialScore(0.0);
+
+                try {
+                    businessRepository.save(businessEntity);
+                } catch (Exception e) {
+                    LoadUsersResponseDTO response = new LoadUsersResponseDTO();
+                    response.setStatus(CreateUserStatus.FAIL);
+                    response.setMessage("Failed to create business for user: " + business.getUsername());
+                    return response;
+                }
+            }
+        }
+
+        LoadUsersResponseDTO response = new LoadUsersResponseDTO();
+        response.setStatus(CreateUserStatus.SUCCESS);
+        response.setMessage("Added all businesses successfully.");
+        return response;
+    }
+
     public static <T> List<T> loadEntities(String fileName, TypeReference<List<T>> typeReference) {
         ObjectMapper objectMapper = new ObjectMapper();
+        String resourcePath = "predefinedData/" + fileName;
+        System.out.println("Attempting to load resource: " + resourcePath); // Debug line
 
-        // Load the file from the resources directory
+        // Try to list available resources
         try (InputStream inputStream = Thread.currentThread()
                 .getContextClassLoader()
-                .getResourceAsStream("predefinedData/" + fileName)) {
+                .getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                System.out.println("Resource not found: " + resourcePath); // Debug line
+                return null;
+            }
             return objectMapper.readValue(inputStream, typeReference);
         } catch (Exception e) {
-            return null; // Handle the exception or return an appropriate response
+            System.out.println("Error loading resource: " + e.getMessage()); // Debug line
+            return null;
         }
     }
 

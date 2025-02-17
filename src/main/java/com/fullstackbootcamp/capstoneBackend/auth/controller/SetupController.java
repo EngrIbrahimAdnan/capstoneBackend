@@ -2,6 +2,7 @@ package com.fullstackbootcamp.capstoneBackend.auth.controller;
 
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fullstackbootcamp.capstoneBackend.auth.bo.CreateBusinessRequest;
 import com.fullstackbootcamp.capstoneBackend.auth.dto.LoadUsersResponseDTO;
 import com.fullstackbootcamp.capstoneBackend.auth.service.AuthService;
 import com.fullstackbootcamp.capstoneBackend.user.bo.CreateUserRequest;
@@ -45,6 +46,24 @@ public class SetupController {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
 
             default: // default error
+                LoadUsersResponseDTO noResponse = new LoadUsersResponseDTO();
+                noResponse.setStatus(CreateUserStatus.FAIL);
+                noResponse.setMessage("Error status unrecognized");
+                return ResponseEntity.badRequest().body(noResponse);
+        }
+    }
+
+    @PostMapping("/load-businesses")
+    public ResponseEntity<LoadUsersResponseDTO> loadBusinesses() {
+        LoadUsersResponseDTO response = authService.loadEntites("businesses.json",
+                new TypeReference<List<CreateBusinessRequest>>() {});
+
+        switch (response.getStatus()) {
+            case SUCCESS:
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+            case FAIL:
+                return ResponseEntity.badRequest().body(response);
+            default:
                 LoadUsersResponseDTO noResponse = new LoadUsersResponseDTO();
                 noResponse.setStatus(CreateUserStatus.FAIL);
                 noResponse.setMessage("Error status unrecognized");

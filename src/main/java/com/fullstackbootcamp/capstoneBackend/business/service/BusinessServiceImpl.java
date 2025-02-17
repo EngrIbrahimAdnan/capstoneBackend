@@ -1,6 +1,7 @@
 package com.fullstackbootcamp.capstoneBackend.business.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fullstackbootcamp.capstoneBackend.auth.bo.CustomUserDetails;
 import com.fullstackbootcamp.capstoneBackend.auth.enums.TokenTypes;
 import com.fullstackbootcamp.capstoneBackend.business.bo.AddBusinessRequest;
 import com.fullstackbootcamp.capstoneBackend.business.dto.AddBusinessDTO;
@@ -69,8 +70,8 @@ public class BusinessServiceImpl implements BusinessService {
         }
 
         // ensure the user in the token exists
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Object civilId = jwt.getClaims().get("civilId"); // user civil id
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        String civilId = userDetails.getCivilId();
         Optional<UserEntity> user = userService.getUserByCivilId(civilId.toString());
 
         if (user.isEmpty()) {
@@ -387,8 +388,8 @@ public class BusinessServiceImpl implements BusinessService {
         }
 
         // ensure the user in the token exists
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Object civilId = jwt.getClaims().get("civilId"); // user civil id
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        String civilId = userDetails.getCivilId();
         Optional<UserEntity> user = userService.getUserByCivilId(civilId.toString());
 
         // if use is not found in repository
@@ -441,17 +442,17 @@ public class BusinessServiceImpl implements BusinessService {
 
 
     public String validateToken(Authentication authentication) {
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-
-        // To ensure the access token is provided and NOT the refresh token
-        if (jwt.getClaims().get("type").equals(TokenTypes.REFRESH.name())) {
-            return "Incorrect Token provided. Please provide access token";
-        }
-
-        // Ensures the user is business owner
-        if (jwt.getClaims().get("roles").equals(Roles.BANKER.name())) {
-            return "Not allowed for bankers. This endpoint is only for Business Owners";
-        }
+//        Jwt jwt = (Jwt) authentication.getPrincipal();
+//
+//        // To ensure the access token is provided and NOT the refresh token
+//        if (jwt.getClaims().get("type").equals(TokenTypes.REFRESH.name())) {
+//            return "Incorrect Token provided. Please provide access token";
+//        }
+//
+//        // Ensures the user is business owner
+//        if (jwt.getClaims().get("roles").equals(Roles.BANKER.name())) {
+//            return "Not allowed for bankers. This endpoint is only for Business Owners";
+//        }
 
         return null; // No errors, return null to continue the flow
     }
