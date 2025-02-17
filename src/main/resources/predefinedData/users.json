@@ -1,15 +1,5 @@
 [
   {
-    "mobileNumber": "91450294",
-    "firstName": "Ibrahim",
-    "lastName": "Alibrahim",
-    "password": "password",
-    "username": "EngrIbrahimAdnan",
-    "civilId": "000000000000",
-    "role": "BUSINESS_OWNER",
-    "bank": "NOT_BANK"
-  },
-  {
     "mobileNumber": "29913920",
     "firstName": "Mohamed",
     "lastName": "Baqer",
@@ -38,6 +28,16 @@
     "civilId": "333333333333",
     "role": "BANKER",
     "bank": "WARBA_BANK"
+  },
+  {
+    "mobileNumber": "91450294",
+    "firstName": "Ibrahim",
+    "lastName": "Alibrahim",
+    "password": "password",
+    "username": "EngrIbrahimAdnan",
+    "civilId": "000000000000",
+    "role": "BUSINESS_OWNER",
+    "bank": "NOT_BANK"
   }
 ]
 
