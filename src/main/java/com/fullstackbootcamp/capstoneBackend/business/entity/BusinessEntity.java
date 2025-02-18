@@ -20,7 +20,7 @@ public class BusinessEntity {
     @JoinColumn(name = "business_owner_user_id", nullable = false)
     private UserEntity businessOwnerUser;
 
-    @Column(name = "business_Nickname", nullable = false, length = 100)
+    @Column(name = "business_Nickname", nullable = false, length = 1000)
     private String businessNickname;
 
     @JoinColumn(name = "financial_statement_PDF", nullable = false)
@@ -41,7 +41,7 @@ public class BusinessEntity {
     @JoinColumn(name = "business_license")
     private BusinessLicenseEntity businessLicense;
 
-    @Column(name = "financial_analysis")
+    @Column(name = "financial_analysis", length = 1000)
     private String financialAnalysis;
 
     @Column(name = "business_state")
