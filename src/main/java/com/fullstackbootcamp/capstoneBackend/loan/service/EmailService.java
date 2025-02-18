@@ -229,7 +229,7 @@ public class EmailService {
                         "            font-size: 14px;\n" +
                         "            text-transform: uppercase;\n" +
                         "            letter-spacing: 0.5px;\n" +
-                        "        }\n" +
+                        "        }\n" 
                         "\n" +
                         "        .logo {\n" +
                         "            width: 300px; /* Adjust size as needed */\n" +
