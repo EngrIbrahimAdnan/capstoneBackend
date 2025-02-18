@@ -8,6 +8,7 @@ import com.fullstackbootcamp.capstoneBackend.loan.entity.LoanRequestEntity;
 import com.fullstackbootcamp.capstoneBackend.loan.enums.*;
 import com.fullstackbootcamp.capstoneBackend.loan.service.EmailService;
 import com.fullstackbootcamp.capstoneBackend.loan.service.LoanService;
+import com.fullstackbootcamp.capstoneBackend.user.service.CacheEvictClasss;
 import jakarta.validation.Valid;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
@@ -24,11 +25,14 @@ import java.util.Map;
 public class LoanController {
     private final LoanService loanService;
     private final EmailService emailService;
+    private final CacheEvictClasss cacheEvictClasss;
 
     public LoanController(LoanService loanService,
-                          EmailService emailService) {
+                          EmailService emailService,
+                          CacheEvictClasss cacheEvictClasss) {
         this.loanService = loanService;
         this.emailService = emailService;
+        this.cacheEvictClasss = cacheEvictClasss;
     }
 
     @GetMapping("/bank/history")
@@ -46,14 +50,6 @@ public class LoanController {
         }
     }
 
-    @CacheEvict(value = "dashboardData", allEntries = true)
-    public void clearAllDashboardCache() {
-        // Method can be empty
-    }
-    @CacheEvict(value = "loanRequests", allEntries = true)
-    public void clearAllLoanRequestsPageable() {
-        // Method can be empty
-    }
 
     @GetMapping("/testemail")
     public ResponseEntity<String> testEmailConnection() {
@@ -71,8 +67,8 @@ public class LoanController {
     public ResponseEntity<LoanRequestDTO> requestLoan(@Valid @RequestBody CreateLoanRequest request,
                                                       BindingResult bindingResult,
                                                       Authentication authentication) {
-        clearAllDashboardCache();
-        clearAllLoanRequestsPageable();
+        cacheEvictClasss.clearAllDashboardCache();
+        cacheEvictClasss.clearAllLoanRequestsPageable();
 
         // ensures no field is missing and typos of field name. the field missing is returned before service layer
         if (bindingResult.hasErrors()) {

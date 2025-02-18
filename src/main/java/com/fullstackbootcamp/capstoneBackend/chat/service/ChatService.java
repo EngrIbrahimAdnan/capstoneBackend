@@ -19,6 +19,7 @@ import com.fullstackbootcamp.capstoneBackend.user.entity.UserEntity;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Bank;
 import com.fullstackbootcamp.capstoneBackend.user.enums.Roles;
 import com.fullstackbootcamp.capstoneBackend.user.repository.UserRepository;
+import com.fullstackbootcamp.capstoneBackend.user.service.CacheEvictClasss;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,6 +44,7 @@ public class ChatService {
     private final JwtUtil jwtUtil;
     private final NotificationService notificationService;
     private final BusinessRepository businessRepository;
+    private final CacheEvictClasss cacheEvict;
 
     public ChatService(
             ChatRepository chatRepository,
@@ -52,6 +54,7 @@ public class ChatService {
             ChatMapperService chatMapperService,
             NotificationService notificationService,
             BusinessRepository businessRepository,
+            CacheEvictClasss cacheEvict,
             JwtUtil jwtUtil) {
         this.chatRepository = chatRepository;
         this.messageRepository = messageRepository;
@@ -61,6 +64,7 @@ public class ChatService {
         this.notificationService = notificationService;
         this.businessRepository = businessRepository;
         this.jwtUtil = jwtUtil;
+        this.cacheEvict = cacheEvict;
     }
 
     @Transactional
@@ -95,6 +99,7 @@ public class ChatService {
         return chatMapperService.convertToDTO(chatEntity, username);
     }
 
+    @Transactional
     @CacheEvict(value = "dashboardData", allEntries = true)
     public void clearAllDashboardCache() {
         // Method can be empty
@@ -125,7 +130,7 @@ public class ChatService {
         chat.setLastMessage(message);
         chatRepository.save(chat);
 
-        clearAllDashboardCache();
+        cacheEvict.clearAllDashboardCache();
 
         // Send notification
         NotificationEntity notification = new NotificationEntity();

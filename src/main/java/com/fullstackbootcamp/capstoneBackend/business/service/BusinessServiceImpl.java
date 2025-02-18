@@ -146,7 +146,7 @@ public class BusinessServiceImpl implements BusinessService {
 
         // to store business license Image
         try {
-            FileEntity entity = fileService.saveFile(request.getBusinessLicenseImage());
+            FileEntity entity = fileService.convertAndSaveAsPDF(request.getBusinessLicenseImage());
 
             /* HACK:
                 Again, we are associating the business entity with the ID of the business license file
