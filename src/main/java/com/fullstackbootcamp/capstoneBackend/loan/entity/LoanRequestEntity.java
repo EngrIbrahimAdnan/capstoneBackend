@@ -90,6 +90,7 @@ public class LoanRequestEntity {
     private List<LoanNotificationEntity> loanRequestNotifications;
 
 
+
     public Long getId() {
         return id;
     }
